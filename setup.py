@@ -5,19 +5,13 @@ from setuptools import setup, find_packages
 PROJECT = "esctl"
 VERSION = "1.0.0"
 
-try:
-    long_description = open("README.rst", "rt").read()
-except IOError:
-    long_description = ""
-
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setup(
     name=PROJECT,
     version=VERSION,
-    description="Esctl is CLI for Elasticsearch",
-    long_description=long_description,
+    description="Easy to use CLI tool to manage Elasticsearch, preventing long curl commands.",
     author="Jérôme Pin",
     maintainer="Jérôme Pin",
     url="https://github.com/jeromepin/esctl",

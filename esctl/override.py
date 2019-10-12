@@ -1,6 +1,7 @@
 import logging
 import time
 import gzip
+import sys
 
 from urllib3.util.retry import Retry
 from urllib3.exceptions import (
