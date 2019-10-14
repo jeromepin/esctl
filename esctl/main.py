@@ -4,9 +4,12 @@ import argparse
 import pkg_resources
 import urllib3
 import importlib
+import ssl
 
 from cliff.app import App
 from cliff.commandmanager import CommandManager
+from elasticsearch.connection import create_ssl_context
+from elasticsearch import Elasticsearch
 
 from esctl import utils
 from esctl import config
@@ -166,12 +169,16 @@ class Esctl(App):
 
         elasticsearch_client_kwargs = {
             "http_auth": http_auth,
-            "verify_certs": not self.context.settings.get(
-                "no_check_certificate", False
-            ),
             "scheme": self.find_scheme(),
             "transport_class": EsctlTransport,
         }
+
+        if self.find_scheme() == "https":
+            if self.context.settings.get("no_check_certificate"):
+                ssl_context = create_ssl_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+                elasticsearch_client_kwargs["ssl_context"] = ssl_context
 
         if "max_retries" in self.context.settings:
             elasticsearch_client_kwargs[
@@ -183,9 +190,7 @@ class Esctl(App):
                 "timeout"
             )
 
-        Esctl._es = self._initialize_es_client(
-            servers, elasticsearch_client_kwargs
-        )
+        Esctl._es = Elasticsearch(servers, **elasticsearch_client_kwargs)
 
     def prepare_to_run_command(self, cmd):
         pass
