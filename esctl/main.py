@@ -120,7 +120,7 @@ class Esctl(App):
     def find_scheme(self):
         scheme = "https"
 
-        if self.context.cluster.get("servers")[0].startswith("http"):
+        if self.context.cluster.get("servers")[0].startswith("http:"):
             scheme = self.context.cluster.get("servers")[0].split(":")[0]
 
         self.log.debug("Using {} scheme".format(scheme))
