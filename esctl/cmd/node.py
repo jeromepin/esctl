@@ -14,7 +14,10 @@ class NodeHotThreads(EsctlCommand):
         parser.add_argument(
             "type",
             metavar="<type>",
-            help=("Type"),
+            help=(
+                "The type to sample (default: cpu), "
+                "valid choices are: ‘cpu’, ‘wait’, ‘block’"
+            ),
             choices=["cpu", "wait", "block"],
             default="cpu",
             nargs="?",
