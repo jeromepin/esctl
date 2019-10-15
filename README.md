@@ -88,14 +88,14 @@ default-context: foo
 
 # Developing
 
-### Run
+### Install
 
 ```bash
-python3 setup.py install --user --prefix= >> /dev/null && esctl
+make install
 ```
 
 ### Run tests
 
 ```bash
-python3 setup.py install --user --prefix= >> /dev/null && pytest -s
+make test
 ```
