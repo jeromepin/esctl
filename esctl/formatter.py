@@ -2,22 +2,25 @@ class TableKey:
     def __init__(self, id, name=None):
         self.id = id
         if name is None:
-            self._create_name_from_id()
+            self.name = self._create_name_from_id()
         else:
             self.name = name
 
     def _create_name_from_id(self):
         """ Extrapolate the column's name based on its ID.
         """
-        self.name = self.id
-        if "." in self.name:
-            self.name = self.name.replace(".", " ")
-        if "_" in self.name:
-            self.name = self.name.replace("_", " ")
-        if "percent" in self.name:
-            self.name = self.name.replace("percent", "%")
+        name = self.id
 
-        self.name = self.name.title()
+        if "." in name:
+            name = name.replace(".", " ")
+        if "_" in name:
+            name = name.replace("_", " ")
+        if "percent" in name:
+            name = name.replace("percent", "%")
+
+        name = name.title()
+
+        return name
 
     def __repr__(self):
         return "({}, {})".format(self.id, self.name)
