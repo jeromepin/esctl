@@ -3,6 +3,24 @@ from esctl.main import Esctl
 from esctl.formatter import JSONToCliffFormatter
 
 
+class ConfigClusterList(EsctlLister):
+    """List all configured clusters."""
+
+    def take_action(self, parsed_args):
+        clusters = [
+            {
+                "name": cluster_name,
+                "servers": "\n".join(cluster_definition.get("servers")),
+            }
+            for cluster_name, cluster_definition in
+            Esctl._config.clusters.items()
+        ]
+
+        return JSONToCliffFormatter(clusters).format_for_lister(
+            columns=[("name"), ("servers")]
+        )
+
+
 class ConfigContextList(EsctlLister):
     """List all contexts."""
 
@@ -19,4 +37,23 @@ class ConfigContextList(EsctlLister):
 
         return JSONToCliffFormatter(contexts).format_for_lister(
             columns=[("name"), ("user"), ("cluster")]
+        )
+
+
+class ConfigUserList(EsctlLister):
+    """List all configured users."""
+
+    def take_action(self, parsed_args):
+        users = [
+            {
+                "name": user_name,
+                "username": user_definition.get("username"),
+                "password": user_definition.get("password"),
+            }
+            for user_name, user_definition in
+            Esctl._config.users.items()
+        ]
+
+        return JSONToCliffFormatter(users).format_for_lister(
+            columns=[("name"), ("username"), ("password")]
         )
