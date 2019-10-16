@@ -27,7 +27,7 @@ class EsctlUrllib3HttpConnection(Urllib3HttpConnection):
 
     # `perform_request` comes from elasticsearch-py and has been modified
     # to add an error log then exit when a connection errors
-    def perform_request(
+    def perform_request(   # noqa: C901
         self,
         method,
         url,
@@ -93,7 +93,8 @@ class EsctlUrllib3HttpConnection(Urllib3HttpConnection):
                 raise ConnectionTimeout("TIMEOUT", str(e), e)
             raise ConnectionError("N/A", str(e), e)
 
-        # raise errors based on http status codes, let the client handle those if needed
+        # raise errors based on http status codes,
+        # let the client handle those if needed
         if (
             not (200 <= response.status < 300)
             and response.status not in ignore
@@ -170,25 +171,26 @@ class EsctlTransport(Transport):
         :arg hosts: list of dictionaries, each containing keyword arguments to
             create a `connection_class` instance
         :arg connection_class: subclass of :class:`~elasticsearch.Connection` to use
-        :arg connection_pool_class: subclass of :class:`~elasticsearch.ConnectionPool` to use
-        :arg host_info_callback: callback responsible for taking the node information from
+        :arg connection_pool_class: subclass of :class:`~elasticsearch.ConnectionPool` to use # noqa: E501
+        :arg host_info_callback: callback responsible for taking the node information from # noqa: E501
             `/_cluser/nodes`, along with already extracted information, and
             producing a list of arguments (same as `hosts` parameter)
         :arg sniff_on_start: flag indicating whether to obtain a list of nodes
             from the cluser at startup time
         :arg sniffer_timeout: number of seconds between automatic sniffs
-        :arg sniff_on_connection_fail: flag controlling if connection failure triggers a sniff
+        :arg sniff_on_connection_fail: flag controlling if connection failure triggers a sniff # noqa: E501
         :arg sniff_timeout: timeout used for the sniff request - it should be a
-            fast api call and we are talking potentially to more nodes so we want
-            to fail quickly. Not used during initial sniffing (if
+            fast api call and we are talking potentially to more nodes so we
+            want to fail quickly. Not used during initial sniffing (if
             ``sniff_on_start`` is on) when the connection still isn't
             initialized.
         :arg serializer: serializer instance
         :arg serializers: optional dict of serializer instances that will be
-            used for deserializing data coming from the server. (key is the mimetype)
+            used for deserializing data coming from the server.
+            (key is the mimetype)
         :arg default_mimetype: when no mimetype is specified by the server
             response assume this mimetype, defaults to `'application/json'`
-        :arg max_retries: maximum number of retries before an exception is propagated
+        :arg max_retries: maximum number of retries before an exception is propagated # noqa: E501
         :arg retry_on_status: set of HTTP status codes on which we should retry
             on a different node. defaults to ``(502, 503, 504)``
         :arg retry_on_timeout: should timeout trigger a retry on different
@@ -205,9 +207,11 @@ class EsctlTransport(Transport):
 
         # serialization config
         _serializers = DEFAULT_SERIALIZERS.copy()
-        # if a serializer has been specified, use it for deserialization as well
+        # if a serializer has been specified,
+        # use it fordeserialization as well
         _serializers[serializer.mimetype] = serializer
-        # if custom serializers map has been supplied, override the defaults with it
+        # if custom serializers map has been supplied,
+        # override the defaults with it
         if serializers:
             _serializers.update(serializers)
         # create a deserializer with our config

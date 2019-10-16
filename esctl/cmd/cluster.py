@@ -71,7 +71,7 @@ class ClusterStats(EsctlShowOne):
         """ Convert a list of dict to a flattened dict with full name.
 
         :Example:
-                node.jvm.versions = [{"version":"12.0.1","vm_name":"OpenJDK 64-Bit Server VM","vm_version":"12.0.1+12","vm_vendor":"Oracle Corporation","bundled_jdk":true,"using_bundled_jdk":true,"count":1}]
+                node.jvm.versions = [{"version":"12.0.1","vm_name":"OpenJDK 64-Bit Server VM","vm_version":"12.0.1+12","vm_vendor":"Oracle Corporation","bundled_jdk":true,"using_bundled_jdk":true,"count":1}] # noqa: E501
             becomes
                 {
                     "node.jvm.versions[0].version": "12.0.1",
@@ -123,7 +123,7 @@ class ClusterRoutingAllocationEnable(EsctlCommandWithPersistency):
             )
 
             if setting.value is not None:
-                if setting.persistency is "defaults":
+                if setting.persistency == "defaults":
                     output = "{} ({})".format(
                         setting.value, Color.colorize("default", Color.ITALIC)
                     )

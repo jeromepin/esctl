@@ -14,7 +14,7 @@ class ClusterSettingsGet(EsctlCommandSetting):
         )
 
         if setting.value is not None:
-            if setting.persistency is "defaults":
+            if setting.persistency == "defaults":
                 output = "{} ({})".format(
                     setting.value, Color.colorize("default", Color.ITALIC)
                 )

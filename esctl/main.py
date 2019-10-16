@@ -44,7 +44,7 @@ class Esctl(App):
         logging.getLogger("elasticsearch").setLevel(logging.WARNING)
 
         # Disable urllib's warnings
-        # See https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
+        # See https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings # noqa: E501
         urllib3.disable_warnings()
 
         # Set up logging to a file
@@ -139,9 +139,16 @@ class Esctl(App):
             elasticsearch = importlib.import_module(
                 "elasticsearch{}".format(es_version)
             )
-        except ModuleNotFoundError as error:
+        except ModuleNotFoundError:
             self.log.error(
-                "You asked to connect to an elasticsearch cluster in version {} but the required python module 'elasticsearch{}' is not installed. You should install the appropriate python module. Trying to use the default module but its version may not match the cluster's version...".format(
+                (
+                    "You asked to connect to an elasticsearch cluster in"
+                    " version {} but the required python module"
+                    " 'elasticsearch{}' is not installed. You should install"
+                    " the appropriate python module. Trying to use the default"
+                    " module but its version may not match the cluster's"
+                    " version..."
+                ).format(
                     es_version, es_version
                 )
             )
@@ -242,15 +249,15 @@ class Esctl(App):
                 action="store_true",
                 help="Show help message and exit.",
             )
-        else:
-            parser.add_argument(
-                "-h",
-                "--help",
-                action=HelpAction,
-                nargs=0,
-                default=self,  # tricky
-                help="Show this help message and exit.",
-            )
+        # else:
+        #     parser.add_argument(
+        #         "-h",
+        #         "--help",
+        #         action=HelpAction,
+        #         nargs=0,
+        #         default=self,  # tricky
+        #         help="Show this help message and exit.",
+        #     )
         parser.add_argument(
             "--debug",
             default=False,

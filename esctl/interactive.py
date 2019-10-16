@@ -158,7 +158,7 @@ class InteractiveApp(cmd2.Cmd):
                     parsed = self.parser_manager.parsed
                 except AttributeError:
                     # cmd2 >= 0.9.1 does not have a parser manager
-                    parsed = lambda x: x  # noqa
+                    parsed = lambda x: x  # noqa E731
             self.default(parsed("help " + arg))
         else:
             cmd2.Cmd.do_help(self, arg)

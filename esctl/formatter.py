@@ -71,7 +71,8 @@ class JSONToCliffFormatter:
         return valid_list
 
     def format_for_lister(self, columns=[]):
-        """Convert a JSON object to an object compliant with cliff's Lister class.
+        """Convert a JSON object to an object compliant with
+        cliff's Lister class.
 
         :Example:
             json :
@@ -112,7 +113,8 @@ class JSONToCliffFormatter:
         columns = self._format_columns(columns)
 
         lst = []
-        # For every line in the JSON object, pick the value corresponding to the given column ID
+        # For every line in the JSON object, pick the value corresponding to
+        # the given column ID
         for line in self.json:
             lst.append(tuple([line.get(column.id) for column in columns]))
 

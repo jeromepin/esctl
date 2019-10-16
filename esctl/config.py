@@ -105,7 +105,7 @@ class ConfigFileParser:
 
         try:
             self._ensure_config_file_is_valid(raw_config_file)
-        except SyntaxError as err:
+        except SyntaxError:
             sys.exit(1)
 
         for config_block in expected_config_blocks:

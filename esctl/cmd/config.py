@@ -13,7 +13,8 @@ class ConfigContextList(EsctlLister):
                 "user": context_definition.get("user"),
                 "cluster": context_definition.get("cluster"),
             }
-            for context_name, context_definition in Esctl._config.contexts.items()
+            for context_name, context_definition in
+            Esctl._config.contexts.items()
         ]
 
         return JSONToCliffFormatter(contexts).format_for_lister(

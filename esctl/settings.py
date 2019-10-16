@@ -1,9 +1,7 @@
 import logging
-import elasticsearch as elasticsearch
 from abc import ABC
 
 from esctl.main import Esctl
-from esctl.utils import Color
 
 
 class Settings(ABC):
