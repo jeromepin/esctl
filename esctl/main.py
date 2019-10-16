@@ -3,7 +3,6 @@ import sys
 import argparse
 import pkg_resources
 import urllib3
-import importlib
 import ssl
 
 from cliff.app import App
@@ -129,32 +128,6 @@ class Esctl(App):
         self.log.debug("Using {} scheme".format(scheme))
 
         return scheme
-
-    def _initialize_es_client(self, servers, es_client_settings):
-        es_version = ""
-        if self.options.es_version is not None:
-            es_version = self.options.es_version
-
-        try:
-            elasticsearch = importlib.import_module(
-                "elasticsearch{}".format(es_version)
-            )
-        except ModuleNotFoundError:
-            self.log.error(
-                (
-                    "You asked to connect to an elasticsearch cluster in"
-                    " version {} but the required python module"
-                    " 'elasticsearch{}' is not installed. You should install"
-                    " the appropriate python module. Trying to use the default"
-                    " module but its version may not match the cluster's"
-                    " version..."
-                ).format(
-                    es_version, es_version
-                )
-            )
-            elasticsearch = importlib.import_module("elasticsearch")
-
-        return elasticsearch.Elasticsearch(servers, **es_client_settings)
 
     def initialize_app(self, argv):
         self._config.load_configuration()
