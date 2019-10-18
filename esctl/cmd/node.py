@@ -12,15 +12,13 @@ class NodeHotThreads(EsctlCommand):
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.add_argument(
-            "type",
-            metavar="<type>",
+            "--type",
             help=(
                 "The type to sample (default: cpu), "
                 "valid choices are: ‘cpu’, ‘wait’, ‘block’"
             ),
             choices=["cpu", "wait", "block"],
             default="cpu",
-            nargs="?",
         )
         return parser
 
