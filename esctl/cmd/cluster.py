@@ -50,9 +50,10 @@ class ClusterHealth(EsctlShowOne):
     def take_action(self, parsed_args):
         health = self._sort_and_order_dict(Esctl._es.cluster.health())
 
-        health["status"] = Color.colorize(
-            health.get("status"), getattr(Color, health.get("status").upper())
-        )
+        if self.formatter.__class__.__name__ == 'TableFormatter':
+            health["status"] = Color.colorize(
+                health.get("status"), getattr(Color, health.get("status").upper())
+            )
 
         return (tuple(health.keys()), tuple(health.values()))
 
