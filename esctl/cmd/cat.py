@@ -5,10 +5,10 @@ from esctl.formatter import JSONToCliffFormatter
 
 
 class CatAllocation(EsctlLister):
-    """Show shard allocation.
+    """Show the number of shards allocated to each node.
 
-    Provides a snapshot of how shards are located around the cluster and the
-    state of disk usage.
+    Provides a snapshot of the number of shards allocated to each data node
+    and their disk space.
     """
 
     def take_action(self, parsed_args):
