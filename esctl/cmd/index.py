@@ -1,6 +1,7 @@
 from esctl.commands import EsctlCommandIndex, EsctlLister
 from esctl.main import Esctl
 from esctl.formatter import JSONToCliffFormatter
+from esctl.utils import Color
 
 
 class IndexCreate(EsctlCommandIndex):
@@ -15,7 +16,7 @@ class IndexList(EsctlLister):
     """List all indices."""
 
     def take_action(self, parsed_args):
-        indices = Esctl._es.cat.indices(format="json")
+        indices = self.transform(Esctl._es.cat.indices(format="json"))
         return JSONToCliffFormatter(indices).format_for_lister(
             columns=[
                 ("index"),
@@ -30,6 +31,20 @@ class IndexList(EsctlLister):
                 ("pri.store.size", "Primary Store Size"),
             ]
         )
+
+    def transform(self, indices):
+        if self.formatter.__class__.__name__ == 'TableFormatter':
+            for idx, indice in enumerate(indices):
+                indices[idx]["health"] = Color.colorize(
+                    indice.get("health"), getattr(Color, indice.get("health").upper())
+                )
+
+                if indice.get("status") == "close":
+                    indices[idx]["status"] = Color.colorize(
+                        indice.get("status"), Color.ITALIC
+                    )
+
+        return indices
 
 
 class IndexClose(EsctlCommandIndex):
