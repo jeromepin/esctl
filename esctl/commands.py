@@ -15,7 +15,7 @@ class EsctlCommon:
         return {e[0]: e[1] for e in sorted(dct.items())}
 
     def print_success(self, message):
-        print("{} {}".format(Color.colorize("SUCCESS", Color.GREEN), message))
+        print("{} {}".format(Color.colorize("==>", Color.GREEN), message))
 
     def print_output(self, message):
         print("{}".format(message))
