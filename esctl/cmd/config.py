@@ -12,8 +12,7 @@ class ConfigClusterList(EsctlLister):
                 "name": cluster_name,
                 "servers": "\n".join(cluster_definition.get("servers")),
             }
-            for cluster_name, cluster_definition in
-            Esctl._config.clusters.items()
+            for cluster_name, cluster_definition in Esctl._config.clusters.items()
         ]
 
         return JSONToCliffFormatter(clusters).format_for_lister(
@@ -31,8 +30,7 @@ class ConfigContextList(EsctlLister):
                 "user": context_definition.get("user"),
                 "cluster": context_definition.get("cluster"),
             }
-            for context_name, context_definition in
-            Esctl._config.contexts.items()
+            for context_name, context_definition in Esctl._config.contexts.items()
         ]
 
         return JSONToCliffFormatter(contexts).format_for_lister(
@@ -50,8 +48,7 @@ class ConfigUserList(EsctlLister):
                 "username": user_definition.get("username"),
                 "password": user_definition.get("password"),
             }
-            for user_name, user_definition in
-            Esctl._config.users.items()
+            for user_name, user_definition in Esctl._config.users.items()
         ]
 
         return JSONToCliffFormatter(users).format_for_lister(

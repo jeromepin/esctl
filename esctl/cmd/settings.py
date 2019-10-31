@@ -43,11 +43,7 @@ class ClusterSettingsReset(EsctlCommandSetting):
                 Color.colorize(parsed_args.setting, Color.ITALIC)
             )
         )
-        print(
-            self.settings.set(
-                parsed_args.setting, None, persistency=persistency
-            )
-        )
+        print(self.settings.set(parsed_args.setting, None, persistency=persistency))
 
 
 class ClusterSettingsSet(EsctlCommandSetting):

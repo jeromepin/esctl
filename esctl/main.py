@@ -65,15 +65,11 @@ class Esctl(App):
 
         logging.addLevelName(
             logging.DEBUG,
-            utils.Color.colorize(
-                logging.getLevelName(logging.DEBUG), utils.Color.END
-            ),
+            utils.Color.colorize(logging.getLevelName(logging.DEBUG), utils.Color.END),
         )
         logging.addLevelName(
             logging.INFO,
-            utils.Color.colorize(
-                logging.getLevelName(logging.INFO), utils.Color.BLUE
-            ),
+            utils.Color.colorize(logging.getLevelName(logging.INFO), utils.Color.BLUE),
         )
         logging.addLevelName(
             logging.WARNING,
@@ -93,9 +89,7 @@ class Esctl(App):
                 logging.getLevelName(logging.CRITICAL), utils.Color.RED
             ),
         )
-        formatter = logging.Formatter(
-            "%(levelname)-8s " + self.CONSOLE_MESSAGE_FORMAT
-        )
+        formatter = logging.Formatter("%(levelname)-8s " + self.CONSOLE_MESSAGE_FORMAT)
         console.setFormatter(formatter)
         root_logger.addHandler(console)
 
@@ -108,9 +102,7 @@ class Esctl(App):
         else:
             context_name = self._config.__getattribute__("default-context")
             self.log.debug(
-                "No context provided. Using default context : {}".format(
-                    context_name
-                )
+                "No context provided. Using default context : {}".format(context_name)
             )
 
         try:
@@ -138,10 +130,7 @@ class Esctl(App):
 
         if self.context.user is not None:
             http_auth = (
-                (
-                    self.context.user.get("username"),
-                    self.context.user.get("password"),
-                )
+                (self.context.user.get("username"), self.context.user.get("password"),)
                 if self.context.user.get("username")
                 and self.context.user.get("password")
                 else None
@@ -161,9 +150,9 @@ class Esctl(App):
                 elasticsearch_client_kwargs["ssl_context"] = ssl_context
 
         if "max_retries" in self.context.settings:
-            elasticsearch_client_kwargs[
+            elasticsearch_client_kwargs["max_retries"] = self.context.settings.get(
                 "max_retries"
-            ] = self.context.settings.get("max_retries")
+            )
 
         if "timeout" in self.context.settings:
             elasticsearch_client_kwargs["timeout"] = self.context.settings.get(
@@ -187,9 +176,7 @@ class Esctl(App):
             description=description, add_help=False, **argparse_kwargs
         )
         parser.add_argument(
-            "--version",
-            action="version",
-            version="%(prog)s {0}".format(version),
+            "--version", action="version", version="%(prog)s {0}".format(version),
         )
         verbose_group = parser.add_mutually_exclusive_group()
         verbose_group.add_argument(

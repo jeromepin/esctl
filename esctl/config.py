@@ -72,15 +72,11 @@ class ConfigFileParser:
                         "Invalid type or schema for configuration field '{0}'."
                         " Should be {1}. Got '{2}'"
                     ).format(
-                        root_error.field,
-                        root_error.constraint,
-                        root_error.value,
+                        root_error.field, root_error.constraint, root_error.value,
                     )
                 )
 
-            raise SyntaxError(
-                "{} doesn't match expected schema".format(self.path)
-            )
+            raise SyntaxError("{} doesn't match expected schema".format(self.path))
 
     def load_configuration(self):
         self.log.debug("Loading configuration...")
@@ -112,9 +108,7 @@ class ConfigFileParser:
             if not hasattr(self, config_block):
                 setattr(self, config_block, None)
             self.load_config_block_from_json(raw_config_file, config_block)
-            self.log.debug(
-                "{}: {}".format(config_block, getattr(self, config_block))
-            )
+            self.log.debug("{}: {}".format(config_block, getattr(self, config_block)))
 
     def load_config_block_from_json(self, raw_config, key):
         if key in raw_config:
@@ -124,9 +118,7 @@ class ConfigFileParser:
 
     def get_context_informations(self, context_name):
         user = self.users.get(self.contexts.get(context_name).get("user"))
-        cluster = self.clusters.get(
-            self.contexts.get(context_name).get("cluster")
-        )
+        cluster = self.clusters.get(self.contexts.get(context_name).get("cluster"))
 
         # Merge global settings and per-cluster settings.
         # Cluster-level settings override global settings
@@ -135,6 +127,4 @@ class ConfigFileParser:
         else:
             settings = {**self.settings}
 
-        return Context(
-            context_name, user=user, cluster=cluster, settings=settings
-        )
+        return Context(context_name, user=user, cluster=cluster, settings=settings)

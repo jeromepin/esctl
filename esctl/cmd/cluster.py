@@ -50,7 +50,7 @@ class ClusterHealth(EsctlShowOne):
     def take_action(self, parsed_args):
         health = self._sort_and_order_dict(Esctl._es.cluster.health())
 
-        if self.formatter.__class__.__name__ == 'TableFormatter':
+        if self.formatter.__class__.__name__ == "TableFormatter":
             health["status"] = Color.colorize(
                 health.get("status"), getattr(Color, health.get("status").upper())
             )
@@ -143,13 +143,8 @@ class ClusterRoutingAllocationEnable(EsctlCommandWithPersistency):
 
         else:
             print(
-                (
-                    "Changing cluster routing"
-                    " allocation policy ({}) to : {}"
-                ).format(
-                    Color.colorize(
-                        "cluster.routing.allocation.enable", Color.ITALIC
-                    ),
+                ("Changing cluster routing allocation policy ({}) to : {}").format(
+                    Color.colorize("cluster.routing.allocation.enable", Color.ITALIC),
                     Color.colorize(parsed_args.status, Color.ITALIC),
                 )
             )
