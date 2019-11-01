@@ -1,17 +1,13 @@
 from esctl.commands import EsctlCommandSetting
 from esctl.utils import Color
+from esctl.exceptions import SettingNotFoundError
 
 
 class ClusterSettingsGet(EsctlCommandSetting):
     """Get a setting value."""
 
-    def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
-        self.log.debug("Persistency is " + persistency)
-
-        setting = self.settings.get(
-            parsed_args.setting, persistency=persistency
-        )
+    def retrieve_setting(self, setting_name, persistency):
+        setting = self.settings.get(setting_name, persistency=persistency)
 
         if setting.value is not None:
             if setting.persistency == "defaults":
@@ -21,15 +17,24 @@ class ClusterSettingsGet(EsctlCommandSetting):
             else:
                 output = setting.value
 
-            print(output)
+            return output
 
         else:
-            self.log.error(
+            raise SettingNotFoundError(
                 "{} does not exists in {} cluster settings.".format(
                     Color.colorize(setting.name, Color.ITALIC),
                     Color.colorize(persistency, Color.ITALIC),
                 )
             )
+
+    def take_action(self, parsed_args):
+        persistency = "persistent" if parsed_args.persistent else "transient"
+        self.log.debug("Persistency is " + persistency)
+
+        try:
+            print(self.retrieve_setting(parsed_args.setting, persistency))
+        except SettingNotFoundError as error:
+            self.log.error(error)
 
 
 class ClusterSettingsReset(EsctlCommandSetting):
