@@ -40,7 +40,7 @@ class Esctl(App):
         """
         root_logger = logging.getLogger("")
         root_logger.setLevel(logging.DEBUG)
-        logging.getLogger("elasticsearch").setLevel(logging.WARNING)
+        logging.getLogger("stevedore.extension").setLevel(logging.WARNING)
 
         # Disable urllib's warnings
         # See https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings # noqa: E501
@@ -89,7 +89,9 @@ class Esctl(App):
                 logging.getLevelName(logging.CRITICAL), utils.Color.RED
             ),
         )
-        formatter = logging.Formatter("%(levelname)-8s " + self.CONSOLE_MESSAGE_FORMAT)
+        formatter = logging.Formatter(
+            "[%(levelname)-8s] " + self.CONSOLE_MESSAGE_FORMAT
+        )
         console.setFormatter(formatter)
         root_logger.addHandler(console)
 
