@@ -24,14 +24,13 @@ class EsctlCommon:
 class EsctlCommand(Command, EsctlCommon):
     """Simple command to run. Doesn’t expect any output."""
 
+    cluster_settings = ClusterSettings()
+
 
 class EsctlCommandWithPersistency(EsctlCommand):
     """Add mutually exclusive arguments `transient` and `persistent` to
     be used when working with settings, logging, etc...
     """
-
-    log = logging.getLogger(__name__)
-    settings = ClusterSettings()
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)

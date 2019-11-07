@@ -119,7 +119,7 @@ class ClusterRoutingAllocationEnable(EsctlCommandWithPersistency):
         self.log.debug("Persistency is " + persistency)
 
         if parsed_args.status is None:
-            setting = self.settings.get(
+            setting = self.cluster_settings.get(
                 "cluster.routing.allocation.enable", persistency=persistency
             )
 
@@ -149,7 +149,7 @@ class ClusterRoutingAllocationEnable(EsctlCommandWithPersistency):
                 )
             )
             print(
-                self.settings.set(
+                self.cluster_settings.set(
                     "cluster.routing.allocation.enable",
                     parsed_args.status,
                     persistency=persistency,

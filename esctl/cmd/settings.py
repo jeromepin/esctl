@@ -7,7 +7,7 @@ class ClusterSettingsGet(EsctlCommandSetting):
     """Get a setting value."""
 
     def retrieve_setting(self, setting_name, persistency):
-        setting = self.settings.get(setting_name, persistency=persistency)
+        setting = self.cluster_settings.get(setting_name, persistency=persistency)
 
         if setting.value is not None:
             if setting.persistency == "defaults":
@@ -48,7 +48,11 @@ class ClusterSettingsReset(EsctlCommandSetting):
                 Color.colorize(parsed_args.setting, Color.ITALIC)
             )
         )
-        print(self.settings.set(parsed_args.setting, None, persistency=persistency))
+        print(
+            self.cluster_settings.set(
+                parsed_args.setting, None, persistency=persistency
+            )
+        )
 
 
 class ClusterSettingsSet(EsctlCommandSetting):
@@ -66,7 +70,7 @@ class ClusterSettingsSet(EsctlCommandSetting):
         )
 
         print(
-            self.settings.set(
+            self.cluster_settings.set(
                 parsed_args.setting, parsed_args.value, persistency=persistency
             )
         )
