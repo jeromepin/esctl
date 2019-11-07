@@ -138,13 +138,15 @@ class Esctl(App):
                 else None
             )
 
+        scheme = self.find_scheme()
+
         elasticsearch_client_kwargs = {
             "http_auth": http_auth,
-            "scheme": self.find_scheme(),
+            "scheme": scheme,
             "transport_class": EsctlTransport,
         }
 
-        if self.find_scheme() == "https":
+        if scheme == "https":
             if self.context.settings.get("no_check_certificate"):
                 ssl_context = create_ssl_context()
                 ssl_context.check_hostname = False
