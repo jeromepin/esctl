@@ -13,6 +13,7 @@ from elasticsearch.transport import Transport
 from elasticsearch import ConnectionError, ConnectionTimeout, SSLError
 from elasticsearch.connection import Urllib3HttpConnection
 from elasticsearch.connection_pool import ConnectionPool
+from elasticsearch.connection.base import Connection
 from elasticsearch.serializer import (
     JSONSerializer,
     Deserializer,
@@ -27,7 +28,7 @@ class EsctlUrllib3HttpConnection(Urllib3HttpConnection):
 
     # `perform_request` comes from elasticsearch-py and has been modified
     # to add an error log then exit when a connection errors
-    def perform_request(   # noqa: C901
+    def perform_request(  # noqa: C901
         self,
         method,
         url,
@@ -95,18 +96,9 @@ class EsctlUrllib3HttpConnection(Urllib3HttpConnection):
 
         # raise errors based on http status codes,
         # let the client handle those if needed
-        if (
-            not (200 <= response.status < 300)
-            and response.status not in ignore
-        ):
+        if not (200 <= response.status < 300) and response.status not in ignore:
             self.log_request_fail(
-                method,
-                full_url,
-                url,
-                body,
-                duration,
-                response.status,
-                raw_data,
+                method, full_url, url, body, duration, response.status, raw_data,
             )
             self._raise_error(response.status, raw_data)
 
@@ -249,3 +241,32 @@ class EsctlTransport(Transport):
 
         if sniff_on_start:
             self.sniff_hosts(True)
+
+
+# The following method it copied from https://github.com/elastic/elasticsearch-py/blob/a2e9f0c807c5cc4aa0575691d3303a475ee74da8/elasticsearch/connection/base.py
+# and modified
+def log_request_success(
+    self, method, full_url, path, body, status_code, response, duration
+):
+    """ Log a successful API call.  """
+    #  TODO: optionally pass in params instead of full_url and do urlencode only when needed
+
+    # body has already been serialized to utf-8, deserialize it for logging
+    # TODO: find a better way to avoid (de)encoding the body back and forth
+    if body:
+        try:
+            body = body.decode("utf-8", "ignore")
+        except AttributeError:
+            pass
+
+    logger = logging.getLogger("elasticsearch")
+    logger.info(
+        "%s %s [status:%s request:%.3fs]", method, full_url, status_code, duration
+    )
+    logger.debug("> %s", body)
+    logger.debug("< %s", response)
+
+    self._log_trace(method, path, body, status_code, response, duration)
+
+
+Connection.log_request_success = log_request_success
