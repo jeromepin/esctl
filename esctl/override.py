@@ -260,7 +260,7 @@ def log_request_success(
             pass
 
     logger = logging.getLogger("elasticsearch")
-    logger.info(
+    logger.debug(
         "%s %s [status:%s request:%.3fs]", method, full_url, status_code, duration
     )
     logger.debug("> %s", body)
