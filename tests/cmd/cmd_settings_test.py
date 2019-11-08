@@ -10,7 +10,7 @@ from esctl.utils import Color
 class TestSettingsGetCommand(base_test_class.EsctlTestCase):
     def setUp(self):
         self.mock = unittest.mock.patch(
-            "esctl.cmd.settings.ClusterSettingsGet.settings.get"
+            "esctl.cmd.settings.ClusterSettingsGet.cluster_settings.get"
         ).start()
 
         self.cluster_settings_get_command = esctl.cmd.settings.ClusterSettingsGet(

@@ -243,13 +243,13 @@ class EsctlTransport(Transport):
             self.sniff_hosts(True)
 
 
-# The following method it copied from https://github.com/elastic/elasticsearch-py/blob/a2e9f0c807c5cc4aa0575691d3303a475ee74da8/elasticsearch/connection/base.py
+# The following method it copied from https://github.com/elastic/elasticsearch-py/blob/a2e9f0c807c5cc4aa0575691d3303a475ee74da8/elasticsearch/connection/base.py  # noqa: E501
 # and modified
 def log_request_success(
     self, method, full_url, path, body, status_code, response, duration
 ):
     """ Log a successful API call.  """
-    #  TODO: optionally pass in params instead of full_url and do urlencode only when needed
+    #  TODO: optionally pass in params instead of full_url and do urlencode only when needed  # noqa: E501
 
     # body has already been serialized to utf-8, deserialize it for logging
     # TODO: find a better way to avoid (de)encoding the body back and forth
