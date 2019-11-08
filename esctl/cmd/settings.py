@@ -41,8 +41,19 @@ class ClusterSettingsList(EsctlShowOne):
     """(EXPERIMENTAL) List available settings."""
 
     def take_action(self, parsed_args):
+        default_settings = {}
         settings_list = self.cluster_settings.list().get("defaults")
-        return (tuple(settings_list.keys()), tuple(settings_list.values()))
+
+        for (setting_name, setting_value) in settings_list.items():
+            if type(setting_value).__name__ == "list":
+                if len(setting_value) > 0:
+                    setting_value = ",\n".join(setting_value)
+                else:
+                    setting_value = "[]"
+
+            default_settings[setting_name] = setting_value
+
+        return (tuple(default_settings.keys()), tuple(default_settings.values()))
 
 
 class ClusterSettingsReset(EsctlCommandSetting):
