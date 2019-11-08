@@ -10,6 +10,7 @@ from esctl.utils import Color
 
 class EsctlCommon:
     log = logging.getLogger(__name__)
+    cluster_settings = ClusterSettings()
 
     def _sort_and_order_dict(self, dct):
         return {e[0]: e[1] for e in sorted(dct.items())}
@@ -23,8 +24,6 @@ class EsctlCommon:
 
 class EsctlCommand(Command, EsctlCommon):
     """Simple command to run. Doesn’t expect any output."""
-
-    cluster_settings = ClusterSettings()
 
 
 class EsctlCommandWithPersistency(EsctlCommand):
