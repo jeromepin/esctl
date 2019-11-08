@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from typing import Any
+from typing import Any, Dict
 
 from esctl.main import Esctl
 
@@ -21,10 +21,11 @@ class Setting:
 class ClusterSettings(Settings):
     """Handle cluster-level settings."""
 
+    def list(self) -> Dict[str, Dict[str, Any]]:
+        return Esctl._es.cluster.get_settings(include_defaults=True, flat_settings=True)
+
     def get(self, key: str, persistency: str = "transient") -> Setting:
-        settings = Esctl._es.cluster.get_settings(
-            include_defaults=True, flat_settings=True
-        )
+        settings = self.list()
 
         if key in settings.get(persistency):
             return Setting(key, settings.get(persistency).get(key), persistency)

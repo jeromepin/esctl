@@ -1,4 +1,4 @@
-from esctl.commands import EsctlCommandSetting
+from esctl.commands import EsctlShowOne, EsctlCommandSetting
 from esctl.utils import Color
 from esctl.exceptions import SettingNotFoundError
 
@@ -35,6 +35,14 @@ class ClusterSettingsGet(EsctlCommandSetting):
             print(self.retrieve_setting(parsed_args.setting, persistency))
         except SettingNotFoundError as error:
             self.log.error(error)
+
+
+class ClusterSettingsList(EsctlShowOne):
+    """(EXPERIMENTAL) List available settings."""
+
+    def take_action(self, parsed_args):
+        settings_list = self.cluster_settings.list().get("defaults")
+        return (tuple(settings_list.keys()), tuple(settings_list.values()))
 
 
 class ClusterSettingsReset(EsctlCommandSetting):

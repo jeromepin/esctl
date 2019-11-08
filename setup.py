@@ -48,6 +48,7 @@ setup(
             "cluster health = esctl.cmd.cluster:ClusterHealth",
             "cluster routing allocation enable = esctl.cmd.cluster:ClusterRoutingAllocationEnable",
             "cluster stats = esctl.cmd.cluster:ClusterStats",
+            "cluster settings list = esctl.cmd.settings:ClusterSettingsList",
             "cluster settings get = esctl.cmd.settings:ClusterSettingsGet",
             "cluster settings reset = esctl.cmd.settings:ClusterSettingsReset",
             "cluster settings set = esctl.cmd.settings:ClusterSettingsSet",
