@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from cliff.command import Command
 from cliff.lister import Lister
@@ -20,6 +21,29 @@ class EsctlCommon:
 
     def print_output(self, message):
         print("{}".format(message))
+
+    def objects_list_to_flat_dict(self, lst: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """ Convert a list of dict to a flattened dict with full name.
+
+        :Example:
+                node.jvm.versions = [{"version":"12.0.1","vm_name":"OpenJDK 64-Bit Server VM","vm_version":"12.0.1+12","vm_vendor":"Oracle Corporation","bundled_jdk":true,"using_bundled_jdk":true,"count":1}] # noqa: E501
+            becomes
+                {
+                    "node.jvm.versions[0].version": "12.0.1",
+                    "node.jvm.versions[0].vm_name": "OpenJDK 64-Bit Server VM"
+                }
+
+        :param lst: A list of dict to flatten
+        :paramtype lst: list
+        :return: A dict
+        :rtype: dict
+        """
+        flat_dict = {}
+        for (index, element) in enumerate(lst):
+            for (attribute, value) in element.items():
+                flat_dict["[{}].{}".format(index, attribute)] = value
+
+        return flat_dict
 
 
 class EsctlCommand(Command, EsctlCommon):
