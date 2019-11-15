@@ -5,13 +5,14 @@ from cliff.command import Command
 from cliff.lister import Lister
 from cliff.show import ShowOne
 
-from esctl.settings import ClusterSettings
+from esctl.settings import ClusterSettings, IndexSettings
 from esctl.utils import Color
 
 
 class EsctlCommon:
     log = logging.getLogger(__name__)
     cluster_settings = ClusterSettings()
+    index_settings = IndexSettings()
 
     def _sort_and_order_dict(self, dct):
         return {e[0]: e[1] for e in sorted(dct.items())}
@@ -92,6 +93,14 @@ class EsctlCommandSetting(EsctlCommandWithPersistency):
 
 class EsctlLister(Lister, EsctlCommon):
     """Expect a list of elements in order to create a multi-columns table."""
+
+
+class EsctlListerIndexSetting(EsctlLister):
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument("index", metavar="<index>", help=("Index"))
+        parser.add_argument("setting", metavar="<setting>", help=("Setting"))
+        return parser
 
 
 class EsctlShowOne(ShowOne, EsctlCommon):

@@ -1,6 +1,15 @@
-from esctl.commands import EsctlShowOne, EsctlCommandSetting
+import collections
+
+from esctl.main import Esctl
+from esctl.commands import (
+    EsctlShowOne,
+    EsctlCommandSetting,
+    EsctlListerIndexSetting,
+    EsctlCommandIndex,
+)
 from esctl.utils import Color
 from esctl.exceptions import SettingNotFoundError
+from esctl.formatter import JSONToCliffFormatter
 
 
 class ClusterSettingsGet(EsctlCommandSetting):
@@ -96,5 +105,93 @@ class ClusterSettingsSet(EsctlCommandSetting):
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
+        parser.add_argument("value", metavar="<value>", help=("Setting value"))
+        return parser
+
+
+class IndexSettingsGet(EsctlListerIndexSetting):
+    """Get an index-level setting value."""
+
+    def retrieve_setting(self, setting_name, index):
+        if not setting_name.startswith("index."):
+            setting_name = "index.{}".format(setting_name)
+
+        raw_settings = self.index_settings.get(setting_name, index=index)
+        settings = []
+
+        for index_name, setting in raw_settings.items():
+            if setting.value is not None:
+                if setting.persistency == "defaults":
+                    settings.append(
+                        {
+                            "index": index_name,
+                            "value": "{} ({})".format(
+                                setting.value, Color.colorize("default", Color.ITALIC)
+                            ),
+                        }
+                    )
+                else:
+                    settings.append({"index": index_name, "value": setting.value})
+
+        return settings
+
+    def take_action(self, parsed_args):
+        return JSONToCliffFormatter(
+            self.retrieve_setting(parsed_args.setting, parsed_args.index)
+        ).format_for_lister(columns=[("index",), ("value",)])
+
+
+class IndexSettingsList(EsctlShowOne):
+    """(EXPERIMENTAL) List available settings in an index."""
+
+    def take_action(self, parsed_args):
+        settings = {}
+        sample_index_name = Esctl._es.cat.indices(format="json", h="index")[0].get(
+            "index"
+        )
+
+        settings_list = self.index_settings.list(sample_index_name)
+        settings_list = collections.OrderedDict(
+            sorted(
+                {
+                    **settings_list.get("settings"),
+                    **settings_list.get("defaults"),
+                }.items()
+            )
+        )
+
+        for (setting_name, setting_value) in settings_list.items():
+            if type(setting_value).__name__ == "list":
+                if len(setting_value) > 0:
+                    setting_value = ",\n".join(setting_value)
+                else:
+                    setting_value = "[]"
+
+            settings[setting_name] = setting_value
+
+        return (tuple(settings.keys()), tuple(settings.values()))
+
+
+class IndexSettingsSet(EsctlCommandIndex):
+    """Set an index-level setting value."""
+
+    def take_action(self, parsed_args):
+        print(
+            "Changing {} to {} in index {}".format(
+                Color.colorize(parsed_args.setting, Color.ITALIC),
+                Color.colorize(parsed_args.value, Color.ITALIC),
+                Color.colorize(parsed_args.index, Color.ITALIC),
+            )
+        )
+
+        print(
+            self.index_settings.set(
+                parsed_args.setting, parsed_args.value, parsed_args.index
+            )
+        )
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument("setting", metavar="<setting>", help=("Setting"))
         parser.add_argument("value", metavar="<value>", help=("Setting value"))
         return parser
