@@ -76,7 +76,14 @@ class EsctlCommandWithPersistency(EsctlCommand):
 class EsctlCommandIndex(EsctlCommand):
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
-        parser.add_argument("index", metavar="<index>", help=("Index"))
+        parser.add_argument(
+            "index",
+            metavar="<index>",
+            help=(
+                "Comma-separated list or wildcard expression of "
+                "index names used to limit the request."
+            ),
+        )
         return parser
 
 
