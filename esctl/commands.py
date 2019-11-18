@@ -23,6 +23,9 @@ class EsctlCommon:
     def print_output(self, message):
         print("{}".format(message))
 
+    def uses_table_formatter(self):
+        return self.formatter.__class__.__name__ == "TableFormatter"
+
     def objects_list_to_flat_dict(self, lst: List[Dict[str, Any]]) -> Dict[str, Any]:
         """ Convert a list of dict to a flattened dict with full name.
 
