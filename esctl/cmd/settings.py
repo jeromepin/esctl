@@ -176,18 +176,21 @@ class IndexSettingsSet(EsctlCommandIndex):
     """Set an index-level setting value."""
 
     def take_action(self, parsed_args):
+        setting_name = parsed_args.setting
+
+        if not setting_name.startswith("index."):
+            setting_name = "index.{}".format(setting_name)
+
         print(
             "Changing {} to {} in index {}".format(
-                Color.colorize(parsed_args.setting, Color.ITALIC),
+                Color.colorize(setting_name, Color.ITALIC),
                 Color.colorize(parsed_args.value, Color.ITALIC),
                 Color.colorize(parsed_args.index, Color.ITALIC),
             )
         )
 
         print(
-            self.index_settings.set(
-                parsed_args.setting, parsed_args.value, parsed_args.index
-            )
+            self.index_settings.set(setting_name, parsed_args.value, parsed_args.index)
         )
 
     def get_parser(self, prog_name):
