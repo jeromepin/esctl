@@ -10,4 +10,4 @@ lint: install
 	mypy esctl/
 
 fmt:
-	black --exclude=esctl/\(interactive\|override\).py esctl/
+	black --exclude=esctl/\(interactive\|override\).py --verbose esctl/
