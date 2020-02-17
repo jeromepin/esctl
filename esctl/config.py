@@ -1,10 +1,10 @@
 import logging
 import os
-import yaml
 import sys
 from pathlib import Path
 
 import cerberus
+import yaml
 
 
 class Context:
@@ -71,9 +71,7 @@ class ConfigFileParser:
                     (
                         "Invalid type or schema for configuration field '{0}'."
                         " Should be {1}. Got '{2}'"
-                    ).format(
-                        root_error.field, root_error.constraint, root_error.value,
-                    )
+                    ).format(root_error.field, root_error.constraint, root_error.value)
                 )
 
             raise SyntaxError("{} doesn't match expected schema".format(self.path))

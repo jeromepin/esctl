@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from esctl.main import Esctl
 
@@ -69,7 +69,7 @@ class IndexSettings(Settings):
                 # look for it in the "defaults" values
                 if key in index_settings.get("defaults"):
                     settings[index_name] = Setting(
-                        key, index_settings.get("defaults").get(key), "defaults",
+                        key, index_settings.get("defaults").get(key), "defaults"
                     )
                 else:
                     settings[index_name] = Setting(key, None)

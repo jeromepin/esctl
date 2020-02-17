@@ -1,9 +1,10 @@
 import unittest.mock
 
 import base_test_class
+
 import esctl.cmd.settings
-import esctl.settings
 import esctl.exceptions
+import esctl.settings
 from esctl.utils import Color
 
 

@@ -1,6 +1,6 @@
 from esctl.commands import EsctlCommand, EsctlLister
-from esctl.main import Esctl
 from esctl.formatter import JSONToCliffFormatter
+from esctl.main import Esctl
 from esctl.utils import Color
 
 

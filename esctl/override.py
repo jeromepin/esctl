@@ -1,25 +1,18 @@
-import logging
-import time
 import gzip
+import logging
 import sys
+import time
 
-from urllib3.util.retry import Retry
-from urllib3.exceptions import (
-    ReadTimeoutError,
-    SSLError as UrllibSSLError,
-    NewConnectionError,
-)
-from elasticsearch.transport import Transport
 from elasticsearch import ConnectionError, ConnectionTimeout, SSLError
-from elasticsearch.connection import Urllib3HttpConnection
-from elasticsearch.connection_pool import ConnectionPool
-from elasticsearch.connection.base import Connection
-from elasticsearch.serializer import (
-    JSONSerializer,
-    Deserializer,
-    DEFAULT_SERIALIZERS,
-)
 from elasticsearch.compat import urlencode
+from elasticsearch.connection import Urllib3HttpConnection
+from elasticsearch.connection.base import Connection
+from elasticsearch.connection_pool import ConnectionPool
+from elasticsearch.serializer import DEFAULT_SERIALIZERS, Deserializer, JSONSerializer
+from elasticsearch.transport import Transport
+from urllib3.exceptions import NewConnectionError, ReadTimeoutError
+from urllib3.exceptions import SSLError as UrllibSSLError
+from urllib3.util.retry import Retry
 
 
 class EsctlUrllib3HttpConnection(Urllib3HttpConnection):
@@ -29,14 +22,7 @@ class EsctlUrllib3HttpConnection(Urllib3HttpConnection):
     # `perform_request` comes from elasticsearch-py and has been modified
     # to add an error log then exit when a connection errors
     def perform_request(  # noqa: C901
-        self,
-        method,
-        url,
-        params=None,
-        body=None,
-        timeout=None,
-        ignore=(),
-        headers=None,
+        self, method, url, params=None, body=None, timeout=None, ignore=(), headers=None
     ):
         url = self.url_prefix + url
         if params:
@@ -98,7 +84,7 @@ class EsctlUrllib3HttpConnection(Urllib3HttpConnection):
         # let the client handle those if needed
         if not (200 <= response.status < 300) and response.status not in ignore:
             self.log_request_fail(
-                method, full_url, url, body, duration, response.status, raw_data,
+                method, full_url, url, body, duration, response.status, raw_data
             )
             self._raise_error(response.status, raw_data)
 

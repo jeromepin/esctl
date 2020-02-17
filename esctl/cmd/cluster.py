@@ -1,12 +1,8 @@
 import elasticsearch as elasticsearch
 
+from esctl.commands import EsctlCommandWithPersistency, EsctlLister, EsctlShowOne
 from esctl.main import Esctl
 from esctl.utils import Color, flatten_dict
-from esctl.commands import (
-    EsctlCommandWithPersistency,
-    EsctlLister,
-    EsctlShowOne,
-)
 
 
 class ClusterAllocationExplain(EsctlLister):

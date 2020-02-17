@@ -1,7 +1,7 @@
 from esctl.commands import EsctlLister
+from esctl.formatter import JSONToCliffFormatter
 from esctl.main import Esctl
 from esctl.utils import Color
-from esctl.formatter import JSONToCliffFormatter
 
 
 class CatAllocation(EsctlLister):

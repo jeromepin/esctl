@@ -1,17 +1,16 @@
-import logging
-import sys
 import argparse
+import logging
+import ssl
+import sys
+
 import pkg_resources
 import urllib3
-import ssl
-
 from cliff.app import App
 from cliff.commandmanager import CommandManager
-from elasticsearch.connection import create_ssl_context
 from elasticsearch import Elasticsearch
+from elasticsearch.connection import create_ssl_context
 
-from esctl import utils
-from esctl import config
+from esctl import config, utils
 from esctl.interactive import InteractiveApp
 from esctl.override import EsctlTransport
 
@@ -132,7 +131,7 @@ class Esctl(App):
 
         if self.context.user is not None:
             http_auth = (
-                (self.context.user.get("username"), self.context.user.get("password"),)
+                (self.context.user.get("username"), self.context.user.get("password"))
                 if self.context.user.get("username")
                 and self.context.user.get("password")
                 else None
@@ -180,7 +179,7 @@ class Esctl(App):
             description=description, add_help=False, **argparse_kwargs
         )
         parser.add_argument(
-            "--version", action="version", version="%(prog)s {0}".format(version),
+            "--version", action="version", version="%(prog)s {0}".format(version)
         )
         verbose_group = parser.add_mutually_exclusive_group()
         verbose_group.add_argument(

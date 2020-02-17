@@ -1,6 +1,7 @@
 import unittest.mock
 
 import base_test_class
+
 import esctl.settings
 
 

@@ -99,3 +99,9 @@ make install
 ```bash
 make test
 ```
+
+### Format code
+
+```bash
+make fmt
+```

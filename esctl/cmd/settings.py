@@ -1,15 +1,15 @@
 import collections
 
-from esctl.main import Esctl
 from esctl.commands import (
-    EsctlShowOne,
+    EsctlCommandIndex,
     EsctlCommandSetting,
     EsctlListerIndexSetting,
-    EsctlCommandIndex,
+    EsctlShowOne,
 )
-from esctl.utils import Color
 from esctl.exceptions import SettingNotFoundError
 from esctl.formatter import JSONToCliffFormatter
+from esctl.main import Esctl
+from esctl.utils import Color
 
 
 class ClusterSettingsGet(EsctlCommandSetting):

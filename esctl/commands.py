@@ -68,7 +68,7 @@ class EsctlCommandWithPersistency(EsctlCommand):
             help=("Set setting as transient (default)"),
         )
         persistency_group.add_argument(
-            "--persistent", action="store_true", help=("Set setting as persistent"),
+            "--persistent", action="store_true", help=("Set setting as persistent")
         )
         return parser
 
