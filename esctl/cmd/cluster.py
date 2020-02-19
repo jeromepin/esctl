@@ -1,7 +1,6 @@
 import elasticsearch as elasticsearch
 
 from esctl.commands import EsctlCommandWithPersistency, EsctlLister, EsctlShowOne
-from esctl.main import Esctl
 from esctl.utils import Color, flatten_dict
 
 
@@ -10,7 +9,7 @@ class ClusterAllocationExplain(EsctlLister):
 
     def take_action(self, parsed_args):
         try:
-            response = Esctl._es.cluster.allocation_explain()
+            response = self.es.cluster.allocation_explain()
         except elasticsearch.TransportError as transport_error:
             if transport_error.args[0] == 400:
                 self.log.warn(
@@ -44,7 +43,7 @@ class ClusterHealth(EsctlShowOne):
     """Show the cluster health."""
 
     def take_action(self, parsed_args):
-        health = self._sort_and_order_dict(Esctl._es.cluster.health())
+        health = self._sort_and_order_dict(self.es.cluster.health())
 
         if self.formatter.__class__.__name__ == "TableFormatter":
             health["status"] = Color.colorize(
@@ -59,7 +58,7 @@ class ClusterStats(EsctlShowOne):
 
     def take_action(self, parsed_args):
         cluster_stats = self._sort_and_order_dict(
-            self.transform(flatten_dict(Esctl._es.cluster.stats()))
+            self.transform(flatten_dict(self.es.cluster.stats()))
         )
 
         return (tuple(cluster_stats.keys()), tuple(cluster_stats.values()))

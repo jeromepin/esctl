@@ -8,7 +8,6 @@ from esctl.commands import (
 )
 from esctl.exceptions import SettingNotFoundError
 from esctl.formatter import JSONToCliffFormatter
-from esctl.main import Esctl
 from esctl.utils import Color
 
 
@@ -146,7 +145,7 @@ class IndexSettingsList(EsctlShowOne):
 
     def take_action(self, parsed_args):
         settings = {}
-        sample_index_name = Esctl._es.cat.indices(format="json", h="index")[0].get(
+        sample_index_name = self.es.cat.indices(format="json", h="index")[0].get(
             "index"
         )
 

@@ -2,13 +2,14 @@ import logging
 from abc import ABC
 from typing import Any, Dict
 
-from esctl.main import Esctl
+from esctl.elasticsearch import Client
 
 
 class Settings(ABC):
     """Abstract class for settings management."""
 
     log = logging.getLogger(__name__)
+    es = Client().es
 
 
 class Setting:
@@ -22,7 +23,7 @@ class ClusterSettings(Settings):
     """Handle cluster-level settings."""
 
     def list(self) -> Dict[str, Dict[str, Any]]:
-        return Esctl._es.cluster.get_settings(include_defaults=True, flat_settings=True)
+        return self.es.cluster.get_settings(include_defaults=True, flat_settings=True)
 
     def get(self, key: str, persistency: str = "transient") -> Setting:
         settings: Dict[str, Dict[str, Any]] = self.list()
@@ -38,7 +39,7 @@ class ClusterSettings(Settings):
                 return Setting(key, None)
 
     def set(self, sections: str, value, persistency: str = "transient"):
-        return Esctl._es.cluster.put_settings(body={persistency: {sections: value}})
+        return self.es.cluster.put_settings(body={persistency: {sections: value}})
 
 
 class IndexSettings(Settings):
@@ -47,14 +48,14 @@ class IndexSettings(Settings):
     def list(self, index: str):
         self.log.debug("Retrieving settings list for index : {}".format(index))
 
-        return Esctl._es.indices.get_settings(
+        return self.es.indices.get_settings(
             index=index, include_defaults=True, flat_settings=True
         ).get(index)
 
     def get(self, key: str, index: str):
         self.log.debug("Retrieving setting '{}' for index : {}".format(key, index))
 
-        response = Esctl._es.indices.get_settings(
+        response = self.es.indices.get_settings(
             name=key, index=index, include_defaults=True, flat_settings=True
         )
         settings: Dict[str, Setting] = {}
@@ -77,4 +78,4 @@ class IndexSettings(Settings):
         return settings
 
     def set(self, setting: str, value: Any, index: str):
-        return Esctl._es.indices.put_settings(index=index, body={setting: value})
+        return self.es.indices.put_settings(index=index, body={setting: value})

@@ -1,6 +1,5 @@
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
-from esctl.main import Esctl
 from esctl.utils import Color
 
 
@@ -12,7 +11,7 @@ class CatAllocation(EsctlLister):
     """
 
     def take_action(self, parsed_args):
-        allocation = self.transform(Esctl._es.cat.allocation(format="json"))
+        allocation = self.transform(self.es.cat.allocation(format="json"))
 
         return JSONToCliffFormatter(allocation).format_for_lister(
             columns=[

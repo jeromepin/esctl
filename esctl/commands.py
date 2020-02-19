@@ -5,12 +5,14 @@ from cliff.command import Command
 from cliff.lister import Lister
 from cliff.show import ShowOne
 
+from esctl.elasticsearch import Client
 from esctl.settings import ClusterSettings, IndexSettings
 from esctl.utils import Color
 
 
 class EsctlCommon:
     log = logging.getLogger(__name__)
+    es = Client().es
     cluster_settings = ClusterSettings()
     index_settings = IndexSettings()
 

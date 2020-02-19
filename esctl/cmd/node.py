@@ -1,6 +1,5 @@
 from esctl.commands import EsctlCommand, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
-from esctl.main import Esctl
 from esctl.utils import Color
 
 
@@ -60,7 +59,7 @@ class NodeHotThreads(EsctlCommand):
     """Print hot threads on each nodes."""
 
     def take_action(self, parsed_args):
-        print(Esctl._es.nodes.hot_threads(type=parsed_args.type))
+        print(self.es.nodes.hot_threads(type=parsed_args.type))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
@@ -80,9 +79,7 @@ class NodeList(EsctlLister):
     """List nodes."""
 
     def take_action(self, parsed_args):
-        return JSONToCliffFormatter(
-            Esctl._es.cat.nodes(format="json")
-        ).format_for_lister(
+        return JSONToCliffFormatter(self.es.cat.nodes(format="json")).format_for_lister(
             columns=[
                 ("ip", "IP"),
                 ("heap.percent",),

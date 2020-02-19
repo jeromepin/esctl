@@ -1,18 +1,15 @@
 import argparse
 import logging
-import ssl
 import sys
 
 import pkg_resources
 import urllib3
 from cliff.app import App
 from cliff.commandmanager import CommandManager
-from elasticsearch import Elasticsearch
-from elasticsearch.connection import create_ssl_context
 
 from esctl import config, utils
+from esctl.elasticsearch import Client
 from esctl.interactive import InteractiveApp
-from esctl.override import EsctlTransport
 
 # `configure_logging` and `build_option_parser` methods comes from cliff
 # and are modified
@@ -126,7 +123,6 @@ class Esctl(App):
         self._config.load_configuration()
         self.create_context()
 
-        servers = self.context.cluster.get("servers")
         http_auth = None
 
         if self.context.user is not None:
@@ -137,32 +133,7 @@ class Esctl(App):
                 else None
             )
 
-        scheme = self.find_scheme()
-
-        elasticsearch_client_kwargs = {
-            "http_auth": http_auth,
-            "scheme": scheme,
-            "transport_class": EsctlTransport,
-        }
-
-        if scheme == "https":
-            if self.context.settings.get("no_check_certificate"):
-                ssl_context = create_ssl_context()
-                ssl_context.check_hostname = False
-                ssl_context.verify_mode = ssl.CERT_NONE
-                elasticsearch_client_kwargs["ssl_context"] = ssl_context
-
-        if "max_retries" in self.context.settings:
-            elasticsearch_client_kwargs["max_retries"] = self.context.settings.get(
-                "max_retries"
-            )
-
-        if "timeout" in self.context.settings:
-            elasticsearch_client_kwargs["timeout"] = self.context.settings.get(
-                "timeout"
-            )
-
-        Esctl._es = Elasticsearch(servers, **elasticsearch_client_kwargs)
+        Client(self.context, http_auth, self.find_scheme())
 
     def prepare_to_run_command(self, cmd):
         pass
