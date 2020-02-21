@@ -7,7 +7,8 @@ import urllib3
 from cliff.app import App
 from cliff.commandmanager import CommandManager
 
-from esctl import config, utils
+from esctl import utils
+from esctl.config import ConfigFileParser
 from esctl.elasticsearch import Client
 from esctl.interactive import InteractiveApp
 
@@ -18,7 +19,7 @@ from esctl.interactive import InteractiveApp
 class Esctl(App):
 
     _es = None
-    _config = config.ConfigFileParser()
+    _config = None
     log = App.LOG
 
     def __init__(self):
@@ -93,22 +94,6 @@ class Esctl(App):
 
         return
 
-    def create_context(self):
-        if self.options.context:
-            context_name = str(self.options.context)
-            self.log.debug("Using provided context : {}".format(context_name))
-        else:
-            context_name = self._config.__getattribute__("default-context")
-            self.log.debug(
-                "No context provided. Using default context : {}".format(context_name)
-            )
-
-        try:
-            self.context = self._config.get_context_informations(context_name)
-        except AttributeError:
-            self.log.fatal("Cannot load context '{}'.".format(context_name))
-            sys.exit(1)
-
     def find_scheme(self):
         scheme = "https"
 
@@ -120,8 +105,11 @@ class Esctl(App):
         return scheme
 
     def initialize_app(self, argv):
-        self._config.load_configuration()
-        self.create_context()
+        self.config_file_parser = ConfigFileParser()
+        Esctl._config = self.config_file_parser.load_configuration(
+            self.options.config_file
+        )
+        self.context = self.config_file_parser.create_context(self.options.context)
 
         http_auth = None
 
@@ -175,6 +163,13 @@ class Esctl(App):
             default=None,
             help="Specify a file to log output. Disabled by default.",
         )
+        parser.add_argument(
+            "--config",
+            action="store",
+            default="~/.esctlrc",
+            help="Path to the config file",
+            dest="config_file",
+        )
         if self.deferred_help:
             parser.add_argument(
                 "-h",
@@ -202,7 +197,9 @@ class Esctl(App):
             "--es-version", action="store", help="Elasticsearch version."
         )
 
-        parser.add_argument("--context", action="store", help="Context to use")
+        parser.add_argument(
+            "--context", action="store", help="Context to use", type=str
+        )
 
         return parser
 

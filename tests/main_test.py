@@ -7,7 +7,7 @@ from esctl.main import Esctl
 class TestFindScheme(EsctlTestCase):
     def setUp(self):
         self.esctl = Esctl()
-        self.esctl.context = Context("foo")
+        self.esctl.context = Context("foo", "bar", "baz", {})
 
     def test_scheme_discovery(self):
         cases = [

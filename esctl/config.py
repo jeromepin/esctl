@@ -2,30 +2,32 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Dict, Any
 
 import cerberus
 import yaml
 
 
 class Context:
-    def __init__(self, name, **kwargs):
+    def __init__(self, name, user, cluster, settings):
         super().__init__()
         self.log = logging.getLogger(__name__)
         self.name = name
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.user = user
+        self.cluster = cluster
+        self.settings = settings
 
 
 class ConfigFileParser:
     log = logging.getLogger(__name__)
 
     def __init__(self):
-        super().__init__()
-        self.path = os.path.expanduser("~") + "/.esctlrc"
-        self.log.debug("Trying to load config file : {}".format(self.path))
+        self.users = {}
+        self.contexts = {}
+        self.clusters = {}
+        self.settings = {}
 
-    def _create_default_config_file(self):
+    def _create_default_config_file(self) -> Dict[str, Any]:
         self.log.info(
             "{} config file does not exists. Creating a default one...".format(
                 self.path
@@ -42,19 +44,49 @@ class ConfigFileParser:
         with open(self.path, "w") as config_file:
             yaml.dump(default_config, config_file, default_flow_style=False)
 
+        return default_config
+
     def _ensure_config_file_is_valid(self, document):
+        settings_schema = {
+            "no_check_certificate": {"type": "boolean"},
+            "max_retries": {"type": "integer"},
+            "timeout": {"type": "integer"},
+        }
         schema = {
-            "settings": {
+            "settings": {"type": "dict", "schema": settings_schema},
+            "clusters": {
                 "type": "dict",
-                "schema": {
-                    "no_check_certificate": {"type": "boolean"},
-                    "max_retries": {"type": "integer"},
-                    "timeout": {"type": "integer"},
+                "keysrules": {},
+                "valuesrules": {
+                    "type": "dict",
+                    "schema": {
+                        "servers": {"type": "list"},
+                        "settings": {"type": "dict", "schema": settings_schema},
+                    },
                 },
             },
-            "clusters": {"type": "dict"},
-            "users": {"type": "dict"},
-            "contexts": {"type": "dict"},
+            "users": {
+                "type": "dict",
+                "keysrules": {"type": "string"},
+                "valuesrules": {
+                    "type": "dict",
+                    "schema": {
+                        "username": {"type": "string"},
+                        "password": {"type": "string"},
+                    },
+                },
+            },
+            "contexts": {
+                "type": "dict",
+                "keysrules": {"type": "string"},
+                "valuesrules": {
+                    "type": "dict",
+                    "schema": {
+                        "cluster": {"type": "string"},
+                        "user": {"type": "string"},
+                    },
+                },
+            },
             "default-context": {"type": "string"},
         }
         cerberus_validator = cerberus.Validator(schema)
@@ -76,8 +108,9 @@ class ConfigFileParser:
 
             raise SyntaxError("{} doesn't match expected schema".format(self.path))
 
-    def load_configuration(self):
-        self.log.debug("Loading configuration...")
+    def load_configuration(self, path: str = "~/.esctlrc"):
+        self.path = os.path.expanduser(path)
+        self.log.debug("Trying to load config file : {}".format(self.path))
         expected_config_blocks = [
             "clusters",
             "contexts",
@@ -87,7 +120,7 @@ class ConfigFileParser:
         ]
 
         if not Path(self.path).is_file():
-            self._create_default_config_file()
+            return self._create_default_config_file()
 
         with open(self.path, "r") as config_file:
             try:
@@ -103,18 +136,17 @@ class ConfigFileParser:
             sys.exit(1)
 
         for config_block in expected_config_blocks:
-            if not hasattr(self, config_block):
-                setattr(self, config_block, None)
-            self.load_config_block_from_json(raw_config_file, config_block)
-            self.log.debug("{}: {}".format(config_block, getattr(self, config_block)))
+            self.__setattr__(config_block, raw_config_file.get(config_block))
 
-    def load_config_block_from_json(self, raw_config, key):
-        if key in raw_config:
-            setattr(self, key, raw_config.get(key))
-        else:
-            self.log.debug("Cannot find config block : " + key)
+            self.log.debug(
+                "Loaded {}: {}".format(
+                    config_block, self.__getattribute__(config_block)
+                )
+            )
 
-    def get_context_informations(self, context_name):
+        return raw_config_file
+
+    def get_context_informations(self, context_name: str):
         user = self.users.get(self.contexts.get(context_name).get("user"))
         cluster = self.clusters.get(self.contexts.get(context_name).get("cluster"))
 
@@ -125,4 +157,21 @@ class ConfigFileParser:
         else:
             settings = {**self.settings}
 
-        return Context(context_name, user=user, cluster=cluster, settings=settings)
+        return Context(context_name, user, cluster, settings)
+
+    def create_context(self, context_name: str = None) -> Context:
+        if context_name:
+            self.log.debug("Using provided context : {}".format(context_name))
+        else:
+            context_name = self.__getattribute__("default-context")
+            self.log.debug(
+                "No context provided. Using default context : {}".format(context_name)
+            )
+
+        try:
+            context = self.get_context_informations(context_name)
+        except AttributeError:
+            self.log.fatal("Cannot load context '{}'.".format(context_name))
+            sys.exit(1)
+
+        return context
