@@ -119,16 +119,16 @@ class ConfigFileParser:
             "users",
         ]
 
-        if not Path(self.path).is_file():
-            return self._create_default_config_file()
-
-        with open(self.path, "r") as config_file:
-            try:
-                raw_config_file = yaml.safe_load(config_file)
-            except yaml.YAMLError as err:
-                self.log.critical("Cannot read YAML from {}".format(self.path))
-                self.log.critical(str(err.problem) + str(err.problem_mark))
-                sys.exit(1)
+        if Path(self.path).is_file():
+            with open(self.path, "r") as config_file:
+                try:
+                    raw_config_file = yaml.safe_load(config_file)
+                except yaml.YAMLError as err:
+                    self.log.critical("Cannot read YAML from {}".format(self.path))
+                    self.log.critical(str(err.problem) + str(err.problem_mark))
+                    sys.exit(1)
+        else:
+            raw_config_file = self._create_default_config_file()
 
         try:
             self._ensure_config_file_is_valid(raw_config_file)
