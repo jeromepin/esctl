@@ -22,3 +22,14 @@ repos:
     rev: 19.3b0
     hooks:
       - id: black
+
+  - repo: local
+    hooks:
+      - id: make-lint
+        name: Lint files
+        language: system
+        entry: make lint
+      - id: make-fmt
+        name: Format files
+        language: system
+        entry: make fmt

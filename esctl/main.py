@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+import os
 
 import pkg_resources
 import urllib3
@@ -23,6 +24,7 @@ class Esctl(App):
     log = App.LOG
 
     def __init__(self):
+        os.environ["COLUMNS"] = "120"
         super(Esctl, self).__init__(
             description=pkg_resources.require("Esctl")[0].project_name,
             version=pkg_resources.require("Esctl")[0].version,

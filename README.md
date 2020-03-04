@@ -1,6 +1,6 @@
 # Esctl
 
-Esctl is a CLI tool for Elasticsearch. It should prevent Elasticsearch operators to use huge `curl` commands with complex bodies like
+Esctl is a CLI tool for Elasticsearch. [I designed it](https://jeromepin.fr/posts/esctl-managing-elasticsearch-from-command-line/) to shorten huge `curl` commands Elasticsearch operators were running like :
 
 ```bash
 curl -XPUT --user "john:doe" 'http://elasticsearch.example.com:9200/_cluster/settings' -d '{
@@ -15,6 +15,8 @@ The equivalent with `esctl` is
 ```bash
 esctl cluster routing allocation enable none
 ```
+
+## Examples
 
 ```
 $ esctl cluster health
@@ -51,15 +53,15 @@ $ esctl node list
 ```
 
 
-# Installation
+## Installation
 
-## From source
+### From source
 
 ```bash
 pip install git+https://github.com/jeromepin/esctl.git
 ```
 
-# Usage
+## Usage
 
 Esctl relies on a `~/.esctlrc` file containing its config :
 
@@ -82,11 +84,11 @@ contexts:
 default-context: foo
 ```
 
-# License
+## License
 
 `esctl` is licensed under the GNU GPLv3. See [LICENCE](https://github.com/jeromepin/esctl/blob/master/LICENSE) file.
 
-# Developing
+## Developing
 
 ### Install
 

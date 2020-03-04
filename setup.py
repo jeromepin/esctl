@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 PROJECT = "esctl"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
@@ -44,6 +44,7 @@ setup(
         "console_scripts": ["esctl = esctl.main:main"],
         "esctl": [
             "cat allocation = esctl.cmd.cat:CatAllocation",
+            "cat thread-pool = esctl.cmd.cat:CatThreadpool",
             "cluster allocation explain = esctl.cmd.cluster:ClusterAllocationExplain",
             "cluster health = esctl.cmd.cluster:ClusterHealth",
             "cluster routing allocation enable = esctl.cmd.cluster:ClusterRoutingAllocationEnable",
