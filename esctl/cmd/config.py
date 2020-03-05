@@ -1,6 +1,7 @@
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.main import Esctl
+from esctl.utils import Color
 
 
 class ConfigClusterList(EsctlLister):
@@ -37,9 +38,24 @@ class ConfigContextList(EsctlLister):
             ).items()
         ]
 
-        return JSONToCliffFormatter(contexts).format_for_lister(
+        return JSONToCliffFormatter(self.transform(contexts)).format_for_lister(
             columns=[("name"), ("user"), ("cluster")]
         )
+
+    def transform(self, raw_contexts):
+        modified_contexts = []
+
+        for context in raw_contexts:
+            if context.get("name") == Esctl._config.get("default-context"):
+                for context_attribute_name, context_attribute_value in context.items():
+                    context[context_attribute_name] = Color.colorize(
+                        context_attribute_value, Color.UNDERLINE
+                    )
+
+            modified_contexts.append(context)
+
+        return modified_contexts
+
 
 
 class ConfigUserList(EsctlLister):
