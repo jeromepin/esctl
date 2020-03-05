@@ -53,21 +53,21 @@ class CatThreadpool(EsctlLister):
     Thread pools reference : https://www.elastic.co/guide/en/elasticsearch/reference/6.8/modules-threadpool.html  # noqa
     """
 
-    _default_columns = "node_name,name,active,queue,rejected,type"
+    _default_headers = "node_name,name,active,queue,rejected,type"
 
     def take_action(self, parsed_args):
-        columns = parsed_args.columns if parsed_args.columns else self._default_columns
+        headers = parsed_args.headers if parsed_args.headers else self._default_headers
 
         thread_pools = self.transform(
             self.es.cat.thread_pool(
                 format="json",
-                h=columns,
+                h=headers,
                 thread_pool_patterns=parsed_args.thread_pool_patterns,
             )
         )
 
         return JSONToCliffFormatter(thread_pools).format_for_lister(
-            columns=[(c,) for c in columns.split(",")]
+            columns=[(h,) for h in headers.split(",")]
         )
 
     def get_parser(self, prog_name):
@@ -80,11 +80,12 @@ class CatThreadpool(EsctlLister):
                 "to filter the thread pools in the output"
             ),
         )
-        # parser.add_argument(
-        #     "--columns",
-        #     help=("A comma-separated list of column names to display"),
-        #     default=self._default_columns,
-        # )
+        parser.add_argument(
+            "--headers",
+            help=("A comma-separated list of column names to display"),
+            default=self._default_headers,
+            type=str,
+        )
 
         return parser
 
