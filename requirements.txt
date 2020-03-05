@@ -1,4 +1,4 @@
 cerberus
 certifi
-cliff==2.15.0
+cliff==3.0
 elasticsearch
