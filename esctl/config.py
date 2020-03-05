@@ -1,8 +1,9 @@
 import logging
 import os
 import sys
+from collections import OrderedDict
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 import cerberus
 import yaml
@@ -27,22 +28,27 @@ class ConfigFileParser:
         self.clusters = {}
         self.settings = {}
 
-    def _create_default_config_file(self) -> Dict[str, Any]:
+    def write_config_file(self, content):
+        with open(self.path, "w") as config_file:
+            yaml.dump(content, config_file, default_flow_style=False)
+
+    def _create_default_config_file(self) -> "OrderedDict[str, Any]":
         self.log.info(
             "{} config file does not exists. Creating a default one...".format(
                 self.path
             )
         )
-        default_config = {
-            "settings": {},
-            "clusters": {"localhost": {"servers": ["http://localhost:9200"]}},
-            "users": {},
-            "contexts": {"localhost": {"cluster": "localhost"}},
-            "default-context": "localhost",
-        }
+        default_config = OrderedDict(
+            {
+                "settings": {},
+                "clusters": {"localhost": {"servers": ["http://localhost:9200"]}},
+                "users": {},
+                "contexts": {"localhost": {"cluster": "localhost"}},
+                "default-context": "localhost",
+            }
+        )
 
-        with open(self.path, "w") as config_file:
-            yaml.dump(default_config, config_file, default_flow_style=False)
+        self.write_config_file(default_config)
 
         return default_config
 
@@ -108,7 +114,7 @@ class ConfigFileParser:
 
             raise SyntaxError("{} doesn't match expected schema".format(self.path))
 
-    def load_configuration(self, path: str = "~/.esctlrc"):
+    def load_configuration(self, path: str = "~/.esctlrc") -> OrderedDict:
         self.path = os.path.expanduser(path)
         self.log.debug("Trying to load config file : {}".format(self.path))
         expected_config_blocks = [
@@ -122,7 +128,7 @@ class ConfigFileParser:
         if Path(self.path).is_file():
             with open(self.path, "r") as config_file:
                 try:
-                    raw_config_file = yaml.safe_load(config_file)
+                    raw_config_file = OrderedDict(yaml.safe_load(config_file))
                 except yaml.YAMLError as err:
                     self.log.critical("Cannot read YAML from {}".format(self.path))
                     self.log.critical(str(err.problem) + str(err.problem_mark))

@@ -1,4 +1,4 @@
-from esctl.commands import EsctlLister
+from esctl.commands import EsctlCommand, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.main import Esctl
 from esctl.utils import Color
@@ -56,6 +56,23 @@ class ConfigContextList(EsctlLister):
 
         return modified_contexts
 
+
+class ConfigContextSet(EsctlCommand):
+    """Set the default context."""
+
+    def take_action(self, parsed_args):
+        Esctl._config["default-context"] = parsed_args.context
+        Esctl._config_file_parser.write_config_file(dict(Esctl._config))
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument(
+            "context",
+            help=("Context to set as default"),
+            choices=Esctl._config.get("contexts"),
+        )
+
+        return parser
 
 
 class ConfigUserList(EsctlLister):

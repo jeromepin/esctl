@@ -21,6 +21,7 @@ class Esctl(App):
 
     _es = None
     _config = None
+    _config_file_parser = ConfigFileParser()
     log = App.LOG
 
     def __init__(self):
@@ -107,11 +108,10 @@ class Esctl(App):
         return scheme
 
     def initialize_app(self, argv):
-        self.config_file_parser = ConfigFileParser()
-        Esctl._config = self.config_file_parser.load_configuration(
+        Esctl._config = Esctl._config_file_parser.load_configuration(
             self.options.config_file
         )
-        self.context = self.config_file_parser.create_context(self.options.context)
+        self.context = Esctl._config_file_parser.create_context(self.options.context)
 
         http_auth = None
 
