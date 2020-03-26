@@ -47,6 +47,20 @@ class CatAllocation(EsctlLister):
         return nodes
 
 
+class CatPlugins(EsctlLister):
+    """Returns informations about installed plugins across nodes."""
+
+    def take_action(self, parsed_args):
+        plugins = self.transform(self.es.cat.plugins(format="json"))
+
+        return JSONToCliffFormatter(plugins).format_for_lister(
+            columns=[("name", "node"), ("component", "plugin"), ("version")]
+        )
+
+    def transform(self, plugins):
+        return sorted(plugins, key=lambda i: i["name"])
+
+
 class CatThreadpool(EsctlLister):
     """Show cluster-wide thread pool statistics per node.
 
