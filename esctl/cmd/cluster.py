@@ -45,12 +45,24 @@ class ClusterHealth(EsctlShowOne):
     def take_action(self, parsed_args):
         health = self._sort_and_order_dict(self.es.cluster.health())
 
-        if self.formatter.__class__.__name__ == "TableFormatter":
+        if self.uses_table_formatter():
             health["status"] = Color.colorize(
                 health.get("status"), getattr(Color, health.get("status").upper())
             )
 
         return (tuple(health.keys()), tuple(health.values()))
+
+
+class ClusterInfo(EsctlShowOne):
+    """Show basic informations about the cluster."""
+
+    def take_action(self, parsed_args):
+        infos = self.es.info()
+
+        if self.uses_table_formatter():
+            infos = self._delete_and_merge_inner_dict_into_parent(infos, "version")
+
+        return (tuple(infos.keys()), tuple(infos.values()))
 
 
 class ClusterStats(EsctlShowOne):

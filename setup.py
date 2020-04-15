@@ -46,6 +46,7 @@ setup(
             "cat thread-pool = esctl.cmd.cat:CatThreadpool",
             "cluster allocation explain = esctl.cmd.cluster:ClusterAllocationExplain",
             "cluster health = esctl.cmd.cluster:ClusterHealth",
+            "cluster info = esctl.cmd.cluster:ClusterInfo",
             "cluster routing allocation enable = esctl.cmd.cluster:ClusterRoutingAllocationEnable",
             "cluster stats = esctl.cmd.cluster:ClusterStats",
             "cluster settings list = esctl.cmd.settings:ClusterSettingsList",

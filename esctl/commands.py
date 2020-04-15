@@ -51,6 +51,59 @@ class EsctlCommon:
 
         return flat_dict
 
+    def _delete_and_merge_inner_dict_into_parent(
+        self, parent_dict: Dict[str, Any], key: str
+    ) -> Dict[str, Any]:
+        """ Merge a inner dictionnary into it's parent.
+
+        :Example:
+                {
+                    "name" : "prod-monolith-us-searchill-es-01",
+                    "cluster_name" : "prod-lumsites-cluster",
+                    "cluster_uuid" : "Z0FeT4oVSw2GQ3bMs0vEZw",
+                    "version" : {
+                        "number" : "7.0.1",
+                        "build_flavor" : "default",
+                        "build_type" : "deb",
+                        "build_hash" : "e4efcb5",
+                        "build_date" : "2019-04-29T12:56:03.145736Z",
+                        "build_snapshot" : false,
+                        "lucene_version" : "8.0.0",
+                        "minimum_wire_compatibility_version" : "6.7.0",
+                        "minimum_index_compatibility_version" : "6.0.0-beta1"
+                    },
+                    "tagline" : "You Know, for Search"
+                }
+            becomes
+                {
+                    "name" : "prod-monolith-us-searchill-es-01",
+                    "cluster_name" : "prod-lumsites-cluster",
+                    "cluster_uuid" : "Z0FeT4oVSw2GQ3bMs0vEZw",
+                    "version.number" : "7.0.1",
+                    "version.build_flavor" : "default",
+                    "version.build_type" : "deb",
+                    "version.build_hash" : "e4efcb5",
+                    "version.build_date" : "2019-04-29T12:56:03.145736Z",
+                    "version.build_snapshot" : false,
+                    "version.lucene_version" : "8.0.0",
+                    "version.minimum_wire_compatibility_version" : "6.7.0",
+                    "version.minimum_index_compatibility_version" : "6.0.0-beta1",
+                    "tagline" : "You Know, for Search"
+                }
+
+        :param parent_dict: The parent dict containing an inner dict
+        :paramtype parent_dict: dict
+        :param key: The key where the inner dict stands
+        :paramtype key: str
+        :return: The parent dict with the merged inner dict
+        :rtype: dict
+        """
+        for k, v in parent_dict.get(key).items():
+            parent_dict[f"{key}.{k}"] = v
+        del parent_dict[key]
+
+        return parent_dict
+
 
 class EsctlCommand(Command, EsctlCommon):
     """Simple command to run. Doesn’t expect any output."""
