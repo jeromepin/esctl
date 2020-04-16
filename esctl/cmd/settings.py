@@ -115,29 +115,27 @@ class IndexSettingsGet(EsctlListerIndexSetting):
         if not setting_name.startswith("index."):
             setting_name = "index.{}".format(setting_name)
 
-        raw_settings = self.index_settings.get(setting_name, index=index)
+        raw_settings = self.index_settings.get(index, setting_name)
         settings = []
 
-        for index_name, setting in raw_settings.items():
-            if setting.value is not None:
-                if setting.persistency == "defaults":
+        for index_name, settings_list in raw_settings.items():
+            for setting in settings_list:
+                if setting.value is not None:
+                    if setting.persistency == "defaults":
+                        value = f"{setting.value} ({Color.colorize('default', Color.ITALIC)})"
+                    else:
+                        value = setting.value
+
                     settings.append(
-                        {
-                            "index": index_name,
-                            "value": "{} ({})".format(
-                                setting.value, Color.colorize("default", Color.ITALIC)
-                            ),
-                        }
+                        {"index": index_name, "setting": setting.name, "value": value}
                     )
-                else:
-                    settings.append({"index": index_name, "value": setting.value})
 
         return settings
 
     def take_action(self, parsed_args):
         return JSONToCliffFormatter(
             self.retrieve_setting(parsed_args.setting, parsed_args.index)
-        ).format_for_lister(columns=[("index",), ("value",)])
+        ).format_for_lister(columns=[("index",), ("setting",), ("value",)])
 
 
 class IndexSettingsList(EsctlShowOne):

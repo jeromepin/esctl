@@ -1,4 +1,4 @@
-from base_test_class import EsctlTestCase
+from .base_test_class import EsctlTestCase
 
 from esctl.config import Context
 from esctl.main import Esctl

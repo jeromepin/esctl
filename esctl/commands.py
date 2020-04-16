@@ -164,7 +164,9 @@ class EsctlListerIndexSetting(EsctlLister):
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.add_argument("index", metavar="<index>", help=("Index"))
-        parser.add_argument("setting", metavar="<setting>", help=("Setting"))
+        parser.add_argument(
+            "setting", metavar="<setting>", help=("Setting"), nargs="?", default="*"
+        )
         return parser
 
 

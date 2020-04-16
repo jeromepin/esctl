@@ -1,14 +1,14 @@
+import json
 import unittest.mock
 
-import base_test_class
-
-import esctl.settings
+from .base_test_class import EsctlTestCase
 
 
-class TestSettingsRetrieval(base_test_class.EsctlTestCase):
+class TestClusterSettingsRetrieval(EsctlTestCase):
     def setUp(self):
-        self.mock = unittest.mock.patch("esctl.settings.Esctl").start()
-        self.mock._es.cluster.get_settings.return_value = self.fixtures()
+        super().setUp()
+        self.mock = unittest.mock.patch("esctl.settings.Settings.es").start()
+        self.mock.cluster.get_settings.return_value = self.fixtures()
 
     def fixtures(self):
         return {
@@ -24,6 +24,8 @@ class TestSettingsRetrieval(base_test_class.EsctlTestCase):
         }
 
     def test_settings_get(self):
+        import esctl.settings
+
         cluster_settings = esctl.settings.ClusterSettings()
         self.assertEqual(
             cluster_settings.get(
@@ -61,4 +63,29 @@ class TestSettingsRetrieval(base_test_class.EsctlTestCase):
                 "cluster.routing.allocation.foobar", persistency="transient"
             ).value,
             None,
+        )
+
+
+class TestIndexSettingsRetrieval(EsctlTestCase):
+    def setUp(self):
+        super().setUp()
+        self.mock = unittest.mock.patch("esctl.settings.Settings.es").start()
+        self.mock.indices.get_settings.return_value = self.fixtures()
+
+    def fixtures(self):
+        with open("{}/index_settings.json".format(self.fixtures_path)) as json_file:
+            return json.load(json_file)
+
+    def test_settings_list(self):
+        import esctl.settings
+
+        index_settings = esctl.settings.IndexSettings()
+
+        self.assertEqual(
+            index_settings.get(
+                "foobar,qux", "index.analysis.analyzer.trigram.tokenizer"
+            )
+            .get("foobar")[0]
+            .value,
+            "standard",
         )
