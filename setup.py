@@ -29,7 +29,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Topic :: Utilities",
         "Topic :: System :: Shells",
-        "Topic :: Systems Administration",
     ],
     platforms=["Any"],
     scripts=[],
