@@ -1,4 +1,5 @@
-# Esctl
+# Esctl ![Lint and test](https://github.com/jeromepin/esctl/workflows/Lint%20and%20test/badge.svg) ![Publish 📦](https://github.com/jeromepin/esctl/workflows/Publish%20%F0%9F%93%A6/badge.svg) [![CodeFactor](https://www.codefactor.io/repository/github/jeromepin/esctl/badge)](https://www.codefactor.io/repository/github/jeromepin/esctl) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jeromepin_esctl&metric=alert_status)](https://sonarcloud.io/dashboard?id=jeromepin_esctl)
+
 
 Esctl is a CLI tool for Elasticsearch. [I designed it](https://jeromepin.fr/posts/esctl-managing-elasticsearch-from-command-line/) to shorten huge `curl` commands Elasticsearch operators were running like :
 

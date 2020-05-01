@@ -1,9 +1,9 @@
-name: Python package
+name: Lint and test
 
 on: [push]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -20,11 +20,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r requirements-dev.txt
       - name: Lint with flake8
         run: |
           pip install flake8
           make lint
-      # - name: Test with pytest
-      #   run: |
-      #     pip install pytest
-      #     make test
+      - name: Test with pytest
+        run: |
+          pip install pytest
+          make test
