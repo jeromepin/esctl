@@ -1,8 +1,8 @@
 install:
-	python3 setup.py install >> /dev/null
+	@python3 setup.py install >> /dev/null
 
 test: install
-	pytest -sv
+	@pytest -sv
 
 lint: install
 	flake8 esctl --count --show-source --statistics --show-source

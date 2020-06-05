@@ -1,5 +1,38 @@
-# Esctl ![Lint and test](https://github.com/jeromepin/esctl/workflows/Lint%20and%20test/badge.svg) ![Publish 📦](https://github.com/jeromepin/esctl/workflows/Publish%20%F0%9F%93%A6/badge.svg) [![CodeFactor](https://www.codefactor.io/repository/github/jeromepin/esctl/badge)](https://www.codefactor.io/repository/github/jeromepin/esctl) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jeromepin_esctl&metric=alert_status)](https://sonarcloud.io/dashboard?id=jeromepin_esctl)
+<h1 align="center">
+  <br/>
+  Esctl
+  <br/>
+</h1>
 
+<h4 align="center">A Command-Line Interface designed to ease Elasticsearch administration.</h4>
+
+<p align="center">
+  <a href="https://github.com/jeromepin/esctl/actions?query=workflow%3A%22Lint+and+test%22+branch%3Amaster">
+    <img src="https://github.com/jeromepin/esctl/workflows/Lint%20and%20test/badge.svg" alt="Test status">
+  </a>
+  <a href="https://github.com/jeromepin/esctl/actions?query=workflow%3A%22Publish+%F0%9F%93%A6%22+branch%3Amaster">
+    <img src="https://github.com/jeromepin/esctl/workflows/Publish%20%F0%9F%93%A6/badge.svg" alt="Publish status">
+  </a>
+
+  <a href="https://www.codefactor.io/repository/github/jeromepin/esctl">
+      <img src="https://www.codefactor.io/repository/github/jeromepin/esctl/badge" alt="Codefactor grade">
+  </a>
+
+  <a href="https://sonarcloud.io/dashboard?id=jeromepin_esctl">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=jeromepin_esctl&metric=alert_status" alt="Code quality status">
+  </a>
+</p>
+
+<p align="center">
+  <a href="#key-features">Key Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#how-to-use">How To Use</a> •
+  <a href="#examples">Examples</a> •
+  <a href="#license">License</a>
+  <a href="#developing">Developing</a>
+</p>
+
+<hr/>
 
 Esctl is a CLI tool for Elasticsearch. [I designed it](https://jeromepin.fr/posts/esctl-managing-elasticsearch-from-command-line/) to shorten huge `curl` commands Elasticsearch operators were running like :
 
@@ -17,44 +50,24 @@ The equivalent with `esctl` is
 esctl cluster routing allocation enable none
 ```
 
-## Examples
+## Key Features
 
-```
-$ esctl cluster health
-+----------------------------------+-----------------+
-| Attribute                        |           Value |
-+----------------------------------+-----------------+
-| active_primary_shards            |            2545 |
-| active_shards                    |           28000 |
-| active_shards_percent_as_number  |           100.0 |
-| cluster_name                     |             foo |
-| delayed_unassigned_shards        |               0 |
-| initializing_shards              |               0 |
-| number_of_data_nodes             |             200 |
-| number_of_in_flight_fetch        |               0 |
-| number_of_nodes                  |             215 |
-| number_of_pending_tasks          |              12 |
-| relocating_shards                |               0 |
-| status                           |           green |
-| task_max_waiting_in_queue_millis |               0 |
-| timed_out                        |           False |
-| unassigned_shards                |               0 |
-+----------------------------------+-----------------+
-```
-
-```
-$ esctl node list
-+------------+--------+-------+-----+---------+---------+----------+------+--------+---------------------------+
-| IP         | Heap % | RAM % | Cpu | Load 1M | Load 5M | Load 15M | Role | Master | Name                      |
-+------------+--------+-------+-----+---------+---------+----------+------+--------+---------------------------+
-| 10.0.0.1   | 45     | 80    | 8   | 2.05    | 1.13    | 1.10     | m    | *      | master001-foo01-prd-sfo1  |
-| 10.0.0.117 | 88     | 91    | 12  | 8.03    | 9.03    | 9.00     | d    | -      | data117-foo01-prd-sfo3    |
-| 10.0.0.12  | 92     | 94    | 12  | 9.00    | 9.01    | 9.00     | d    | -      | data012-foo01-prd-sfo2    |
-+------------+--------+-------+-----+---------+---------+----------+------+--------+---------------------------+
-```
+* Cluster-level informations : **stats**, **info**, **health**, **allocation explanation**
+* Node-level informations : **list**, **hot threads**, **exclusion**
+* Cluster-level and index-level **settings**
+* `_cat` API for **allocation**, **plugins** and **thread pools**
+* **Index management** : open, close, create, delete, list
+* Per-module **log configuration**
+* X-Pack APIs : **users** and **roles**
 
 
 ## Installation
+
+### Using PIP
+
+```bash
+pip3 install esctl
+```
 
 ### From source
 
@@ -62,9 +75,10 @@ $ esctl node list
 pip install git+https://github.com/jeromepin/esctl.git
 ```
 
-## Usage
 
-Esctl relies on a `~/.esctlrc` file containing its config :
+## How To Use
+
+Esctl relies on a `~/.esctlrc` file containing its config. This file is automatically created on the first start if it doesn't exists :
 
 ```yaml
 clusters:
@@ -84,6 +98,13 @@ contexts:
 
 default-context: foo
 ```
+
+## Examples
+
+<p align="center">
+  <img src="node-list-sample.png" alt="node-list sample">
+</p>
+
 
 ## License
 
