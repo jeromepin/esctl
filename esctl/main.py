@@ -1,7 +1,10 @@
 import argparse
 import logging
-import sys
 import os
+import re
+import subprocess
+import sys
+from typing import List
 
 import pkg_resources
 import urllib3
@@ -34,6 +37,13 @@ class Esctl(App):
             interactive_app_factory=InteractiveApp,
         )
         self.interactive_mode = False
+
+        self.LOCAL_COMMANDS: List[str] = [
+            "ConfigClusterList",
+            "ConfigContextList",
+            "ConfigContextSet",
+            "ConfigUserList",
+        ]
 
     def configure_logging(self):
         """Create logging handlers for any log output.
@@ -125,10 +135,69 @@ class Esctl(App):
 
         Client(self.context, http_auth, self.find_scheme())
 
+    def _run_shell_subcommand(self, command):
+        command = command.split(" ")
+        self.log.debug(f"Running pre-command : {command}")
+        process = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+
+        return process
+
     def prepare_to_run_command(self, cmd):
-        pass
+        if (cmd.__class__.__name__ not in self.LOCAL_COMMANDS) and hasattr(
+            self.context, "pre_commands"
+        ):
+            for i in range(len(self.context.pre_commands)):
+                command_block = self.context.pre_commands[i]
+                process = self._run_shell_subcommand(command_block.get("command"))
+
+                if command_block.get("wait_for_exit"):
+                    process.communicate()
+                    # (stdout, _) = process.communicate()
+                    # stdout = stdout.decode("utf-8").strip()
+
+                    # if command_block.get("save"):
+                    #     self.log.debug(
+                    #         f"Expecting command output to match `{command_block.get('save')}` in order to save it"
+                    #     )
+                    #     save_pattern = re.compile(command_block.get("save"))
+                    #     self.context.pre_commands[i]["saved"] = re.search(
+                    #         save_pattern, stdout
+                    #     )
+
+                elif command_block.get("wait_for_output"):
+                    string_to_look_for = command_block.get("wait_for_output")
+                    pattern = re.compile(string_to_look_for)
+
+                    while True:
+                        line = process.stdout.readline()
+                        if not line:
+                            break
+
+                        line = line.decode("utf-8").strip()
+
+                        match = re.search(pattern, line)
+
+                        if match is None:
+                            self.log.debug(
+                                f"Expecting command output to match `{string_to_look_for}` but got `{line}`..."
+                            )
+                        else:
+                            self.log.debug(
+                                f"Got `{string_to_look_for}` from `{command_block.get('command')}`"
+                            )
+                            break
+
+                self.context.pre_commands[i]["process"] = process
 
     def clean_up(self, cmd, result, err):
+        if (cmd.__class__.__name__ not in self.LOCAL_COMMANDS) and hasattr(
+            self.context, "pre_commands"
+        ):
+            for pre_command in self.context.pre_commands:
+                pre_command.get("process").terminate()
+
         if err:
             self.log.debug("got an error: %s", err)
 

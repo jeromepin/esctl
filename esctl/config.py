@@ -3,20 +3,26 @@ import os
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Dict
 
 import cerberus
 import yaml
 
 
 class Context:
-    def __init__(self, name, user, cluster, settings):
+    def __init__(self, name, user, cluster, settings, **kwargs):
         super().__init__()
         self.log = logging.getLogger(__name__)
         self.name = name
         self.user = user
         self.cluster = cluster
         self.settings = settings
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def __repr__(self):
+        return f"<Context {self.name} user={self.user} cluster={self.cluster} settings={self.settings}>"
 
 
 class ConfigFileParser:
@@ -58,6 +64,18 @@ class ConfigFileParser:
             "max_retries": {"type": "integer"},
             "timeout": {"type": "integer"},
         }
+
+        # command_schema = {
+        #     "keysrules": {"type": "string"},
+        #     "valuesrules": {
+        #         "type": "dict",
+        #         "schema": {
+        #             "command": {"type": "string"},
+        #             "allow_failure": {"type": "boolean", "required": False},
+        #         },
+        #     },
+        # }
+
         schema = {
             "settings": {"type": "dict", "schema": settings_schema},
             "clusters": {
@@ -90,6 +108,7 @@ class ConfigFileParser:
                     "schema": {
                         "cluster": {"type": "string"},
                         "user": {"type": "string"},
+                        "pre_commands": {"type": "list"},
                     },
                 },
             },
@@ -153,8 +172,9 @@ class ConfigFileParser:
         return raw_config_file
 
     def get_context_informations(self, context_name: str):
-        user = self.users.get(self.contexts.get(context_name).get("user"))
-        cluster = self.clusters.get(self.contexts.get(context_name).get("cluster"))
+        raw_context = self.contexts.get(context_name)
+        user = self.users.get(raw_context.get("user"))
+        cluster = self.clusters.get(raw_context.get("cluster"))
 
         # Merge global settings and per-cluster settings.
         # Cluster-level settings override global settings
@@ -163,7 +183,30 @@ class ConfigFileParser:
         else:
             settings = {**self.settings}
 
-        return Context(context_name, user, cluster, settings)
+        pre_commands: List[Dict] = []
+        if "pre_commands" in raw_context:
+            pre_commands = raw_context.get("pre_commands")
+
+            for i in range(len(pre_commands)):
+                pre_command = pre_commands[i]
+                pre_command = {
+                    **{
+                        "allow_failure": False,
+                        "wait_for_exit": True,
+                        "wait_for_output": "",
+                        "suppress_stdout": True,
+                        "save": False,
+                    },
+                    **pre_command,
+                }
+
+                pre_commands[i] = pre_command
+
+        context = Context(
+            context_name, user, cluster, settings, pre_commands=pre_commands
+        )
+
+        return context
 
     def create_context(self, context_name: str = None) -> Context:
         if context_name:
