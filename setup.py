@@ -70,6 +70,8 @@ setup(
             "node exclude = esctl.cmd.node:NodeExclude",
             "node hot-threads = esctl.cmd.node:NodeHotThreads",
             "node list = esctl.cmd.node:NodeList",
+            "roles get = esctl.cmd.roles:SecurityRolesGet",
+            "users get = esctl.cmd.users:SecurityUsersGet",
         ],
     },
     zip_safe=False,
