@@ -32,15 +32,16 @@ class CatAllocation(EsctlLister):
 
         for node in allocation:
             if self.formatter.__class__.__name__ == "TableFormatter":
-                if int(node.get("disk.percent")) > 85:
-                    node["disk.percent"] = Color.colorize(
-                        node.get("disk.percent"), Color.RED
-                    )
+                if node.get("disk.percent") is not None:
+                    if int(node.get("disk.percent")) > 85:
+                        node["disk.percent"] = Color.colorize(
+                            node.get("disk.percent"), Color.RED
+                        )
 
-                elif int(node.get("disk.percent")) > 70:
-                    node["disk.percent"] = Color.colorize(
-                        node.get("disk.percent"), Color.YELLOW
-                    )
+                    elif int(node.get("disk.percent")) > 70:
+                        node["disk.percent"] = Color.colorize(
+                            node.get("disk.percent"), Color.YELLOW
+                        )
 
             nodes.append(node)
 
