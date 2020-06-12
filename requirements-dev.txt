@@ -1,4 +1,4 @@
-pytest
 mypy
 flake8
 pre-commit
+ward
