@@ -65,17 +65,6 @@ class ConfigFileParser:
             "timeout": {"type": "integer"},
         }
 
-        # command_schema = {
-        #     "keysrules": {"type": "string"},
-        #     "valuesrules": {
-        #         "type": "dict",
-        #         "schema": {
-        #             "command": {"type": "string"},
-        #             "allow_failure": {"type": "boolean", "required": False},
-        #         },
-        #     },
-        # }
-
         schema = {
             "settings": {"type": "dict", "schema": settings_schema},
             "clusters": {
@@ -108,7 +97,17 @@ class ConfigFileParser:
                     "schema": {
                         "cluster": {"type": "string"},
                         "user": {"type": "string"},
-                        "pre_commands": {"type": "list"},
+                        "pre_commands": {
+                            "type": "list",
+                            "schema": {
+                                "type": "dict",
+                                "schema": {
+                                    "command": {"type": "string"},
+                                    "wait_for_exit": {"type": "boolean"},
+                                    "wait_for_output": {"type": "string"},
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -190,13 +189,7 @@ class ConfigFileParser:
             for i in range(len(pre_commands)):
                 pre_command = pre_commands[i]
                 pre_command = {
-                    **{
-                        "allow_failure": False,
-                        "wait_for_exit": True,
-                        "wait_for_output": "",
-                        "suppress_stdout": True,
-                        "save": False,
-                    },
+                    **{"wait_for_exit": True, "wait_for_output": ""},
                     **pre_command,
                 }
 
