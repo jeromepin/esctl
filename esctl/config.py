@@ -175,6 +175,14 @@ class ConfigFileParser:
         user = self.users.get(raw_context.get("user"))
         cluster = self.clusters.get(raw_context.get("cluster"))
 
+        if cluster is None:
+            self.log.error(
+                f"Malformed context `{context_name}` in configuration file : "
+                f"it requires a cluster named `{raw_context.get('cluster')}` but none could be found ! "
+                f"Here are the clusters I know : {', '.join(list(self.clusters.keys()))}"
+            )
+            sys.exit(1)
+
         # Merge global settings and per-cluster settings.
         # Cluster-level settings override global settings
         if "settings" in cluster:
