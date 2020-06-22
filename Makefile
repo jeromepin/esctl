@@ -4,7 +4,7 @@ install:
 	@python3 setup.py install >> /dev/null
 
 test: install
-	@cd tests && ward
+	@cd tests && ward test --no-capture-output
 
 lint:
 	flake8 esctl --count --show-source --statistics --show-source

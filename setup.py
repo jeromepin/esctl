@@ -3,15 +3,21 @@
 from setuptools import find_packages, setup
 
 PROJECT = "esctl"
-VERSION = "1.5.0"
+VERSION = "1.6.0"
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
+
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name=PROJECT,
     version=VERSION,
     description="Easy to use CLI tool to manage Elasticsearch, preventing long curl commands.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Jérôme Pin",
     maintainer="Jérôme Pin",
     url="https://github.com/jeromepin/esctl",
@@ -74,6 +80,7 @@ setup(
             "repository show = esctl.cmd.repository:RepositoryShow",
             "repository verify = esctl.cmd.repository:RepositoryVerify",
             "roles get = esctl.cmd.roles:SecurityRolesGet",
+            "snapshot list = esctl.cmd.snapshot:SnapshotList",
             "users get = esctl.cmd.users:SecurityUsersGet",
         ],
     },
