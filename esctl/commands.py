@@ -1,4 +1,6 @@
 import logging
+import os
+import sys
 from typing import Any, Dict, List
 
 from cliff.command import Command
@@ -27,6 +29,14 @@ class EsctlCommon:
 
     def uses_table_formatter(self):
         return self.formatter.__class__.__name__ == "TableFormatter"
+
+    def read_from_file_or_stdin(self, path: str) -> str:
+        """ Read some content from a file if the path is defined otherwise read from stdin. """
+        if path is not None:
+            with open(os.path.expanduser(path)) as reader:
+                return reader.read()
+        else:
+            return sys.stdin.read()
 
     def objects_list_to_flat_dict(self, lst: List[Dict[str, Any]]) -> Dict[str, Any]:
         """ Convert a list of dict to a flattened dict with full name.
@@ -133,7 +143,6 @@ class EsctlCommandIndex(EsctlCommand):
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "index",
-            metavar="<index>",
             help=(
                 "Comma-separated list or wildcard expression of "
                 "index names used to limit the request."

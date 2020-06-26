@@ -1,14 +1,29 @@
-from esctl.commands import EsctlCommandIndex, EsctlLister
+from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
 
 
-class IndexCreate(EsctlCommandIndex):
-    """Create an index."""
+class IndexCreate(EsctlCommand):
+    """Create an index.
+
+    Read the index configuration as a JSON document from either stdin or a path.
+    """
 
     def take_action(self, parsed_args):
+        configuration = self.read_from_file_or_stdin(parsed_args.configuration)
+
         self.log.info("Creating index {}".format(parsed_args.index))
-        print(self.es.indices.create(index=parsed_args.index))
+        print(self.es.indices.create(index=parsed_args.index, body=configuration))
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument("index", help="Name of the index to create")
+        parser.add_argument(
+            "--configuration",
+            metavar="PATH",
+            help="Path to the JSON document containing the index configuration (mapping, aliases, settings)",
+        )
+        return parser
 
 
 class IndexList(EsctlLister):
