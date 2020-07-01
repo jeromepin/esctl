@@ -47,7 +47,7 @@ class IndexList(EsctlLister):
         )
 
     def transform(self, indices):
-        if self.formatter.__class__.__name__ == "TableFormatter":
+        if self.uses_table_formatter():
             for idx, indice in enumerate(indices):
                 indices[idx]["health"] = Color.colorize(
                     indice.get("health"), getattr(Color, indice.get("health").upper())
