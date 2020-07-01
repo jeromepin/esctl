@@ -81,6 +81,7 @@ setup(
             "repository verify = esctl.cmd.repository:RepositoryVerify",
             "roles get = esctl.cmd.roles:SecurityRolesGet",
             "snapshot list = esctl.cmd.snapshot:SnapshotList",
+            "task list = esctl.cmd.task:TaskList",
             "users get = esctl.cmd.users:SecurityUsersGet",
         ],
     },
