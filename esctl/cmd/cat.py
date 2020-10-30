@@ -10,7 +10,7 @@ class CatAllocation(EsctlLister):
     and their disk space.
     """
 
-    def take_action(self, parsed_args):
+    def take_action(self):
         allocation = self.transform(self.es.cat.allocation(format="json"))
 
         return JSONToCliffFormatter(allocation).format_for_lister(
@@ -51,7 +51,7 @@ class CatAllocation(EsctlLister):
 class CatPlugins(EsctlLister):
     """Returns informations about installed plugins across nodes."""
 
-    def take_action(self, parsed_args):
+    def take_action(self):
         plugins = self.transform(self.es.cat.plugins(format="json"))
 
         return JSONToCliffFormatter(plugins).format_for_lister(
@@ -116,3 +116,21 @@ class CatThreadpool(EsctlLister):
             modified_thread_pools.append(thread_pool)
 
         return modified_thread_pools
+
+
+class CatTemplates(EsctlLister):
+    """Returns information about existing templates."""
+
+    def take_action(self, parsed_args):
+        templates = self.es.cat.templates(name=parsed_args.name, format="json")
+
+        return JSONToCliffFormatter(templates).format_for_lister(
+            columns=[("name",), ("index_patterns",), ("order",), ("version")]
+        )
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument(
+            "name", help="A pattern that returned template names must match", nargs="?"
+        )
+        return parser

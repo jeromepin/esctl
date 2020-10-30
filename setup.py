@@ -50,6 +50,7 @@ setup(
             "cat allocation = esctl.cmd.cat:CatAllocation",
             "cat plugins = esctl.cmd.cat:CatPlugins",
             "cat thread-pool = esctl.cmd.cat:CatThreadpool",
+            "cat templates = esctl.cmd.cat:CatTemplates",
             "cluster allocation explain = esctl.cmd.cluster:ClusterAllocationExplain",
             "cluster health = esctl.cmd.cluster:ClusterHealth",
             "cluster info = esctl.cmd.cluster:ClusterInfo",
