@@ -10,7 +10,7 @@ class CatAllocation(EsctlLister):
     and their disk space.
     """
 
-    def take_action(self):
+    def take_action(self, parsed_args):
         allocation = self.transform(self.es.cat.allocation(format="json"))
 
         return JSONToCliffFormatter(allocation).format_for_lister(
@@ -51,7 +51,7 @@ class CatAllocation(EsctlLister):
 class CatPlugins(EsctlLister):
     """Returns informations about installed plugins across nodes."""
 
-    def take_action(self):
+    def take_action(self, parsed_args):
         plugins = self.transform(self.es.cat.plugins(format="json"))
 
         return JSONToCliffFormatter(plugins).format_for_lister(

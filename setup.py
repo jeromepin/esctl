@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 PROJECT = "esctl"
-VERSION = "1.6.1"
+VERSION = "1.7.0"
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
@@ -64,6 +64,7 @@ setup(
             "config context list = esctl.cmd.config:ConfigContextList",
             "config context set = esctl.cmd.config:ConfigContextSet",
             "config user list = esctl.cmd.config:ConfigUserList",
+            "document get = esctl.cmd.document:DocumentGet",
             "index close = esctl.cmd.index:IndexClose",
             "index create = esctl.cmd.index:IndexCreate",
             "index delete = esctl.cmd.index:IndexDelete",
