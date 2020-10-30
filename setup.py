@@ -46,6 +46,7 @@ setup(
     entry_points={
         "console_scripts": ["esctl = esctl.main:main"],
         "esctl": [
+            "alias list = esctl.cmd.alias:AliasList",
             "cat allocation = esctl.cmd.cat:CatAllocation",
             "cat plugins = esctl.cmd.cat:CatPlugins",
             "cat thread-pool = esctl.cmd.cat:CatThreadpool",
