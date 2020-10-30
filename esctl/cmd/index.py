@@ -27,10 +27,12 @@ class IndexCreate(EsctlCommand):
 
 
 class IndexList(EsctlLister):
-    """List all indices."""
+    """Returns information about indices: number of primaries and replicas, document counts, disk size, ..."""
 
     def take_action(self, parsed_args):
-        indices = self.transform(self.es.cat.indices(format="json"))
+        indices = self.transform(
+            self.es.cat.indices(format="json", index=parsed_args.index)
+        )
         return JSONToCliffFormatter(indices).format_for_lister(
             columns=[
                 ("index"),
@@ -59,6 +61,15 @@ class IndexList(EsctlLister):
                     )
 
         return indices
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument(
+            "index",
+            help="A comma-separated list of index names to limit the returned information",
+            nargs="?",
+        )
+        return parser
 
 
 class IndexClose(EsctlCommandIndex):
