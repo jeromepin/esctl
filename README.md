@@ -103,6 +103,31 @@ contexts:
 default-context: foo
 ```
 
+### Running pre-commands
+
+Sometimes, you need to execute a shell command right before running the `esctl` command. Like running a `kubectl port-forward` in order to connect to your Kubernetes cluster.
+There is a `pre_commands` block inside the context which can take care of that :
+
+```yaml
+clusters:
+  remote-kubernetes:
+    servers:
+    - http://localhost:9200
+contexts:
+  my-distant-cluster:
+    cluster: remote-kubernetes
+    pre_commands:
+    - command: kubectl --context=my-kubernetes-context --namespace=elasticsearch port-forward svc/elasticsearch 9200
+      wait_for_exit: false
+      wait_for_output: Forwarding from
+    user: john-doe
+```
+
+Along with `command`, you can pass two options :
+* `wait_for_exit` (_default_: `true`) : wait for the command to exit before continuing. Usually set to `false` when the command is running in the foreground.
+* `wait_for_output` : if `wait_for_exit` is `false`, look for a specific output in the command's stdout. The string to look-for is interpreted as a regular expression passed to Python's [re.compile()](https://docs.python.org/3.7/library/re.html).
+
+
 ## Examples
 
 <p align="center">
