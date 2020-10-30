@@ -7,8 +7,7 @@ class TableKey:
             self.name = name
 
     def _create_name_from_id(self):
-        """ Extrapolate the column's name based on its ID.
-        """
+        """Extrapolate the column's name based on its ID."""
         name = self.id
 
         if "." in name:
@@ -33,7 +32,7 @@ class JSONToCliffFormatter:
         self.json = json
 
     def _format_columns(self, columns):
-        """ Ensure all elements given as column names are formatted as needed.
+        """Ensure all elements given as column names are formatted as needed.
 
         Each element must finally be a TableKey object containing the column ID
         and the column name.
@@ -121,7 +120,7 @@ class JSONToCliffFormatter:
         return (tuple([c.name for c in columns]), tuple(lst))
 
     def to_show_one(self, lines=[]):
-        """ For every given element, retrieve the value in the original
+        """For every given element, retrieve the value in the original
         json object based on the key provided
 
         :param lines: The columns to format as a list of tuples containing

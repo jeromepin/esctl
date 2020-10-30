@@ -39,7 +39,7 @@ class EsctlCommon:
             return sys.stdin.read()
 
     def objects_list_to_flat_dict(self, lst: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """ Convert a list of dict to a flattened dict with full name.
+        """Convert a list of dict to a flattened dict with full name.
 
         :Example:
                 node.jvm.versions = [{"version":"12.0.1","vm_name":"OpenJDK 64-Bit Server VM","vm_version":"12.0.1+12","vm_vendor":"Oracle Corporation","bundled_jdk":true,"using_bundled_jdk":true,"count":1}] # noqa: E501
@@ -64,7 +64,7 @@ class EsctlCommon:
     def _delete_and_merge_inner_dict_into_parent(
         self, parent_dict: Dict[str, Any], key: str
     ) -> Dict[str, Any]:
-        """ Merge a inner dictionnary into it's parent.
+        """Merge a inner dictionnary into it's parent.
 
         :Example:
                 {

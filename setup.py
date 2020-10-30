@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 PROJECT = "esctl"
-VERSION = "1.6.0"
+VERSION = "1.6.1"
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()

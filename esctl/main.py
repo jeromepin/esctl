@@ -46,8 +46,7 @@ class Esctl(App):
         ]
 
     def configure_logging(self):
-        """Create logging handlers for any log output.
-        """
+        """Create logging handlers for any log output."""
         root_logger = logging.getLogger("")
         root_logger.setLevel(logging.DEBUG)
         logging.getLogger("stevedore.extension").setLevel(logging.WARNING)
@@ -202,8 +201,7 @@ class Esctl(App):
             self.log.debug("got an error: %s", err)
 
     def build_option_parser(self, description, version, argparse_kwargs=None):
-        """Return an argparse option parser for this application.
-        """
+        """Return an argparse option parser for this application."""
         argparse_kwargs = argparse_kwargs or {}
         parser = argparse.ArgumentParser(
             description=description, add_help=False, **argparse_kwargs

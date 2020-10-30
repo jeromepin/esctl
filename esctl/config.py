@@ -35,6 +35,17 @@ class ConfigFileParser:
         self.settings = {}
 
     def write_config_file(self, content):
+        def setup_yaml():
+            """ https://stackoverflow.com/a/8661021 """
+            yaml.add_representer(
+                OrderedDict,
+                lambda self, data: self.represent_mapping(
+                    "tag:yaml.org,2002:map", data.items()
+                ),
+            )
+
+        setup_yaml()
+
         with open(self.path, "w") as config_file:
             yaml.dump(content, config_file, default_flow_style=False)
 
