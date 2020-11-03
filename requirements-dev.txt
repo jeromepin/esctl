@@ -1,4 +1,6 @@
 mypy
 flake8
 pre-commit
-ward
+pytest
+pytest-clarity
+pytest-icdiff

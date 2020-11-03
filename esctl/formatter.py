@@ -1,3 +1,6 @@
+from typing import List
+
+
 class TableKey:
     def __init__(self, id, name=None):
         self.id = id
@@ -6,18 +9,74 @@ class TableKey:
         else:
             self.name = name
 
+    def _format_special_word(self, word: str) -> str:
+        if word.lower() in ["percent", "gc", "id", "uuid"]:
+            if word == "percent":
+                word = "%"
+
+            elif word == "gc":
+                word = "GC"
+
+            elif word == "id":
+                word = "ID"
+
+            elif word == "uuid":
+                word = "UUID"
+
+        return word
+
+    def _split_string(self, string: str) -> List[str]:
+        splitted_string: List[str]
+
+        if "." in string:
+            splitted_string = string.split(".")
+
+            # Check if words can also be splitted on underscores
+            for idx in range(len(splitted_string)):
+                # If there is an underscore anywhere in the word except at the beginning
+                if "_" in splitted_string[idx] and not splitted_string[idx].startswith(
+                    "_"
+                ):
+                    splitted_string[idx] = splitted_string[idx].split("_")
+
+            flat_list = []
+            for sublist in splitted_string:
+                if sublist.__class__.__name__ == "list":
+                    for item in sublist:
+                        flat_list.append(item)
+                else:
+                    flat_list.append(sublist)
+
+            splitted_string = flat_list
+
+        elif "_" in string:
+            splitted_string = string.split("_")
+
+        else:
+            splitted_string = [string]
+
+        return splitted_string
+
     def _create_name_from_id(self):
         """Extrapolate the column's name based on its ID."""
-        name = self.id
+        name = self._split_string(self.id)
 
-        if "." in name:
-            name = name.replace(".", " ")
-        if "_" in name:
-            name = name.replace("_", " ")
-        if "percent" in name:
-            name = name.replace("percent", "%")
+        for idx in range(len(name)):
+            # Format some special words like "percent" -> %
+            name[idx] = self._format_special_word(name[idx])
 
-        name = name.title()
+            # Put the word to titlecase unless it contains at least an uppercase letter
+            if all(char.islower() for char in name[idx]):
+                name[idx] = name[idx].title()
+            else:
+                # If the word contains an uppercase letter somewhere, maintain the case
+                # but uppercase the first letter
+                if name[idx].startswith("_"):
+                    name[idx] = name[idx][0] + name[idx][1].upper() + name[idx][2:]
+                else:
+                    name[idx] = name[idx][0].upper() + name[idx][1:]
+
+        name = " ".join(name)
 
         return name
 

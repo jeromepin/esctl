@@ -41,7 +41,7 @@ setup(
     provides=[],
     install_requires=requirements,
     namespace_packages=[],
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
     entry_points={
         "console_scripts": ["esctl = esctl.main:main"],

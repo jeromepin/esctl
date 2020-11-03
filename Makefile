@@ -1,10 +1,10 @@
 SHELL:=bash
 
 install:
-	@python3 setup.py install >> /dev/null
+	@pip3 install .
 
-test: install
-	@cd tests && ward test --no-capture-output
+test:
+	@pytest -svv
 
 test-install:
 	docker run --entrypoint=/bin/bash -v `pwd`:/opt:ro python:3.7 -c "cd /opt && pip3 install . && esctl config context list && cat ~/.esctlrc && esctl cluster health"

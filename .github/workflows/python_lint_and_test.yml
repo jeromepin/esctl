@@ -25,7 +25,7 @@ jobs:
         run: |
           pip install flake8
           make lint
-      - name: Test with ward
+      - name: Test with pytest
         run: |
-          pip install ward
+          pip install pytest
           make test
