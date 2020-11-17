@@ -2,3 +2,4 @@ cerberus==1.3.2
 certifi
 cliff==3.0
 elasticsearch
+jmespath==0.10.0
