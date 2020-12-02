@@ -14,7 +14,8 @@ lint:
 	flake8 esctl --count --exit-zero --max-complexity=10 --statistics --show-source
 
 fmt:
-	black --exclude=esctl/\(interactive\|override\).py --verbose esctl/
+	python3 -m isort . --color
+	black --exclude=esctl/\(interactive\|override\).py esctl/
 
 tag:
 	git tag $(shell \grep VERSION setup.py | \egrep -oh "[.0-9]+")

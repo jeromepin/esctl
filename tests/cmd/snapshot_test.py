@@ -1,6 +1,6 @@
-from ..base_test_class import EsctlTestCase
-
 from esctl.cmd.snapshot import SnapshotList
+
+from ..base_test_class import EsctlTestCase
 
 
 class TestSnapshotList(EsctlTestCase):

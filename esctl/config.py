@@ -3,7 +3,7 @@ import os
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, List, Dict
+from typing import Any, Dict, List
 
 import cerberus
 import yaml

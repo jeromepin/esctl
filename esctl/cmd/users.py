@@ -1,4 +1,5 @@
-from typing import List, Dict
+from typing import Dict, List
+
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 

@@ -49,6 +49,7 @@ setup(
             "alias list = esctl.cmd.alias:AliasList",
             "cat allocation = esctl.cmd.cat:CatAllocation",
             "cat plugins = esctl.cmd.cat:CatPlugins",
+            "cat shards = esctl.cmd.cat:CatShards",
             "cat thread-pool = esctl.cmd.cat:CatThreadpool",
             "cat templates = esctl.cmd.cat:CatTemplates",
             "cluster allocation explain = esctl.cmd.cluster:ClusterAllocationExplain",

@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
@@ -60,6 +62,65 @@ class CatPlugins(EsctlLister):
 
     def transform(self, plugins):
         return sorted(plugins, key=lambda i: i["name"])
+
+
+class CatShards(EsctlLister):
+    """Provides a detailed view of shard allocation on nodes."""
+
+    def take_action(self, parsed_args):
+        nodes = [n.get("name") for n in self.es.cat.nodes(format="json", h="name")]
+        shards = self.transform(
+            self.es.cat.shards(
+                format="json", index=parsed_args.index, h="index,node,shard,prirep"
+            ),
+            nodes,
+        )
+
+        columns = [("index",)] + [
+            (
+                n,
+                n.lower(),
+            )
+            for n in nodes
+        ]
+
+        if self.has_unassigned_shards:
+            columns = columns + [("UNASSIGNED",)]
+
+        return JSONToCliffFormatter(shards).format_for_lister(columns=columns)
+
+    def transform(self, shards_list: List[Dict[str, str]], nodes: List[str]):
+        indices = {}
+        self.has_unassigned_shards: bool = False
+
+        for shard in shards_list:
+            shard_index = shard.get("index")
+
+            if shard_index not in indices:
+                indices[shard_index] = {
+                    **{"index": shard_index},
+                    **{n: "" for n in nodes},
+                }
+
+            shard_node = shard.get("node") or "UNASSIGNED"
+
+            if shard_node == "UNASSIGNED":
+                self.has_unassigned_shards = True
+
+            indices[shard_index][
+                shard_node
+            ] = f"{shard.get('shard')}{shard.get('prirep')}"
+
+        return list(indices.values())
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument(
+            "index",
+            help="A comma-separated list of index names to limit the returned information",
+            nargs="?",
+        )
+        return parser
 
 
 class CatThreadpool(EsctlLister):

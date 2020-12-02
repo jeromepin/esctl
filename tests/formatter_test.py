@@ -1,6 +1,6 @@
-from .base_test_class import EsctlTestCase
-
 from esctl.formatter import TableKey
+
+from .base_test_class import EsctlTestCase
 
 
 class TestCreateColumnNameFromId(EsctlTestCase):

@@ -1,4 +1,4 @@
-from esctl.commands import EsctlLister, EsctlShowOne, EsctlCommand
+from esctl.commands import EsctlCommand, EsctlLister, EsctlShowOne
 from esctl.formatter import JSONToCliffFormatter
 
 

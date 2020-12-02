@@ -1,5 +1,6 @@
-mypy
 flake8
+isort
+mypy
 pre-commit
 pytest
 pytest-clarity

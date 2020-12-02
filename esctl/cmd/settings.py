@@ -46,7 +46,7 @@ class ClusterSettingsGet(EsctlCommandSetting):
 
 
 class ClusterSettingsList(EsctlShowOne):
-    """(EXPERIMENTAL) List available settings."""
+    """[Experimental] List available settings."""
 
     def take_action(self, parsed_args):
         default_settings = {}
@@ -139,7 +139,7 @@ class IndexSettingsGet(EsctlListerIndexSetting):
 
 
 class IndexSettingsList(EsctlShowOne):
-    """(EXPERIMENTAL) List available settings in an index."""
+    """[Experimental] List available settings in an index."""
 
     def take_action(self, parsed_args):
         settings = {}

@@ -1,7 +1,7 @@
-import logging
 import fnmatch
+import logging
 from abc import ABC
-from typing import Any, Dict, Union, List
+from typing import Any, Dict, List, Union
 
 from esctl.elasticsearch import Client
 
