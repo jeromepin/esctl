@@ -54,15 +54,16 @@ esctl cluster routing allocation enable none
 
 * **Easy to use CLI** rather than long curl commands (thanks to [cliff](https://github.com/openstack/cliff))
 * Cluster-level informations : **stats**, **info**, **health**, **allocation explanation**
-* Node-level informations : **list**, **hot threads**, **exclusion**
+* Node-level informations : **list**, **hot threads**, **exclusion**, **stats**
 * Cluster-level and index-level **settings**
 * `_cat` API for **allocation**, **plugins** and **thread pools**
 * **Index management** : open, close, create, delete, list
 * Per-module **log configuration**
 * X-Pack APIs : **users** and **roles**
 * **Multiple output formats** : table, csv, json, value, yaml
+* [JMESPath](https://jmespath.org/) queries using the `--jmespath` flag
 * Colored output !
-* Run arbitrary pre-commands before issuing the HTTP call to Elasticsearch (like running `kubectl port-forward` for example)
+* Run arbitrary pre-commands before issuing the call to Elasticsearch (like running `kubectl port-forward` for example)
 
 
 ## Installation

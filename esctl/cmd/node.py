@@ -1,5 +1,3 @@
-import jmespath
-
 from esctl.commands import EsctlCommand, EsctlLister, EsctlShowOne
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color, flatten_dict
@@ -110,7 +108,7 @@ class NodeStats(EsctlShowOne):
         ).get("nodes")
 
         if parsed_args.jmespath is not None:
-            path = jmespath.search(parsed_args.jmespath, stats)
+            path = self.jmespath_search(parsed_args.jmespath, stats)
 
             return (tuple(["Result"]), tuple([path]))
 
@@ -161,9 +159,5 @@ class NodeStats(EsctlShowOne):
             ),
             default="node",
         )
-        parser.add_argument(
-            "--jmespath",
-            help="[Experimental] Execute a JMESPath query on the response.",
-        )
-        return parser
 
+        return parser

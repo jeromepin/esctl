@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Any, Dict, List
 
+import jmespath
 from cliff.command import Command
 from cliff.lister import Lister
 from cliff.show import ShowOne
@@ -182,6 +183,9 @@ class EsctlListerIndexSetting(EsctlLister):
 class EsctlShowOne(ShowOne, EsctlCommon):
     """Expect a key-value list to create a two-columns table."""
 
+    def jmespath_search(self, expression, data, options=None):
+        return jmespath.search(expression, data, options=options)
+
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -189,6 +193,12 @@ class EsctlShowOne(ShowOne, EsctlCommon):
             action="store_true",
             help=(
                 "Don't format keys. (Like `ingest.total.count` into `Ingest Total Count`)"
+            ),
+        )
+        parser.add_argument(
+            "--jmespath",
+            help=(
+                "[Experimental] Execute a JMESPath query on the response. See https://jmespath.org for help."
             ),
         )
         return parser
