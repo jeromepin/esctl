@@ -116,7 +116,9 @@ class NodeStats(EsctlShowOne):
 
         stats = self.transform(stats)
 
-        return JSONToCliffFormatter(stats).to_show_one(lines=list(stats.keys()))
+        return JSONToCliffFormatter(
+            stats, pretty_key=not parsed_args.no_pretty
+        ).to_show_one(lines=list(stats.keys()))
 
     def transform(self, raw_stats):
         if self.uses_table_formatter():

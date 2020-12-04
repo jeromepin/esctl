@@ -3,6 +3,9 @@ SHELL:=bash
 install:
 	@pip3 install .
 
+install-dev:
+	pip3 install -r requirements-dev.txt
+
 test:
 	@pytest -svv
 

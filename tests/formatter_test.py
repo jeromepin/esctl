@@ -4,8 +4,8 @@ from .base_test_class import EsctlTestCase
 
 
 class TestCreateColumnNameFromId(EsctlTestCase):
-    def test_name_interpolation(self):
-        cases = [
+    def setUp(self):
+        self.cases = [
             {"input": "index.uuid", "expected_output": "Index UUID"},
             {"input": "index.id", "expected_output": "Index ID"},
             {"input": "index.gc_deletes", "expected_output": "Index GC Deletes"},
@@ -23,10 +23,33 @@ class TestCreateColumnNameFromId(EsctlTestCase):
                 "input": "_source._metadata.createTime",
                 "expected_output": "_Source _Metadata CreateTime",
             },
+            # TODO: Rework name handling in `node stats` command
+            # {
+            #     "input": "b4XevSayQNCx_-1mrroUzw.index.uuid",
+            #     "expected_output": "b4XevSayQNCx_-1mrroUzw Index UUID",
+            # },
+            # {
+            #     "input": "BfTa0i_sQQmyFsVzjOtApQ.index.uuid",
+            #     "expected_output": "BfTa0i_sQQmyFsVzjOtApQ Index UUID",
+            # },
+            # {
+            #     "input": "Xggkx0fORHO_vgJ-WBp0bw.index.uuid",
+            #     "expected_output": "Xggkx0fORHO_vgJ-WBp0bw Index UUID",
+            # },
         ]
 
-        for case in cases:
+    def test_name_interpolation(self):
+        for case in self.cases:
             self.assertEqual(
                 TableKey(case.get("input"))._create_name_from_id(),
                 case.get("expected_output"),
+            )
+
+    def test_no_pretty_name_interpolation(self):
+        cases = [c.get("input") for c in self.cases]
+
+        for case in cases:
+            self.assertEqual(
+                TableKey(case)._create_name_from_id(pretty_key=False),
+                case,
             )

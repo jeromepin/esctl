@@ -181,3 +181,14 @@ class EsctlListerIndexSetting(EsctlLister):
 
 class EsctlShowOne(ShowOne, EsctlCommon):
     """Expect a key-value list to create a two-columns table."""
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument(
+            "--no-pretty",
+            action="store_true",
+            help=(
+                "Don't format keys. (Like `ingest.total.count` into `Ingest Total Count`)"
+            ),
+        )
+        return parser

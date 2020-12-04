@@ -2,10 +2,10 @@ from typing import List
 
 
 class TableKey:
-    def __init__(self, id, name=None):
+    def __init__(self, id, name=None, pretty_key=True):
         self.id = id
         if name is None:
-            self.name = self._create_name_from_id()
+            self.name = self._create_name_from_id(pretty_key=pretty_key)
         else:
             self.name = name
 
@@ -57,8 +57,11 @@ class TableKey:
 
         return splitted_string
 
-    def _create_name_from_id(self):
+    def _create_name_from_id(self, pretty_key=True):
         """Extrapolate the column's name based on its ID."""
+        if not pretty_key:
+            return self.id
+
         name = self._split_string(self.id)
 
         for idx in range(len(name)):
@@ -87,8 +90,9 @@ class TableKey:
 class JSONToCliffFormatter:
     """ Format a JSON object to one of the cliff's class expected inputs."""
 
-    def __init__(self, json):
+    def __init__(self, json, pretty_key=True):
         self.json = json
+        self.pretty_key = pretty_key
 
     def _format_columns(self, columns):
         """Ensure all elements given as column names are formatted as needed.
@@ -124,7 +128,7 @@ class JSONToCliffFormatter:
             if isinstance(column, str):
                 column = (column,)
 
-            valid_list.append(TableKey(*column))
+            valid_list.append(TableKey(*column, pretty_key=self.pretty_key))
 
         return valid_list
 
