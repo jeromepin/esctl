@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@722adc63f1aa60a57ec37892e133b1d319cae598 # v2.0.0
       - name: Set up Python 3.7
         if: github.event_name == 'push'
-        uses: actions/setup-python@28a6c1b915d5808acb3da49af7063544ebfbe085 # v1.1.1
+        uses: actions/setup-python@41b7212b1668f5de9d65e9c82aa777e6bbedb3a8 # v2.1.4
         with:
           python-version: 3.7
       - name: Install pep517

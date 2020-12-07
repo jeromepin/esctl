@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@722adc63f1aa60a57ec37892e133b1d319cae598 # v2.0.0
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@28a6c1b915d5808acb3da49af7063544ebfbe085 # v1.1.1
+        uses: actions/setup-python@41b7212b1668f5de9d65e9c82aa777e6bbedb3a8 # v2.1.4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -22,10 +22,6 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
       - name: Lint with flake8
-        run: |
-          pip install flake8
-          make lint
+        run: make lint
       - name: Test with pytest
-        run: |
-          pip install pytest
-          make test
+        run: make test

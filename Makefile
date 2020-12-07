@@ -6,7 +6,7 @@ install:
 install-dev:
 	pip3 install -r requirements-dev.txt
 
-test:
+test: install
 	@pytest -svv
 
 test-install:
