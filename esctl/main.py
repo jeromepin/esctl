@@ -153,17 +153,6 @@ class Esctl(App):
 
                 if command_block.get("wait_for_exit"):
                     process.communicate()
-                    # (stdout, _) = process.communicate()
-                    # stdout = stdout.decode("utf-8").strip()
-
-                    # if command_block.get("save"):
-                    #     self.log.debug(
-                    #         f"Expecting command output to match `{command_block.get('save')}` in order to save it"
-                    #     )
-                    #     save_pattern = re.compile(command_block.get("save"))
-                    #     self.context.pre_commands[i]["saved"] = re.search(
-                    #         save_pattern, stdout
-                    #     )
 
                 elif command_block.get("wait_for_output"):
                     string_to_look_for = command_block.get("wait_for_output")

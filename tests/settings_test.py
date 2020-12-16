@@ -60,6 +60,13 @@ class TestClusterSettingsRetrieval(EsctlTestCase):
         )
         self.assertEqual(
             cluster_settings.get(
+                "cluster.routing.allocation.disk.watermark.high",
+                persistency="persistent",
+            ).value,
+            "90%",
+        )
+        self.assertEqual(
+            cluster_settings.get(
                 "cluster.routing.allocation.foobar", persistency="transient"
             ).value,
             None,

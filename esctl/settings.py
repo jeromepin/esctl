@@ -4,6 +4,7 @@ from abc import ABC
 from typing import Any, Dict, List, Union
 
 from esctl.elasticsearch import Client
+from esctl.utils import Color
 
 
 class Settings(ABC):
@@ -18,6 +19,9 @@ class Setting:
         self.name = name
         self.value = value
         self.persistency = persistency
+
+    def __str__(self) -> str:
+        return f"{self.name}={self.value}({self.persistency})"
 
 
 class ClusterSettings(Settings):
@@ -39,8 +43,37 @@ class ClusterSettings(Settings):
             else:
                 return Setting(key, None)
 
+    def __get_setting_for_persistency(
+        self, settings: Dict[str, Dict[str, Any]], key: str, persistency: str
+    ) -> Setting:
+        if key in settings.get(persistency):
+            return Setting(key, settings.get(persistency).get(key), persistency)
+
+        return Setting(key, None)
+
+    def mget(self, key: str) -> Dict[str, Setting]:
+        settings: Dict[str, Dict[str, Any]] = self.list()
+
+        return {
+            "transient": self.__get_setting_for_persistency(settings, key, "transient"),
+            "persistent": self.__get_setting_for_persistency(
+                settings, key, "persistent"
+            ),
+            "defaults": self.__get_setting_for_persistency(settings, key, "defaults"),
+        }
+
     def set(self, sections: str, value, persistency: str = "transient"):
-        return self.es.cluster.put_settings(body={persistency: {sections: value}})
+        self.log.info(
+            "Changing {}'s {} to : {}".format(
+                persistency,
+                Color.colorize(sections, Color.ITALIC),
+                Color.colorize(value, Color.ITALIC),
+            )
+        )
+        return self.es.cluster.put_settings(
+            body={persistency: {sections: value}},
+            flat_settings=True,
+        )
 
 
 class IndexSettings(Settings):

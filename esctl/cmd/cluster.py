@@ -1,6 +1,7 @@
 import elasticsearch as elasticsearch
 
-from esctl.commands import EsctlCommandWithPersistency, EsctlLister, EsctlShowOne
+from esctl.cmd.settings import AbstractClusterSettings
+from esctl.commands import EsctlLister, EsctlShowOne
 from esctl.utils import Color, flatten_dict
 
 
@@ -95,56 +96,34 @@ class ClusterStats(EsctlShowOne):
         return stats
 
 
-class ClusterRoutingAllocationEnable(EsctlCommandWithPersistency):
-    """Get and set the routing allocation policy."""
+class ClusterRoutingAllocationEnable(AbstractClusterSettings):
+    """Get and set the cluster's routing allocation policy."""
 
     def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
-        self.log.debug("Persistency is " + persistency)
-
-        if parsed_args.status is None:
-            setting = self.cluster_settings.get(
-                "cluster.routing.allocation.enable", persistency=persistency
+        if parsed_args.status is not None:
+            self._settings_set(
+                "cluster.routing.allocation.enable",
+                parsed_args.status,
+                persistency="persistent" if parsed_args.persistent else "transient",
             )
 
-            if setting.value is not None:
-                if setting.persistency == "defaults":
-                    output = "{} ({})".format(
-                        setting.value, Color.colorize("default", Color.ITALIC)
-                    )
-                else:
-                    output = setting.value
-
-                print(output)
-
-            else:
-                self.log.error(
-                    "{} does not exists in {} cluster settings.".format(
-                        Color.colorize(setting.name, Color.ITALIC),
-                        Color.colorize(persistency, Color.ITALIC),
-                    )
-                )
-
-        else:
-            print(
-                ("Changing cluster routing allocation policy ({}) to : {}").format(
-                    Color.colorize("cluster.routing.allocation.enable", Color.ITALIC),
-                    Color.colorize(parsed_args.status, Color.ITALIC),
-                )
-            )
-            print(
-                self.cluster_settings.set(
-                    "cluster.routing.allocation.enable",
-                    parsed_args.status,
-                    persistency=persistency,
-                )
-            )
+        return self._settings_get("cluster.routing.allocation.enable")
 
     def get_parser(self, prog_name):
-        parser = super().get_parser(prog_name)
+        parser = super(AbstractClusterSettings, self).get_parser(prog_name)
+
+        persistency_group = parser.add_mutually_exclusive_group()
+        persistency_group.add_argument(
+            "--transient",
+            action="store_true",
+            help=("Set setting as transient (default)"),
+        )
+        persistency_group.add_argument(
+            "--persistent", action="store_true", help=("Set setting as persistent")
+        )
+
         parser.add_argument(
             "status",
-            metavar="<status>",
             nargs="?",
             help=("Routing allocation status"),
             choices=["all", "primaries", "new_primaries", "none"],

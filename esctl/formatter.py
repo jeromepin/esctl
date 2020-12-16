@@ -132,7 +132,7 @@ class JSONToCliffFormatter:
 
         return valid_list
 
-    def format_for_lister(self, columns=[]):
+    def format_for_lister(self, columns=[], none_as=None):
         """Convert a JSON object to an object compliant with
         cliff's Lister class.
 
@@ -177,12 +177,21 @@ class JSONToCliffFormatter:
         lst = []
         # For every line in the JSON object, pick the value corresponding to
         # the given column ID
-        for line in self.json:
-            lst.append(tuple([line.get(column.id) for column in columns]))
+        for raw_line in self.json:
+            line = []
+            for column in columns:
+                element = raw_line.get(column.id)
+
+                if element is None:
+                    element = none_as
+
+                line.append(element)
+
+            lst.append(tuple(line))
 
         return (tuple([c.name for c in columns]), tuple(lst))
 
-    def to_show_one(self, lines=[]):
+    def to_show_one(self, lines=[], none_as=None):
         """For every given element, retrieve the value in the original
         json object based on the key provided
 
@@ -202,6 +211,11 @@ class JSONToCliffFormatter:
 
         for line in lines:
             keys.append(line.name)
-            values.append(self.json.get(line.id))
+
+            element = self.json.get(line.id)
+            if element is None:
+                element = none_as
+
+            values.append(element)
 
         return (tuple(keys), tuple(values))

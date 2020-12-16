@@ -1,48 +1,45 @@
 import collections
 
-from esctl.commands import (
-    EsctlCommandIndex,
-    EsctlCommandSetting,
-    EsctlListerIndexSetting,
-    EsctlShowOne,
-)
-from esctl.exceptions import SettingNotFoundError
+from esctl.commands import EsctlCommandIndex, EsctlListerIndexSetting, EsctlShowOne
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
 
 
-class ClusterSettingsGet(EsctlCommandSetting):
-    """Get a setting value."""
-
-    def retrieve_setting(self, setting_name, persistency):
-        setting = self.cluster_settings.get(setting_name, persistency=persistency)
-
-        if setting.value is not None:
-            if setting.persistency == "defaults":
-                output = "{} ({})".format(
-                    setting.value, Color.colorize("default", Color.ITALIC)
-                )
-            else:
-                output = setting.value
-
-            return output
-
-        else:
-            raise SettingNotFoundError(
-                "{} does not exists in {} cluster settings.".format(
-                    Color.colorize(setting.name, Color.ITALIC),
-                    Color.colorize(persistency, Color.ITALIC),
-                )
-            )
-
-    def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
+class AbstractClusterSettings(EsctlShowOne):
+    def _settings_set(self, setting: str, value: str, persistency: str):
         self.log.debug("Persistency is " + persistency)
 
-        try:
-            print(self.retrieve_setting(parsed_args.setting, persistency))
-        except SettingNotFoundError as error:
-            self.log.error(error)
+        self.log.debug(
+            self.cluster_settings.set(setting, value, persistency=persistency)
+        )
+
+    def _settings_get(self, setting: str):
+        s = self.cluster_settings.mget(setting)
+
+        return JSONToCliffFormatter(
+            {
+                "transient": s.get("transient").value,
+                "persistent": s.get("persistent").value,
+                "defaults": s.get("defaults").value,
+            }
+        ).to_show_one(
+            lines=[("transient"), ("persistent"), ("defaults")],
+            none_as="" if self.uses_table_formatter() else None,
+        )
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+
+        parser.add_argument("setting", metavar="<setting>", help=("Setting"))
+
+        return parser
+
+
+class ClusterSettingsGet(AbstractClusterSettings):
+    """Get a setting value."""
+
+    def take_action(self, parsed_args):
+        return self._settings_get(parsed_args.setting)
 
 
 class ClusterSettingsList(EsctlShowOne):
@@ -64,47 +61,59 @@ class ClusterSettingsList(EsctlShowOne):
         return (tuple(default_settings.keys()), tuple(default_settings.values()))
 
 
-class ClusterSettingsReset(EsctlCommandSetting):
+class ClusterSettingsReset(AbstractClusterSettings):
     """Reset a setting value."""
 
     def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
-        self.log.debug("Persistency is " + persistency)
-        print(
-            "Resetting {} to its default value".format(
-                Color.colorize(parsed_args.setting, Color.ITALIC)
-            )
+        self._settings_set(
+            parsed_args.setting,
+            None,
+            persistency="persistent" if parsed_args.persistent else "transient",
         )
-        print(
-            self.cluster_settings.set(
-                parsed_args.setting, None, persistency=persistency
-            )
-        )
-
-
-class ClusterSettingsSet(EsctlCommandSetting):
-    """Set a setting value."""
-
-    def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
-        self.log.debug("Persistency is " + persistency)
-
-        print(
-            "Changing {} to {}".format(
-                Color.colorize(parsed_args.setting, Color.ITALIC),
-                Color.colorize(parsed_args.value, Color.ITALIC),
-            )
-        )
-
-        print(
-            self.cluster_settings.set(
-                parsed_args.setting, parsed_args.value, persistency=persistency
-            )
-        )
+        return self._settings_get(parsed_args.setting)
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
+
+        persistency_group = parser.add_mutually_exclusive_group()
+        persistency_group.add_argument(
+            "--transient",
+            action="store_true",
+            help=("Set setting as transient (default)"),
+        )
+        persistency_group.add_argument(
+            "--persistent", action="store_true", help=("Set setting as persistent")
+        )
+
+        return parser
+
+
+class ClusterSettingsSet(AbstractClusterSettings):
+    """Set a setting value."""
+
+    def take_action(self, parsed_args):
+        self._settings_set(
+            parsed_args.setting,
+            parsed_args.value,
+            persistency="persistent" if parsed_args.persistent else "transient",
+        )
+        return self._settings_get(parsed_args.setting)
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+
+        persistency_group = parser.add_mutually_exclusive_group()
+        persistency_group.add_argument(
+            "--transient",
+            action="store_true",
+            help=("Set setting as transient (default)"),
+        )
+        persistency_group.add_argument(
+            "--persistent", action="store_true", help=("Set setting as persistent")
+        )
+
         parser.add_argument("value", metavar="<value>", help=("Setting value"))
+
         return parser
 
 
