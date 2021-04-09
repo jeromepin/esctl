@@ -4,15 +4,10 @@ clusters:
       - https://foobar-01:9200
       - https://foobar-02:9200
       - https://foobar-03:9200
-  localhost:
-    servers:
-      - http://localhost:9200
 contexts:
   foobar:
     cluster: foobar
     user: foobar
-  localhost:
-    cluster: localhost
 default-context: foobar
 settings:
   max_retries: 0

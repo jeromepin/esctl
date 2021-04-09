@@ -64,6 +64,7 @@ esctl cluster routing allocation enable none
 * [JMESPath](https://jmespath.org/) queries using the `--jmespath` flag
 * Colored output !
 * Run arbitrary pre-commands before issuing the call to Elasticsearch (like running `kubectl port-forward` for example)
+* Fetch cluster's credentials from external commands instead of having them shown in cleartext in the config file
 
 
 ## Installation
@@ -94,7 +95,9 @@ clusters:
 users:
   john-doe:
     username: john
-    password: doe
+    external_password:
+      command:
+        run: kubectl --context=bar --namespace=baz get secrets -o json my-secret | jq -r '.data.password||@base64d'
 
 contexts:
   foo:

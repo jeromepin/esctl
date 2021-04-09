@@ -116,6 +116,16 @@ class Esctl(App):
 
         return scheme
 
+    def insert_password_into_context(self):
+        external_passowrd_definition = self.context.user.get("external_password")
+        del self.context.user["external_password"]
+
+        if "command" in external_passowrd_definition:
+            if "run" in external_passowrd_definition.get("command"):
+                self.context.user["password"] = self._run_os_system_command(
+                    external_passowrd_definition.get("command").get("run")
+                )
+
     def initialize_app(self, argv):
         Esctl._config = Esctl._config_file_parser.load_configuration(
             self.options.config_file
@@ -125,6 +135,9 @@ class Esctl(App):
         http_auth = None
 
         if self.context.user is not None:
+            if "external_password" in self.context.user:
+                self.insert_password_into_context()
+
             http_auth = (
                 (self.context.user.get("username"), self.context.user.get("password"))
                 if self.context.user.get("username")
@@ -133,6 +146,10 @@ class Esctl(App):
             )
 
         Client(self.context, http_auth, self.find_scheme())
+
+    def _run_os_system_command(self, raw_command: str) -> str:
+        self.log.debug(f"Running command : {raw_command}")
+        return os.popen(raw_command).read().strip()
 
     def _run_shell_subcommand(self, command):
         command = command.split(" ")

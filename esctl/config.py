@@ -76,10 +76,26 @@ class ConfigFileParser:
             "timeout": {"type": "integer"},
         }
 
+        external_credentials_schema = {
+            "type": "dict",
+            "schema": {
+                "command": {
+                    "type": "dict",
+                    "schema": {
+                        "run": {
+                            "type": "string",
+                            "required": True,
+                        }
+                    },
+                },
+            },
+        }
+
         schema = {
             "settings": {"type": "dict", "schema": settings_schema},
             "clusters": {
                 "type": "dict",
+                "required": True,
                 "keysrules": {},
                 "valuesrules": {
                     "type": "dict",
@@ -97,11 +113,14 @@ class ConfigFileParser:
                     "schema": {
                         "username": {"type": "string"},
                         "password": {"type": "string"},
+                        "external_username": external_credentials_schema,
+                        "external_password": external_credentials_schema,
                     },
                 },
             },
             "contexts": {
                 "type": "dict",
+                "required": True,
                 "keysrules": {"type": "string"},
                 "valuesrules": {
                     "type": "dict",
