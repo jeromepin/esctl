@@ -58,6 +58,7 @@ esctl cluster routing allocation enable none
 * Cluster-level and index-level **settings**
 * `_cat` API for **allocation**, **plugins** and **thread pools**
 * **Index management** : open, close, create, delete, list
+* `raw` command to perform raw HTTP calls when esctl doesn't provide a nice interface for a given route.
 * Per-module **log configuration**
 * X-Pack APIs : **users** and **roles**
 * **Multiple output formats** : table, csv, json, value, yaml
