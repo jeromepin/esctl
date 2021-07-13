@@ -2,6 +2,8 @@ from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
 
+from typing import Any, Dict
+
 
 class IndexCreate(EsctlCommand):
     """Create an index.
@@ -96,3 +98,58 @@ class IndexOpen(EsctlCommandIndex):
     def take_action(self, parsed_args):
         self.log.info("Opening index " + parsed_args.index)
         print(self.es.indices.open(index=parsed_args.index))
+
+
+class IndexReindex(EsctlCommand):
+    """Reindex a given index into another one."""
+
+    def _build_request_body(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "source": {
+                "index": args.get("source_index"),
+            },
+            "dest": {
+                "index": args.get("destination_index"),
+                "version_type": args.get("version_type"),
+                "op_type": args.get("op_type"),
+            },
+            "conflicts": args.get("conflicts"),
+        }
+
+    def take_action(self, parsed_args):
+        print(self.es.reindex(body=self._build_request_body(vars(parsed_args))))
+
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        parser.add_argument(
+            "source_index", help="Name of the index to index document from"
+        )
+        parser.add_argument(
+            "destination_index", help="Name of the index to index document to"
+        )
+        parser.add_argument(
+            "--conflicts",
+            help="Set to `proceed` to continue reindexing even if there are conflicts (default: abort)",
+            choices=["abort", "proceed"],
+            default="abort",
+        )
+        parser.add_argument(
+            "--version-type",
+            help=(
+                "The versioning to use for the indexing operation (default: internal), "
+                "valid choices are: `internal`, `external`, `external_gt`, `external_gte`"
+            ),
+            choices=["internal", "external", "external_gt", "external_gte"],
+            default="internal",
+        )
+        parser.add_argument(
+            "--op-type",
+            help=(
+                "Set to `create` to only index documents that do not already exist (default: index), "
+                "valid choices are: `index`, `create`"
+            ),
+            choices=["index", "create"],
+            default="index",
+        )
+
+        return parser

@@ -71,6 +71,7 @@ setup(
             "index delete = esctl.cmd.index:IndexDelete",
             "index list = esctl.cmd.index:IndexList",
             "index open = esctl.cmd.index:IndexOpen",
+            "index reindex = esctl.cmd.index:IndexReindex",
             "index settings get = esctl.cmd.settings:IndexSettingsGet",
             "index settings list = esctl.cmd.settings:IndexSettingsList",
             "index settings set = esctl.cmd.settings:IndexSettingsSet",
