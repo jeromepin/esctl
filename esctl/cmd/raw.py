@@ -5,9 +5,15 @@ class RawCommand(EsctlCommand):
     """Performs a raw HTTP call. Useful when esctl doesn't provide a nice interface for a specific route."""
 
     def take_action(self, parsed_args):
+
+        body: str = parsed_args.body
+
+        if parsed_args.body is not None and parsed_args.body.startswith("@"):
+            body = self.read_from_file_or_stdin(parsed_args.body[1:])
+
         print(
             self.es.transport.perform_request(
-                parsed_args.verb.upper(), parsed_args.route, body=parsed_args.body
+                parsed_args.verb.upper(), parsed_args.route, body=body
             )
         )
 
@@ -16,7 +22,11 @@ class RawCommand(EsctlCommand):
         parser.add_argument(
             "-d",
             "--data",
-            help="Specify the body to send",
+            help=(
+                "Specify the body to send. If you start the data with the letter @, "
+                "the rest should be a file name to read the data from, or - if you want curl "
+                "to read the data from stdin."
+            ),
             metavar="BODY",
             dest="body",
         )
