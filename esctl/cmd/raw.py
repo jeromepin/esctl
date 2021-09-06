@@ -1,3 +1,5 @@
+import json
+
 from esctl.commands import EsctlCommand
 
 
@@ -12,8 +14,10 @@ class RawCommand(EsctlCommand):
             body = self.read_from_file_or_stdin(parsed_args.body[1:])
 
         print(
-            self.es.transport.perform_request(
-                parsed_args.verb.upper(), parsed_args.route, body=body
+            json.dumps(
+                self.es.transport.perform_request(
+                    parsed_args.verb.upper(), parsed_args.route, body=body
+                )
             )
         )
 
