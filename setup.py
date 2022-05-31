@@ -64,6 +64,7 @@ setup(
             "config cluster list = esctl.cmd.config:ConfigClusterList",
             "config context list = esctl.cmd.config:ConfigContextList",
             "config context set = esctl.cmd.config:ConfigContextSet",
+            "config show = esctl.cmd.config:ConfigShow",
             "config user list = esctl.cmd.config:ConfigUserList",
             "document get = esctl.cmd.document:DocumentGet",
             "index close = esctl.cmd.index:IndexClose",

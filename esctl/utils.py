@@ -1,3 +1,8 @@
+from collections import OrderedDict
+
+import yaml
+
+
 class Color:
     BLUE = "\033[94m"
     BOLD = "\033[1m"
@@ -26,3 +31,13 @@ def flatten_dict(dictionary):
     items = [item for k, v in dictionary.items() for item in expand(k, v)]
 
     return dict(items)
+
+
+def setup_yaml():
+    """ https://stackoverflow.com/a/8661021 """
+    yaml.add_representer(
+        OrderedDict,
+        lambda self, data: self.represent_mapping(
+            "tag:yaml.org,2002:map", data.items()
+        ),
+    )

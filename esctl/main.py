@@ -42,6 +42,7 @@ class Esctl(App):
             "ConfigClusterList",
             "ConfigContextList",
             "ConfigContextSet",
+            "ConfigShow",
             "ConfigUserList",
         ]
 

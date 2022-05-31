@@ -1,7 +1,9 @@
+import yaml
+
 from esctl.commands import EsctlCommand, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.main import Esctl
-from esctl.utils import Color
+from esctl.utils import Color, setup_yaml
 
 
 class ConfigClusterList(EsctlLister):
@@ -73,6 +75,18 @@ class ConfigContextSet(EsctlCommand):
         )
 
         return parser
+
+
+class ConfigShow(EsctlCommand):
+    """Print the config."""
+
+    def take_action(self, parsed_args):
+        setup_yaml()
+        print(
+            yaml.safe_dump(
+                dict(Esctl._config), None, default_flow_style=False, width=500
+            )
+        )
 
 
 class ConfigUserList(EsctlLister):

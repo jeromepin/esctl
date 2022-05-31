@@ -1,12 +1,14 @@
+from collections import OrderedDict
 import logging
 import os
-import sys
-from collections import OrderedDict
 from pathlib import Path
+import sys
 from typing import Any, Dict, List
 
 import cerberus
 import yaml
+
+from esctl.utils import setup_yaml
 
 
 class Context:
@@ -35,19 +37,10 @@ class ConfigFileParser:
         self.settings = {}
 
     def write_config_file(self, content):
-        def setup_yaml():
-            """ https://stackoverflow.com/a/8661021 """
-            yaml.add_representer(
-                OrderedDict,
-                lambda self, data: self.represent_mapping(
-                    "tag:yaml.org,2002:map", data.items()
-                ),
-            )
-
         setup_yaml()
 
         with open(self.path, "w") as config_file:
-            yaml.dump(content, config_file, default_flow_style=False)
+            yaml.dump(content, config_file, default_flow_style=False, width=500)
 
     def _create_default_config_file(self) -> "OrderedDict[str, Any]":
         self.log.info(
