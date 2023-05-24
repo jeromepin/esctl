@@ -49,7 +49,7 @@ class ClusterSettingsList(EsctlShowOne):
         default_settings = {}
         settings_list = self.cluster_settings.list().get("defaults")
 
-        for (setting_name, setting_value) in settings_list.items():
+        for setting_name, setting_value in settings_list.items():
             if type(setting_value).__name__ == "list":
                 if len(setting_value) > 0:
                     setting_value = ",\n".join(setting_value)
@@ -166,7 +166,7 @@ class IndexSettingsList(EsctlShowOne):
             )
         )
 
-        for (setting_name, setting_value) in settings_list.items():
+        for setting_name, setting_value in settings_list.items():
             if type(setting_value).__name__ == "list":
                 if len(setting_value) > 0:
                     setting_value = ",\n".join(setting_value)

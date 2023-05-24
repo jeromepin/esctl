@@ -21,7 +21,6 @@ from esctl.interactive import InteractiveApp
 
 
 class Esctl(App):
-
     _es = None
     _config = None
     _config_file_parser = ConfigFileParser()

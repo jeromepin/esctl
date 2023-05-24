@@ -88,7 +88,7 @@ class TableKey:
 
 
 class JSONToCliffFormatter:
-    """ Format a JSON object to one of the cliff's class expected inputs."""
+    """Format a JSON object to one of the cliff's class expected inputs."""
 
     def __init__(self, json, pretty_key=True):
         self.json = json

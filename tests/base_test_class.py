@@ -1,9 +1,8 @@
 import os
+from argparse import Namespace
 from unittest import TestCase
 
 import esctl.main
-
-from argparse import Namespace
 
 
 class EsctlTestCase(TestCase):

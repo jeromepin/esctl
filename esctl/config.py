@@ -1,8 +1,8 @@
-from collections import OrderedDict
 import logging
 import os
-from pathlib import Path
 import sys
+from collections import OrderedDict
+from pathlib import Path
 from typing import Any, Dict, List
 
 import cerberus

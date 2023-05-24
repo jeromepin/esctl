@@ -1,8 +1,8 @@
+from typing import Any, Dict
+
 from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
-
-from typing import Any, Dict
 
 
 class IndexCreate(EsctlCommand):
