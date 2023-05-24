@@ -158,8 +158,8 @@ make install
 make test
 ```
 
-### Format code
+### Format and lint code
 
 ```bash
-make fmt
+make lint
 ```

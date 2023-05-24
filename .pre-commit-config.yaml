@@ -19,7 +19,3 @@ repos:
         name: Lint files
         language: system
         entry: make lint
-      - id: make-fmt
-        name: Format files
-        language: system
-        entry: make fmt
