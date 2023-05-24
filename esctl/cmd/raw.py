@@ -7,7 +7,6 @@ class RawCommand(EsctlCommand):
     """Performs a raw HTTP call. Useful when esctl doesn't provide a nice interface for a specific route."""
 
     def take_action(self, parsed_args):
-
         body: str = parsed_args.body
 
         if parsed_args.body is not None and parsed_args.body.startswith("@"):
@@ -15,9 +14,7 @@ class RawCommand(EsctlCommand):
 
         print(
             json.dumps(
-                self.es.transport.perform_request(
-                    parsed_args.verb.upper(), parsed_args.route, body=body
-                )
+                self.request(verb=parsed_args.verb, route=parsed_args.route, body=body)
             )
         )
 

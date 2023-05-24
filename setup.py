@@ -3,7 +3,7 @@
 from setuptools import find_packages, setup
 
 PROJECT = "esctl"
-VERSION = "1.9.0"
+VERSION = "1.10.0"
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
@@ -79,6 +79,7 @@ setup(
             "logging get = esctl.cmd.logging:LoggingGet",
             "logging reset = esctl.cmd.logging:LoggingReset",
             "logging set = esctl.cmd.logging:LoggingSet",
+            "migration deprecations = esctl.cmd.migration:MigrationDeprecations",
             "node exclude = esctl.cmd.node:NodeExclude",
             "node hot-threads = esctl.cmd.node:NodeHotThreads",
             "node list = esctl.cmd.node:NodeList",

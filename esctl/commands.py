@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import jmespath
 from cliff.command import Command
@@ -32,12 +32,17 @@ class EsctlCommon:
         return self.formatter.__class__.__name__ == "TableFormatter"
 
     def read_from_file_or_stdin(self, path: str) -> str:
-        """ Read some content from a file if the path is defined otherwise read from stdin. """
+        """Read some content from a file if the path is defined otherwise read from stdin."""
         if path is not None:
             with open(os.path.expanduser(path)) as reader:
                 return reader.read()
         else:
             return sys.stdin.read()
+
+    def request(
+        self, verb: str, route: str, body: Optional[Dict[Any, Any]]
+    ) -> Dict[Any, Any]:
+        return self.es.transport.perform_request(verb.upper(), route, body=body)
 
     def objects_list_to_flat_dict(self, lst: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Convert a list of dict to a flattened dict with full name.
@@ -56,8 +61,8 @@ class EsctlCommon:
         :rtype: dict
         """
         flat_dict = {}
-        for (index, element) in enumerate(lst):
-            for (attribute, value) in element.items():
+        for index, element in enumerate(lst):
+            for attribute, value in element.items():
                 flat_dict["[{}].{}".format(index, attribute)] = value
 
         return flat_dict
