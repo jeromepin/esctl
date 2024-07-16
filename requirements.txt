@@ -3,3 +3,4 @@ certifi
 cliff==3.0
 elasticsearch
 jmespath==0.10.0
+setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
