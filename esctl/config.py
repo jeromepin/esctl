@@ -237,12 +237,11 @@ class ConfigFileParser:
             self.log.debug("Using provided context : {}".format(context_name))
         else:
             context_name = self.__getattribute__("default-context")
-            self.log.debug(
-                "No context provided. Using default context : {}".format(context_name)
-            )
+            self.log.debug("No context provided. Using default context")
 
         try:
             context = self.get_context_informations(context_name)
+            self.log.debug(context)
         except AttributeError:
             self.log.fatal("Cannot load context '{}'.".format(context_name))
             sys.exit(1)

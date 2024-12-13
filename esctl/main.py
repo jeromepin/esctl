@@ -106,15 +106,6 @@ class Esctl(App):
 
         return
 
-    def find_scheme(self):
-        scheme = "https"
-
-        if self.context.cluster.get("servers")[0].startswith("http:"):
-            scheme = self.context.cluster.get("servers")[0].split(":")[0]
-
-        self.log.debug("Using {} scheme".format(scheme))
-
-        return scheme
 
     def insert_password_into_context(self):
         external_passowrd_definition = self.context.user.get("external_password")
@@ -145,7 +136,7 @@ class Esctl(App):
                 else None
             )
 
-        Client(self.context, http_auth, self.find_scheme())
+        Client(self.context, http_auth)
 
     def _run_os_system_command(self, raw_command: str) -> str:
         self.log.debug(f"Running command : {raw_command}")
