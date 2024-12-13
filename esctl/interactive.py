@@ -16,8 +16,7 @@
 # and has been modified
 #
 
-"""Application base class.
-"""
+"""Application base class."""
 
 import itertools
 import shlex

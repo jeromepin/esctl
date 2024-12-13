@@ -50,10 +50,10 @@ class TaskList(EsctlLister):
                 if "parent_task_id" not in task:
                     task["parent_task_id"] = ""
 
-                task[
-                    "start_time_human_readable"
-                ] = self.convert_timestamp_in_ms_to_human_readable(
-                    task.get("start_time_in_millis")
+                task["start_time_human_readable"] = (
+                    self.convert_timestamp_in_ms_to_human_readable(
+                        task.get("start_time_in_millis")
+                    )
                 )
 
                 tasks.append(task)

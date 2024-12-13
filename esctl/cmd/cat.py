@@ -107,9 +107,9 @@ class CatShards(EsctlLister):
             if shard_node == "UNASSIGNED":
                 self.has_unassigned_shards = True
 
-            indices[shard_index][
-                shard_node
-            ] = f"{shard.get('shard')}{shard.get('prirep')}"
+            indices[shard_index][shard_node] = (
+                f"{shard.get('shard')}{shard.get('prirep')}"
+            )
 
         return list(indices.values())
 

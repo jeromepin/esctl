@@ -106,7 +106,6 @@ class Esctl(App):
 
         return
 
-
     def insert_password_into_context(self):
         external_passowrd_definition = self.context.user.get("external_password")
         del self.context.user["external_password"]

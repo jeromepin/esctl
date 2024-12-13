@@ -1,27 +1,22 @@
 name: Publish 📦
 
-on: push
+on:
+  push:
+    tags:
+      - '*'
 
-# From https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
 jobs:
   build-and-publish:
     name: Build and publish 📦 to PyPI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@722adc63f1aa60a57ec37892e133b1d319cae598 # v2.0.0
-      - name: Set up Python 3.7
-        if: github.event_name == 'push'
-        uses: actions/setup-python@41b7212b1668f5de9d65e9c82aa777e6bbedb3a8 # v2.1.4
-        with:
-          python-version: 3.7
-      - name: Install pep517
-        if: github.event_name == 'push'
-        run: python -m pip install pep517 --user
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.12
+
       - name: Build a binary wheel and a source tarball
-        if: github.event_name == 'push'
-        run: python -m pep517.build --source --binary --out-dir dist/ .
-      - name: Publish distribution 📦 to PyPI
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@37e305e7413032d8422456179fee28fac7d25187
-        with:
-          password: ${{ secrets.PYPI_PASSWORD }}
+        run: uv publish --index=testpypi

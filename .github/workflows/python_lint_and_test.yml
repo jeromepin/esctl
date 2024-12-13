@@ -8,20 +8,29 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version:
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
 
     steps:
-      - uses: actions/checkout@722adc63f1aa60a57ec37892e133b1d319cae598 # v2.0.0
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@41b7212b1668f5de9d65e9c82aa777e6bbedb3a8 # v2.1.4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-      - name: Lint with flake8
-        run: make lint
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Lint
+        run: uv run ruff check --select I --diff && uv run ruff check --diff
+
+      - name: Format
+        run: uv run ruff format --diff
+
       - name: Test with pytest
-        run: make test
+        run: uv run pytest

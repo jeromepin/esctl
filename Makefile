@@ -1,27 +1,21 @@
 SHELL:=bash
+ESCTL_VERSION = $(shell \grep version pyproject.toml | \egrep -oh "[.0-9]+")
 
 install:
-	@pip3 install .
+	@rm -rf dist/*
+	uv build; uv run pipx install --force dist/esctl-*-py3-none-any.whl
 
-# Only for storing dev requirements
-venv:
-	python3 -m venv venv
-
-install-dev: venv
-	venv/bin/pip3 install -r dev-requirements.txt
-
-test: install venv
-	venv/bin/pytest -svv
+test:
+	uv run pytest
 
 test-install:
-	docker run --entrypoint=/bin/bash -v `pwd`:/opt:ro python:3.7 -c "cd /opt && pip3 install . && esctl config context list && cat ~/.esctlrc && esctl cluster health"
+	docker run --entrypoint=/bin/bash -v `pwd`:/tmp/esctl:ro python:$(shell cat .python-version) -c "pip install uv && cp -r /tmp/esctl /opt && cd /opt/esctl && uv build && uv run pipx install --force dist/esctl-*-py3-none-any.whl && uv run pipx ensurepath && source ~/.bashrc && esctl config context list && cat ~/.esctlrc && esctl cluster health"
 
-lint:
-	venv/bin/black --exclude=esctl/\(interactive\|override\).py esctl/
-	venv/bin/flake8 esctl --count --show-source --statistics --show-source
-	venv/bin/flake8 esctl --count --exit-zero --max-complexity=10 --statistics --show-source
-	venv/bin/isort . --color
-	# venv/bin/mypy esctl/
+format:
+	uv run ruff check --select I --fix
+	uv run ruff check --fix
+	uv run ruff format
+	# uv run mypy esctl/
 
 tag:
-	git tag $(shell \grep VERSION setup.py | \egrep -oh "[.0-9]+")
+	git tag $(ESCTL_VERSION)
