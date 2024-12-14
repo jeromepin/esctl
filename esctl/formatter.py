@@ -23,36 +23,36 @@ class TableKey:
         return word
 
     def _split_string(self, string: str) -> list[str]:
-        splitted_string: list[str]
+        split_string: list[str]
 
         if "." in string:
-            splitted_string = string.split(".")
+            split_string = string.split(".")
 
-            # Check if words can also be splitted on underscores
-            for idx in range(len(splitted_string)):
+            # Check if words can also be split on underscores
+            for idx in range(len(split_string)):
                 # If there is an underscore anywhere in the word except at the beginning
-                if "_" in splitted_string[idx] and not splitted_string[idx].startswith(
+                if "_" in split_string[idx] and not split_string[idx].startswith(
                     "_"
                 ):
-                    splitted_string[idx] = splitted_string[idx].split("_")
+                    split_string[idx] = split_string[idx].split("_")
 
             flat_list = []
-            for sublist in splitted_string:
+            for sublist in split_string:
                 if sublist.__class__.__name__ == "list":
                     for item in sublist:
                         flat_list.append(item)
                 else:
                     flat_list.append(sublist)
 
-            splitted_string = flat_list
+            split_string = flat_list
 
         elif "_" in string:
-            splitted_string = string.split("_")
+            split_string = string.split("_")
 
         else:
-            splitted_string = [string]
+            split_string = [string]
 
-        return splitted_string
+        return split_string
 
     def _create_name_from_id(self, pretty_key=True):
         """Extrapolate the column's name based on its ID."""

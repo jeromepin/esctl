@@ -91,7 +91,7 @@ class InteractiveApp(cmd2.Cmd):
         ret = self.parent_app.run_subcommand(line_parts)
         if self.errexit:
             # Only provide this if errexit is enabled,
-            # otherise keep old behaviour
+            # otherwise keep old behaviour
             return ret
 
     def completenames(self, text, line, begidx, endidx):

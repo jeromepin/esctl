@@ -193,7 +193,7 @@ class ConfigFileParser:
 
         return raw_config_file
 
-    def get_context_informations(self, context_name: str):
+    def get_context_information(self, context_name: str):
         raw_context = self.contexts.get(context_name)
         user = self.users.get(raw_context.get("user"))
         cluster = self.clusters.get(raw_context.get("cluster"))
@@ -240,7 +240,7 @@ class ConfigFileParser:
             self.log.debug("No context provided. Using default context")
 
         try:
-            context = self.get_context_informations(context_name)
+            context = self.get_context_information(context_name)
             self.log.debug(context)
         except AttributeError:
             self.log.fatal(f"Cannot load context '{context_name}'.")

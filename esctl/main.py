@@ -106,13 +106,13 @@ class Esctl(App):
         return
 
     def insert_password_into_context(self):
-        external_passowrd_definition = self.context.user.get("external_password")
+        external_password_definition = self.context.user.get("external_password")
         del self.context.user["external_password"]
 
-        if "command" in external_passowrd_definition:
-            if "run" in external_passowrd_definition.get("command"):
+        if "command" in external_password_definition:
+            if "run" in external_password_definition.get("command"):
                 self.context.user["password"] = self._run_os_system_command(
-                    external_passowrd_definition.get("command").get("run")
+                    external_password_definition.get("command").get("run")
                 )
 
     def initialize_app(self, argv):

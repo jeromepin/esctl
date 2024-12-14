@@ -49,7 +49,7 @@ class CatAllocation(EsctlLister):
 
 
 class CatPlugins(EsctlLister):
-    """Returns informations about installed plugins across nodes."""
+    """Returns information about installed plugins across nodes."""
 
     def take_action(self, parsed_args):
         plugins = self.transform(self.es.cat.plugins(format="json"))

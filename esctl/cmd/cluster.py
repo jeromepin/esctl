@@ -53,7 +53,7 @@ class ClusterHealth(EsctlShowOne):
 
 
 class ClusterInfo(EsctlShowOne):
-    """Show basic informations about the cluster."""
+    """Show basic information about the cluster."""
 
     def take_action(self, parsed_args):
         infos = self.es.info()
