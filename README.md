@@ -53,8 +53,8 @@ esctl cluster routing allocation enable none
 ## Key Features
 
 * **Easy to use CLI** rather than long curl commands (thanks to [cliff](https://github.com/openstack/cliff))
-* Cluster-level informations : **stats**, **info**, **health**, **allocation explanation**
-* Node-level informations : **list**, **hot threads**, **exclusion**, **stats**
+* Cluster-level information : **stats**, **info**, **health**, **allocation explanation**
+* Node-level information : **list**, **hot threads**, **exclusion**, **stats**
 * Cluster-level and index-level **settings**
 * `_cat` API for **allocation**, **plugins** and **thread pools**
 * **Index management** : open, close, create, delete, list
