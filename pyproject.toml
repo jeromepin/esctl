@@ -101,6 +101,7 @@ dev-dependencies = [
     "pytest-clarity>=1.0.1",
     "pytest-icdiff>=0.9",
     "pytest>=8.3.4",
+    "pyupgrade>=3.19.0",
     "ruff>=0.8.3",
     "setuptools>=75.6.0",
 ]
