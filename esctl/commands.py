@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import jmespath
 from cliff.command import Command
@@ -26,7 +26,7 @@ class EsctlCommon:
         print("{} {}".format(Color.colorize("==>", Color.GREEN), message))
 
     def print_output(self, message):
-        print("{}".format(message))
+        print(f"{message}")
 
     def uses_table_formatter(self):
         return self.formatter.__class__.__name__ == "TableFormatter"
@@ -40,11 +40,11 @@ class EsctlCommon:
             return sys.stdin.read()
 
     def request(
-        self, verb: str, route: str, body: Optional[Dict[Any, Any]]
-    ) -> Dict[Any, Any]:
+        self, verb: str, route: str, body: dict[Any, Any] | None
+    ) -> dict[Any, Any]:
         return self.es.transport.perform_request(verb.upper(), route, body=body)
 
-    def objects_list_to_flat_dict(self, lst: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def objects_list_to_flat_dict(self, lst: list[dict[str, Any]]) -> dict[str, Any]:
         """Convert a list of dict to a flattened dict with full name.
 
         :Example:
@@ -63,13 +63,13 @@ class EsctlCommon:
         flat_dict = {}
         for index, element in enumerate(lst):
             for attribute, value in element.items():
-                flat_dict["[{}].{}".format(index, attribute)] = value
+                flat_dict[f"[{index}].{attribute}"] = value
 
         return flat_dict
 
     def _delete_and_merge_inner_dict_into_parent(
-        self, parent_dict: Dict[str, Any], key: str
-    ) -> Dict[str, Any]:
+        self, parent_dict: dict[str, Any], key: str
+    ) -> dict[str, Any]:
         """Merge a inner dictionnary into it's parent.
 
         :Example:

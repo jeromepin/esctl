@@ -56,7 +56,7 @@ class InteractiveApp(cmd2.Cmd):
                     parent_app.NAME, self.parent_app.context.name
                 )
             else:
-                self.prompt = "({}) ".format(parent_app.NAME)
+                self.prompt = f"({parent_app.NAME}) "
         else:
             # batch/pipe mode
             self.prompt = ""

@@ -14,10 +14,8 @@ class ClusterAllocationExplain(EsctlLister):
         except elasticsearch.TransportError as transport_error:
             if transport_error.args[0] == 400:
                 self.log.warn(
-                    (
-                        "Unable to find any unassigned shards to explain."
-                        " This may indicate that all shards are allocated."
-                    )
+                    "Unable to find any unassigned shards to explain."
+                    " This may indicate that all shards are allocated."
                 )
 
                 return (("Attribute", "Value"), tuple())
@@ -89,7 +87,7 @@ class ClusterStats(EsctlShowOne):
                 for key, value in self.objects_list_to_flat_dict(
                     stats.get(attribute)
                 ).items():
-                    stats.update({"{}{}".format(attribute, key): value})
+                    stats.update({f"{attribute}{key}": value})
 
                 del stats[attribute]
 

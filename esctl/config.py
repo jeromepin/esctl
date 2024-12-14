@@ -3,7 +3,7 @@ import os
 import sys
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import cerberus
 import yaml
@@ -148,16 +148,16 @@ class ConfigFileParser:
                     )
                 self.log.error(
                     (
-                        "Invalid type or schema for configuration field '{0}'."
-                        " Should be {1}. Got '{2}'"
+                        "Invalid type or schema for configuration field '{}'."
+                        " Should be {}. Got '{}'"
                     ).format(root_error.field, root_error.constraint, root_error.value)
                 )
 
-            raise SyntaxError("{} doesn't match expected schema".format(self.path))
+            raise SyntaxError(f"{self.path} doesn't match expected schema")
 
     def load_configuration(self, path: str = "~/.esctlrc") -> OrderedDict:
         self.path = os.path.expanduser(path)
-        self.log.debug("Trying to load config file : {}".format(self.path))
+        self.log.debug(f"Trying to load config file : {self.path}")
         expected_config_blocks = [
             "clusters",
             "contexts",
@@ -167,11 +167,11 @@ class ConfigFileParser:
         ]
 
         if Path(self.path).is_file():
-            with open(self.path, "r") as config_file:
+            with open(self.path) as config_file:
                 try:
                     raw_config_file = OrderedDict(yaml.safe_load(config_file))
                 except yaml.YAMLError as err:
-                    self.log.critical("Cannot read YAML from {}".format(self.path))
+                    self.log.critical(f"Cannot read YAML from {self.path}")
                     self.log.critical(str(err.problem) + str(err.problem_mark))
                     sys.exit(1)
         else:
@@ -213,7 +213,7 @@ class ConfigFileParser:
         else:
             settings = {**self.settings}
 
-        pre_commands: List[Dict] = []
+        pre_commands: list[dict] = []
         if "pre_commands" in raw_context:
             pre_commands = raw_context.get("pre_commands")
 
@@ -234,7 +234,7 @@ class ConfigFileParser:
 
     def create_context(self, context_name: str = None) -> Context:
         if context_name:
-            self.log.debug("Using provided context : {}".format(context_name))
+            self.log.debug(f"Using provided context : {context_name}")
         else:
             context_name = self.__getattribute__("default-context")
             self.log.debug("No context provided. Using default context")
@@ -243,7 +243,7 @@ class ConfigFileParser:
             context = self.get_context_informations(context_name)
             self.log.debug(context)
         except AttributeError:
-            self.log.fatal("Cannot load context '{}'.".format(context_name))
+            self.log.fatal(f"Cannot load context '{context_name}'.")
             sys.exit(1)
 
         return context

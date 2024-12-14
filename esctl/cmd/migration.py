@@ -1,5 +1,3 @@
-from typing import Dict, List, Union
-
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 
@@ -24,11 +22,9 @@ class MigrationDeprecations(EsctlLister):
 
     def transform(
         self,
-        deprecations: Dict[
-            str, Union[List[Dict[str, str]], Dict[str, List[Dict[str, str]]]]
-        ],
-    ) -> List[Dict[str, str]]:
-        foo: List[Dict[str, str]] = []
+        deprecations: dict[str, list[dict[str, str]] | dict[str, list[dict[str, str]]]],
+    ) -> list[dict[str, str]]:
+        foo: list[dict[str, str]] = []
 
         # Convert index_settings which is a dict[str, list[dict[str, str]]] to the same format
         # as other keys (i.e list[dict[str, str]])

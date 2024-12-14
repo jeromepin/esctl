@@ -80,7 +80,7 @@ class TestIndexSettingsRetrieval(EsctlTestCase):
         self.mock.indices.get_settings.return_value = self.fixtures()
 
     def fixtures(self):
-        with open("{}/index_settings.json".format(self.fixtures_path)) as json_file:
+        with open(f"{self.fixtures_path}/index_settings.json") as json_file:
             return json.load(json_file)
 
     def test_settings_list(self):

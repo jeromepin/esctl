@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
@@ -89,7 +87,7 @@ class CatShards(EsctlLister):
 
         return JSONToCliffFormatter(shards).format_for_lister(columns=columns)
 
-    def transform(self, shards_list: List[Dict[str, str]], nodes: List[str]):
+    def transform(self, shards_list: list[dict[str, str]], nodes: list[str]):
         indices = {}
         self.has_unassigned_shards: bool = False
 

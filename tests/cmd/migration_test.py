@@ -13,13 +13,13 @@ def test_transform(mock_request: MagicMock, capsys):
     # TODO: move into fixtures
     # Initialize the App
     tests_path = Path(__file__).parent.parent
-    fixtures_path = "{}/files".format(tests_path)
+    fixtures_path = f"{tests_path}/files"
 
     app = esctl.main.Esctl()
 
     # Command-line arguments
     app.options = Namespace()
-    app.options.config_file = "{}/valid_esctlrc.yml".format(fixtures_path)
+    app.options.config_file = f"{fixtures_path}/valid_esctlrc.yml"
     app.options.verbose_level = 3
     app.options.context = "foobar"
     app.initialize_app([])

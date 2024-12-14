@@ -1,7 +1,7 @@
 import fnmatch
 import logging
 from abc import ABC
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from esctl.elasticsearch import Client
 from esctl.utils import Color
@@ -27,11 +27,11 @@ class Setting:
 class ClusterSettings(Settings):
     """Handle cluster-level settings."""
 
-    def list(self) -> Dict[str, Dict[str, Any]]:
+    def list(self) -> dict[str, dict[str, Any]]:
         return self.es.cluster.get_settings(include_defaults=True, flat_settings=True)
 
     def get(self, key: str, persistency: str = "transient") -> Setting:
-        settings: Dict[str, Dict[str, Any]] = self.list()
+        settings: dict[str, dict[str, Any]] = self.list()
 
         if key in settings.get(persistency):
             return Setting(key, settings.get(persistency).get(key), persistency)
@@ -44,15 +44,15 @@ class ClusterSettings(Settings):
                 return Setting(key, None)
 
     def __get_setting_for_persistency(
-        self, settings: Dict[str, Dict[str, Any]], key: str, persistency: str
+        self, settings: dict[str, dict[str, Any]], key: str, persistency: str
     ) -> Setting:
         if key in settings.get(persistency):
             return Setting(key, settings.get(persistency).get(key), persistency)
 
         return Setting(key, None)
 
-    def mget(self, key: str) -> Dict[str, Setting]:
-        settings: Dict[str, Dict[str, Any]] = self.list()
+    def mget(self, key: str) -> dict[str, Setting]:
+        settings: dict[str, dict[str, Any]] = self.list()
 
         return {
             "transient": self.__get_setting_for_persistency(settings, key, "transient"),
@@ -79,10 +79,10 @@ class ClusterSettings(Settings):
 class IndexSettings(Settings):
     """Handle index-level settings."""
 
-    def list(self, index: str) -> Dict[str, Dict[str, Setting]]:
-        self.log.debug("Retrieving settings list for indices : {}".format(index))
+    def list(self, index: str) -> dict[str, dict[str, Setting]]:
+        self.log.debug(f"Retrieving settings list for indices : {index}")
 
-        settings: Dict[str, Dict[str, Setting]] = {}
+        settings: dict[str, dict[str, Setting]] = {}
 
         for index_name, index_settings in self.es.indices.get_settings(
             index=index, include_defaults=True, flat_settings=True
@@ -99,12 +99,12 @@ class IndexSettings(Settings):
 
         return settings
 
-    def get(self, index: str, key: Union[str, None]) -> Dict[str, List[Setting]]:
-        self.log.debug("Retrieving setting(s) '{}' for indices : {}".format(key, index))
+    def get(self, index: str, key: str | None) -> dict[str, list[Setting]]:
+        self.log.debug(f"Retrieving setting(s) '{key}' for indices : {index}")
 
         response = self.list(index)
-        settings: Dict[str, List[Setting]] = {}
-        requested_settings: List[str] = []
+        settings: dict[str, list[Setting]] = {}
+        requested_settings: list[str] = []
 
         known_settings = [
             list(index_settings.keys()) for _, index_settings in response.items()

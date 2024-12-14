@@ -18,7 +18,7 @@ class Color:
 
     @classmethod
     def colorize(cls, text, color):
-        return "{}{}{}".format(color, text, cls.END)
+        return f"{color}{text}{cls.END}"
 
 
 def flatten_dict(dictionary):

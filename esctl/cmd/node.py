@@ -7,7 +7,7 @@ class NodeExclude(EsctlCommand):
     """Define a list of excluded nodes from routing."""
 
     def take_action(self, parsed_args):
-        setting_name = "cluster.routing.allocation.exclude.{}".format(parsed_args.by)
+        setting_name = f"cluster.routing.allocation.exclude.{parsed_args.by}"
 
         if parsed_args.list is None:
             setting = self.cluster_settings.get(setting_name, persistency="transient")

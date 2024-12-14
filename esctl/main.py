@@ -4,7 +4,6 @@ import os
 import re
 import subprocess
 import sys
-from typing import List
 
 import pkg_resources
 import urllib3
@@ -28,7 +27,7 @@ class Esctl(App):
 
     def __init__(self):
         os.environ["COLUMNS"] = "120"
-        super(Esctl, self).__init__(
+        super().__init__(
             description=pkg_resources.require("Esctl")[0].project_name,
             version=pkg_resources.require("Esctl")[0].version,
             command_manager=CommandManager("esctl"),
@@ -37,7 +36,7 @@ class Esctl(App):
         )
         self.interactive_mode = False
 
-        self.LOCAL_COMMANDS: List[str] = [
+        self.LOCAL_COMMANDS: list[str] = [
             "ConfigClusterList",
             "ConfigContextList",
             "ConfigContextSet",
@@ -203,7 +202,7 @@ class Esctl(App):
             description=description, add_help=False, **argparse_kwargs
         )
         parser.add_argument(
-            "--version", action="version", version="%(prog)s {0}".format(version)
+            "--version", action="version", version=f"%(prog)s {version}"
         )
         verbose_group = parser.add_mutually_exclusive_group()
         verbose_group.add_argument(

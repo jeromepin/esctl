@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 
@@ -26,7 +24,7 @@ class SecurityUsersGet(EsctlLister):
         )
 
     def transform(self, raw_users):
-        users: List[Dict[str, str]] = []
+        users: list[dict[str, str]] = []
         for _, user in raw_users.items():
             user["roles"] = ", ".join(user.get("roles"))
             users.append(user)

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
@@ -14,7 +14,7 @@ class IndexCreate(EsctlCommand):
     def take_action(self, parsed_args):
         configuration = self.read_from_file_or_stdin(parsed_args.configuration)
 
-        self.log.info("Creating index {}".format(parsed_args.index))
+        self.log.info(f"Creating index {parsed_args.index}")
         print(self.es.indices.create(index=parsed_args.index, body=configuration))
 
     def get_parser(self, prog_name):
@@ -103,7 +103,7 @@ class IndexOpen(EsctlCommandIndex):
 class IndexReindex(EsctlCommand):
     """Reindex a given index into another one."""
 
-    def _build_request_body(self, args: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_request_body(self, args: dict[str, Any]) -> dict[str, Any]:
         return {
             "source": {
                 "index": args.get("source_index"),

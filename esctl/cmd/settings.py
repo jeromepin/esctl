@@ -122,7 +122,7 @@ class IndexSettingsGet(EsctlListerIndexSetting):
 
     def retrieve_setting(self, setting_name, index):
         if not setting_name.startswith("index."):
-            setting_name = "index.{}".format(setting_name)
+            setting_name = f"index.{setting_name}"
 
         raw_settings = self.index_settings.get(index, setting_name)
         settings = []
@@ -185,7 +185,7 @@ class IndexSettingsSet(EsctlCommandIndex):
         setting_name = parsed_args.setting
 
         if not setting_name.startswith("index."):
-            setting_name = "index.{}".format(setting_name)
+            setting_name = f"index.{setting_name}"
 
         print(
             "Changing {} to {} in index {}".format(

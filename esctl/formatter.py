@@ -1,6 +1,3 @@
-from typing import List
-
-
 class TableKey:
     def __init__(self, id, name=None, pretty_key=True):
         self.id = id
@@ -25,8 +22,8 @@ class TableKey:
 
         return word
 
-    def _split_string(self, string: str) -> List[str]:
-        splitted_string: List[str]
+    def _split_string(self, string: str) -> list[str]:
+        splitted_string: list[str]
 
         if "." in string:
             splitted_string = string.split(".")
@@ -84,7 +81,7 @@ class TableKey:
         return name
 
     def __repr__(self):
-        return "({}, {})".format(self.id, self.name)
+        return f"({self.id}, {self.name})"
 
 
 class JSONToCliffFormatter:

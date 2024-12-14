@@ -1,6 +1,5 @@
 import random
 import ssl
-from typing import Optional, Tuple, Union
 
 from elasticsearch import Elasticsearch
 
@@ -10,8 +9,8 @@ from esctl.config import Context
 class Client:
     def __new__(
         self,
-        context: Optional[Union[Context, None]] = None,
-        http_auth: Optional[Union[Tuple[str], None]] = None,
+        context: Context | None | None = None,
+        http_auth: tuple[str] | None | None = None,
     ):
         if not hasattr(self, "instance"):
             self.instance = super().__new__(self)
@@ -24,8 +23,8 @@ class Client:
     @staticmethod
     def initialize_elasticsearch_connection(
         client,
-        context: Optional[Union[Context, None]] = None,
-        http_auth: Optional[Union[Tuple[str], None]] = None,
+        context: Context | None | None = None,
+        http_auth: tuple[str] | None | None = None,
     ):
         elasticsearch_client_kwargs = {
             "http_auth": http_auth,

@@ -15,7 +15,7 @@ class LoggingGet(EsctlCommandLogging):
             self.cluster_settings.get(parsed_args.logger, persistency=persistency) or ""
         )
 
-        print("{} : {}".format(str(parsed_args.logger), str(level)))
+        print(f"{str(parsed_args.logger)} : {str(level)}")
 
 
 class LoggingReset(EsctlCommandLogging):
@@ -28,7 +28,7 @@ class LoggingReset(EsctlCommandLogging):
         if not parsed_args.logger.startswith("logger"):
             parsed_args.logger = "logger." + parsed_args.logger
 
-        print("Resetting logger {}".format(parsed_args.logger))
+        print(f"Resetting logger {parsed_args.logger}")
         print(
             self.cluster_settings.set(parsed_args.logger, None, persistency=persistency)
         )
@@ -44,7 +44,7 @@ class LoggingSet(EsctlCommandLogging):
         if not parsed_args.logger.startswith("logger"):
             parsed_args.logger = "logger." + parsed_args.logger
 
-        print("Changing logger {} to {}".format(parsed_args.logger, parsed_args.level))
+        print(f"Changing logger {parsed_args.logger} to {parsed_args.level}")
 
         print(
             self.cluster_settings.set(
