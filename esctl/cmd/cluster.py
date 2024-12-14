@@ -61,7 +61,7 @@ class ClusterHealth(EsctlShowOne):
 
 
 class ClusterInfo(EsctlShowOne):
-    """Show basic informations about the cluster."""
+    """Show basic information about the cluster."""
 
     @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:

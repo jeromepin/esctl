@@ -61,7 +61,7 @@ class CatAllocation(EsctlLister):
 
 
 class CatPlugins(EsctlLister):
-    """Returns informations about installed plugins across nodes."""
+    """Returns information about installed plugins across nodes."""
 
     @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:

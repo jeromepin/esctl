@@ -207,7 +207,7 @@ class ConfigFileParser:
 
         return raw_config_file
 
-    def get_context_informations(self, context_name: str) -> Context:
+    def get_context_information(self, context_name: str) -> Context:
         # The context gets mutated at runtime (resolved credentials, defaults,
         # running processes...) while the raw configuration may be written back
         # to disk: never share objects between them.
@@ -263,7 +263,7 @@ class ConfigFileParser:
                 raise ConfigurationError(msg)
             self.log.debug("No context provided. Using default context")
 
-        context = self.get_context_informations(context_name)
+        context = self.get_context_information(context_name)
         self.log.debug(context)
 
         return context
