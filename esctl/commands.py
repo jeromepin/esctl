@@ -70,7 +70,7 @@ class EsctlCommon:
     def _delete_and_merge_inner_dict_into_parent(
         self, parent_dict: dict[str, Any], key: str
     ) -> dict[str, Any]:
-        """Merge a inner dictionnary into it's parent.
+        """Merge a inner dictionary into it's parent.
 
         :Example:
                 {
