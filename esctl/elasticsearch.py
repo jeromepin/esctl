@@ -14,8 +14,8 @@ class Client:
     ):
         if not hasattr(self, "instance"):
             self.instance = super().__new__(self)
-            self.es = Client.initialize_elasticsearch_connection(
-                self, context, http_auth
+            self.es: Elasticsearch.Elasticsearch = (
+                Client.initialize_elasticsearch_connection(self, context, http_auth)
             )
 
         return self.instance

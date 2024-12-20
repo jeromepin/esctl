@@ -3,7 +3,8 @@ ESCTL_VERSION = $(shell \grep version pyproject.toml | \egrep -oh "[.0-9]+")
 
 install:
 	@rm -rf dist/*
-	uv build; uv run pipx install --force dist/esctl-*-py3-none-any.whl
+	uv build
+	uv run pipx install --force dist/esctl-*-py3-none-any.whl
 
 test:
 	uv run pytest

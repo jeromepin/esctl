@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "esctl"
-version = "1.11.0"
+version = "1.11.1"
 description = "Easy to use CLI tool to manage Elasticsearch, preventing long curl commands"
 keywords = ["elasticsearch", "es", "cli"]
 readme = "README.md"

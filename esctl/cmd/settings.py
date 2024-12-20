@@ -2,10 +2,13 @@ import collections
 
 from esctl.commands import EsctlCommandIndex, EsctlListerIndexSetting, EsctlShowOne
 from esctl.formatter import JSONToCliffFormatter
+from esctl.settings import ClusterSettings, IndexSettings
 from esctl.utils import Color
 
 
 class AbstractClusterSettings(EsctlShowOne):
+    cluster_settings: ClusterSettings
+
     def _settings_set(self, setting: str, value: str, persistency: str):
         self.log.debug("Persistency is " + persistency)
 
@@ -45,9 +48,11 @@ class ClusterSettingsGet(AbstractClusterSettings):
 class ClusterSettingsList(EsctlShowOne):
     """[Experimental] List available settings."""
 
+    cluster_settings: ClusterSettings
+
     def take_action(self, parsed_args):
         default_settings = {}
-        settings_list = self.cluster_settings.list().get("defaults")
+        settings_list = self.cluster_settings.list_().get("defaults")
 
         for setting_name, setting_value in settings_list.items():
             if type(setting_value).__name__ == "list":
@@ -150,13 +155,15 @@ class IndexSettingsGet(EsctlListerIndexSetting):
 class IndexSettingsList(EsctlShowOne):
     """[Experimental] List available settings in an index."""
 
+    index_settings: IndexSettings
+
     def take_action(self, parsed_args):
         settings = {}
         sample_index_name = self.es.cat.indices(format="json", h="index")[0].get(
             "index"
         )
 
-        settings_list = self.index_settings.list(sample_index_name)
+        settings_list = self.index_settings.list_(sample_index_name)
         settings_list = collections.OrderedDict(
             sorted(
                 {
@@ -180,6 +187,8 @@ class IndexSettingsList(EsctlShowOne):
 
 class IndexSettingsSet(EsctlCommandIndex):
     """Set an index-level setting value."""
+
+    index_settings: IndexSettings
 
     def take_action(self, parsed_args):
         setting_name = parsed_args.setting

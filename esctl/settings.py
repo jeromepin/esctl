@@ -27,11 +27,11 @@ class Setting:
 class ClusterSettings(Settings):
     """Handle cluster-level settings."""
 
-    def list(self) -> dict[str, dict[str, Any]]:
+    def list_(self) -> dict[str, dict[str, Any]]:
         return self.es.cluster.get_settings(include_defaults=True, flat_settings=True)
 
     def get(self, key: str, persistency: str = "transient") -> Setting:
-        settings: dict[str, dict[str, Any]] = self.list()
+        settings: dict[str, dict[str, Any]] = self.list_()
 
         if key in settings.get(persistency):
             return Setting(key, settings.get(persistency).get(key), persistency)
@@ -52,7 +52,7 @@ class ClusterSettings(Settings):
         return Setting(key, None)
 
     def mget(self, key: str) -> dict[str, Setting]:
-        settings: dict[str, dict[str, Any]] = self.list()
+        settings: dict[str, dict[str, Any]] = self.list_()
 
         return {
             "transient": self.__get_setting_for_persistency(settings, key, "transient"),
@@ -79,7 +79,7 @@ class ClusterSettings(Settings):
 class IndexSettings(Settings):
     """Handle index-level settings."""
 
-    def list(self, index: str) -> dict[str, dict[str, Setting]]:
+    def list_(self, index: str) -> dict[str, dict[str, Setting]]:
         self.log.debug(f"Retrieving settings list for indices : {index}")
 
         settings: dict[str, dict[str, Setting]] = {}
@@ -102,7 +102,7 @@ class IndexSettings(Settings):
     def get(self, index: str, key: str | None) -> dict[str, list[Setting]]:
         self.log.debug(f"Retrieving setting(s) '{key}' for indices : {index}")
 
-        response = self.list(index)
+        response = self.list_(index)
         settings: dict[str, list[Setting]] = {}
         requested_settings: list[str] = []
 
