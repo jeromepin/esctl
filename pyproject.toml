@@ -93,6 +93,19 @@ esctl = "esctl.main:main"
 "task list" = "esctl.cmd.task:TaskList"
 "users get" = "esctl.cmd.users:SecurityUsersGet"
 
+[tool.ruff]
+# Allow lines to be as long as 120.
+line-length = 120
+
+[tool.ruff.lint]
+# select = ["ALL"]
+ignore = [
+  "ANN",
+  "D",
+  "G004",
+]
+exclude = ["tests/**.py"]
+
 [tool.uv]
 dev-dependencies = [
     "mypy>=1.13.0",

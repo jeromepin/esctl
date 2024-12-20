@@ -8,7 +8,7 @@ class SnapshotList(EsctlLister):
 
     def take_action(self, parsed_args):
         snapshots = self.transform(
-            self.es.cat.snapshots(repository=parsed_args.repository, format="json")
+            self.es.cat.snapshots(repository=parsed_args.repository, format="json"),
         )
 
         return JSONToCliffFormatter(snapshots).format_for_lister(
@@ -22,21 +22,24 @@ class SnapshotList(EsctlLister):
                 ("successful_shards"),
                 ("failed_shards"),
                 ("total_shards"),
-            ]
+            ],
         )
 
     def transform(self, snapshots):
         for idx in range(len(snapshots)):
             if snapshots[idx].get("status") == "PARTIAL":
                 snapshots[idx]["status"] = Color.colorize(
-                    snapshots[idx].get("status"), Color.YELLOW
+                    snapshots[idx].get("status"),
+                    Color.YELLOW,
                 )
                 snapshots[idx]["failed_shards"] = Color.colorize(
-                    snapshots[idx].get("failed_shards"), Color.RED
+                    snapshots[idx].get("failed_shards"),
+                    Color.RED,
                 )
             elif snapshots[idx].get("status") == "IN_PROGRESS":
                 snapshots[idx]["status"] = Color.colorize(
-                    snapshots[idx].get("status"), Color.CYAN
+                    snapshots[idx].get("status"),
+                    Color.CYAN,
                 )
 
         return snapshots
@@ -45,10 +48,7 @@ class SnapshotList(EsctlLister):
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "repository",
-            help=(
-                "Comma-separated list or wildcard expression of "
-                "repository names used to limit the request."
-            ),
+            help=("Comma-separated list or wildcard expression of repository names used to limit the request."),
         )
 
         return parser

@@ -14,9 +14,7 @@ class Client:
     ):
         if not hasattr(self, "instance"):
             self.instance = super().__new__(self)
-            self.es: Elasticsearch.Elasticsearch = (
-                Client.initialize_elasticsearch_connection(self, context, http_auth)
-            )
+            self.es: Elasticsearch.Elasticsearch = Client.initialize_elasticsearch_connection(self, context, http_auth)
 
         return self.instance
 
@@ -40,12 +38,13 @@ class Client:
 
             if "max_retries" in context.settings:
                 elasticsearch_client_kwargs["max_retries"] = context.settings.get(
-                    "max_retries"
+                    "max_retries",
                 )
 
             if "timeout" in context.settings:
                 elasticsearch_client_kwargs["timeout"] = context.settings.get("timeout")
 
             return Elasticsearch(
-                random.choice(context.cluster["servers"]), **elasticsearch_client_kwargs
+                random.choice(context.cluster["servers"]),
+                **elasticsearch_client_kwargs,
             )

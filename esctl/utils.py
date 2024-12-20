@@ -25,8 +25,7 @@ def flatten_dict(dictionary):
     def expand(key, value):
         if isinstance(value, dict):
             return [(key + "." + k, v) for k, v in flatten_dict(value).items()]
-        else:
-            return [(key, value)]
+        return [(key, value)]
 
     items = [item for k, v in dictionary.items() for item in expand(k, v)]
 
@@ -38,6 +37,7 @@ def setup_yaml():
     yaml.add_representer(
         OrderedDict,
         lambda self, data: self.represent_mapping(
-            "tag:yaml.org,2002:map", data.items()
+            "tag:yaml.org,2002:map",
+            data.items(),
         ),
     )

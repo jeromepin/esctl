@@ -32,7 +32,7 @@ def test_transform(mock_request: MagicMock, capsys):
                 "message": "Cluster name cannot contain ':'",
                 "url": "https://www.elastic.co/guide/en/elasticsearch/reference/7.17/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_cluster_name",
                 "details": "This cluster is named [mycompany:logging], which contains the illegal character ':'.",
-            }
+            },
         ],
         "node_settings": [],
         "index_settings": {
@@ -42,7 +42,7 @@ def test_transform(mock_request: MagicMock, capsys):
                     "message": "Index name cannot contain ':'",
                     "url": "https://www.elastic.co/guide/en/elasticsearch/reference/7.17/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_index_name",
                     "details": "This index is named [logs:apache], which contains the illegal character ':'.",
-                }
+                },
             ],
             "foobar": [
                 {
@@ -102,5 +102,5 @@ def test_transform(mock_request: MagicMock, capsys):
                     "Doc": "https://www.elastic.co/guide/en/elasticsearch/reference/7.17/breaking-changes-7.0.html#_literal_literal_is_no_longer_allowed_in_index_name",
                 },
             ],
-        )
+        ),
     )

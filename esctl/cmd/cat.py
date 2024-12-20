@@ -24,24 +24,25 @@ class CatAllocation(EsctlLister):
                 ("host"),
                 ("ip", "IP"),
                 ("node"),
-            ]
+            ],
         )
 
     def transform(self, allocation):
         nodes = []
 
         for node in allocation:
-            if self.uses_table_formatter():
-                if node.get("disk.percent") is not None:
-                    if int(node.get("disk.percent")) > 85:
-                        node["disk.percent"] = Color.colorize(
-                            node.get("disk.percent"), Color.RED
-                        )
+            if self.uses_table_formatter() and node.get("disk.percent") is not None:
+                if int(node.get("disk.percent")) > 85:
+                    node["disk.percent"] = Color.colorize(
+                        node.get("disk.percent"),
+                        Color.RED,
+                    )
 
-                    elif int(node.get("disk.percent")) > 70:
-                        node["disk.percent"] = Color.colorize(
-                            node.get("disk.percent"), Color.YELLOW
-                        )
+                elif int(node.get("disk.percent")) > 70:
+                    node["disk.percent"] = Color.colorize(
+                        node.get("disk.percent"),
+                        Color.YELLOW,
+                    )
 
             nodes.append(node)
 
@@ -55,7 +56,7 @@ class CatPlugins(EsctlLister):
         plugins = self.transform(self.es.cat.plugins(format="json"))
 
         return JSONToCliffFormatter(plugins).format_for_lister(
-            columns=[("name", "node"), ("component", "plugin"), ("version")]
+            columns=[("name", "node"), ("component", "plugin"), ("version")],
         )
 
     def transform(self, plugins):
@@ -69,7 +70,9 @@ class CatShards(EsctlLister):
         nodes = [n.get("name") for n in self.es.cat.nodes(format="json", h="name")]
         shards = self.transform(
             self.es.cat.shards(
-                format="json", index=parsed_args.index, h="index,node,shard,prirep"
+                format="json",
+                index=parsed_args.index,
+                h="index,node,shard,prirep",
             ),
             nodes,
         )
@@ -96,7 +99,7 @@ class CatShards(EsctlLister):
 
             if shard_index not in indices:
                 indices[shard_index] = {
-                    **{"index": shard_index},
+                    "index": shard_index,
                     **{n: "" for n in nodes},
                 }
 
@@ -105,9 +108,7 @@ class CatShards(EsctlLister):
             if shard_node == "UNASSIGNED":
                 self.has_unassigned_shards = True
 
-            indices[shard_index][shard_node] = (
-                f"{shard.get('shard')}{shard.get('prirep')}"
-            )
+            indices[shard_index][shard_node] = f"{shard.get('shard')}{shard.get('prirep')}"
 
         return list(indices.values())
 
@@ -137,11 +138,11 @@ class CatThreadpool(EsctlLister):
                 format="json",
                 h=headers,
                 thread_pool_patterns=parsed_args.thread_pool_patterns,
-            )
+            ),
         )
 
         return JSONToCliffFormatter(thread_pools).format_for_lister(
-            columns=[(h,) for h in headers.split(",")]
+            columns=[(h,) for h in headers.split(",")],
         )
 
     def get_parser(self, prog_name):
@@ -149,10 +150,7 @@ class CatThreadpool(EsctlLister):
 
         parser.add_argument(
             "--thread-pool-patterns",
-            help=(
-                "A comma-separated list of regular-expressions or strings "
-                "to filter the thread pools in the output"
-            ),
+            help=("A comma-separated list of regular-expressions or strings to filter the thread pools in the output"),
         )
         parser.add_argument(
             "--headers",
@@ -184,12 +182,14 @@ class CatTemplates(EsctlLister):
         templates = self.es.cat.templates(name=parsed_args.name, format="json")
 
         return JSONToCliffFormatter(templates).format_for_lister(
-            columns=[("name",), ("index_patterns",), ("order",), ("version")]
+            columns=[("name",), ("index_patterns",), ("order",), ("version")],
         )
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.add_argument(
-            "name", help="A pattern that returned template names must match", nargs="?"
+            "name",
+            help="A pattern that returned template names must match",
+            nargs="?",
         )
         return parser

@@ -44,9 +44,7 @@ class ConfigFileParser:
 
     def _create_default_config_file(self) -> "OrderedDict[str, Any]":
         self.log.info(
-            "{} config file does not exists. Creating a default one...".format(
-                self.path
-            )
+            f"{self.path} config file does not exists. Creating a default one...",
         )
         default_config = OrderedDict(
             {
@@ -55,7 +53,7 @@ class ConfigFileParser:
                 "users": {},
                 "contexts": {"localhost": {"cluster": "localhost"}},
                 "default-context": "localhost",
-            }
+            },
         )
 
         self.write_config_file(default_config)
@@ -78,7 +76,7 @@ class ConfigFileParser:
                         "run": {
                             "type": "string",
                             "required": True,
-                        }
+                        },
                     },
                 },
             },
@@ -143,14 +141,12 @@ class ConfigFileParser:
                 for inner_error in root_error.info[0]:
                     self.log.error(
                         "Unknown configuration : {}".format(
-                            ".".join(inner_error.document_path)
-                        )
+                            ".".join(inner_error.document_path),
+                        ),
                     )
                 self.log.error(
-                    (
-                        "Invalid type or schema for configuration field '{}'."
-                        " Should be {}. Got '{}'"
-                    ).format(root_error.field, root_error.constraint, root_error.value)
+                    f"Invalid type or schema for configuration field '{root_error.field}'."
+                    f" Should be {root_error.constraint}. Got '{root_error.value}'",
                 )
 
             raise SyntaxError(f"{self.path} doesn't match expected schema")
@@ -186,9 +182,7 @@ class ConfigFileParser:
             self.__setattr__(config_block, raw_config_file.get(config_block))
 
             self.log.debug(
-                "Loaded {}: {}".format(
-                    config_block, self.__getattribute__(config_block)
-                )
+                f"Loaded {config_block}: {self.__getattribute__(config_block)}",
             )
 
         return raw_config_file
@@ -202,7 +196,7 @@ class ConfigFileParser:
             self.log.error(
                 f"Malformed context `{context_name}` in configuration file : "
                 f"it requires a cluster named `{raw_context.get('cluster')}` but none could be found ! "
-                f"Here are the clusters I know : {', '.join(list(self.clusters.keys()))}"
+                f"Here are the clusters I know : {', '.join(list(self.clusters.keys()))}",
             )
             sys.exit(1)
 
@@ -220,14 +214,19 @@ class ConfigFileParser:
             for i in range(len(pre_commands)):
                 pre_command = pre_commands[i]
                 pre_command = {
-                    **{"wait_for_exit": True, "wait_for_output": ""},
+                    "wait_for_exit": True,
+                    "wait_for_output": "",
                     **pre_command,
                 }
 
                 pre_commands[i] = pre_command
 
         context = Context(
-            context_name, user, cluster, settings, pre_commands=pre_commands
+            context_name,
+            user,
+            cluster,
+            settings,
+            pre_commands=pre_commands,
         )
 
         return context

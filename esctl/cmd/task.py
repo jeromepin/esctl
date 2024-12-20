@@ -13,7 +13,7 @@ class TaskList(EsctlLister):
                 actions=parsed_args.actions,
                 detailed=parsed_args.detailed,
                 parent_task_id=parsed_args.parent_task_id,
-            ).get("nodes")
+            ).get("nodes"),
         )
 
         return JSONToCliffFormatter(tasks).format_for_lister(
@@ -28,14 +28,14 @@ class TaskList(EsctlLister):
                 ("parent_task_id"),
                 ("cancellable"),
                 ("headers"),
-            ]
+            ],
         )
 
     def convert_timestamp_in_ms_to_human_readable(self, time_in_ms: int) -> str:
         miliseconds = str(round((time_in_ms / 1000) % 1, 3)).split(".")[1]
         return (
             datetime.datetime.utcfromtimestamp(time_in_ms / 1000).strftime(
-                "%Y-%m-%d %H:%M:%S"
+                "%Y-%m-%d %H:%M:%S",
             )
             + f".{miliseconds}"
         )
@@ -50,10 +50,8 @@ class TaskList(EsctlLister):
                 if "parent_task_id" not in task:
                     task["parent_task_id"] = ""
 
-                task["start_time_human_readable"] = (
-                    self.convert_timestamp_in_ms_to_human_readable(
-                        task.get("start_time_in_millis")
-                    )
+                task["start_time_human_readable"] = self.convert_timestamp_in_ms_to_human_readable(
+                    task.get("start_time_in_millis"),
                 )
 
                 tasks.append(task)

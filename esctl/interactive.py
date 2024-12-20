@@ -50,11 +50,10 @@ class InteractiveApp(cmd2.Cmd):
         self.parent_app = parent_app
         if not hasattr(sys.stdin, "isatty") or sys.stdin.isatty():
             if hasattr(self.parent_app, "context") and hasattr(
-                self.parent_app.context, "name"
+                self.parent_app.context,
+                "name",
             ):
-                self.prompt = "({} {}) ".format(
-                    parent_app.NAME, self.parent_app.context.name
-                )
+                self.prompt = f"({parent_app.NAME} {self.parent_app.context.name}) "
             else:
                 self.prompt = f"({parent_app.NAME}) "
         else:
@@ -134,7 +133,7 @@ class InteractiveApp(cmd2.Cmd):
                 itertools.chain(
                     ["do"],
                     itertools.takewhile(lambda x: not x.startswith("-"), arg_parts),
-                )
+                ),
             )
             # Have the command manager version of the help
             # command produce the help text since cmd and
@@ -159,7 +158,7 @@ class InteractiveApp(cmd2.Cmd):
             cmd2.Cmd.do_help(self, arg)
             cmd_names = sorted([n for n, v in self.command_manager])
             self.print_topics(self.app_cmd_header, cmd_names, 15, 80)
-        return
+        return None
 
     # Create exit alias to quit the interactive shell.
     do_exit = cmd2.Cmd.do_quit

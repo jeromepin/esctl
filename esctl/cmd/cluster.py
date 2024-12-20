@@ -13,9 +13,9 @@ class ClusterAllocationExplain(EsctlLister):
             response = self.es.cluster.allocation_explain()
         except elasticsearch.TransportError as transport_error:
             if transport_error.args[0] == 400:
-                self.log.warn(
+                self.log.warning(
                     "Unable to find any unassigned shards to explain."
-                    " This may indicate that all shards are allocated."
+                    " This may indicate that all shards are allocated.",
                 )
 
                 return (("Attribute", "Value"), tuple())
@@ -25,14 +25,14 @@ class ClusterAllocationExplain(EsctlLister):
                 "can_allocate": response.get("can_allocate"),
                 "explanation": response.get("allocate_explanation"),
                 "last_allocation_status": response.get("unassigned_info").get(
-                    "last_allocation_status"
+                    "last_allocation_status",
                 ),
                 "reason": response.get("unassigned_info").get("reason"),
             }
 
             for node in response.get("node_allocation_decisions"):
                 output[node.get("node_name")] = node.get("deciders")[0].get(
-                    "explanation"
+                    "explanation",
                 )
 
             return (("Attribute", "Value"), tuple(output.items()))
@@ -46,7 +46,8 @@ class ClusterHealth(EsctlShowOne):
 
         if self.uses_table_formatter():
             health["status"] = Color.colorize(
-                health.get("status"), getattr(Color, health.get("status").upper())
+                health.get("status"),
+                getattr(Color, health.get("status").upper()),
             )
 
         return (tuple(health.keys()), tuple(health.values()))
@@ -69,7 +70,7 @@ class ClusterStats(EsctlShowOne):
 
     def take_action(self, parsed_args):
         cluster_stats = self._sort_and_order_dict(
-            self.transform(flatten_dict(self.es.cluster.stats()))
+            self.transform(flatten_dict(self.es.cluster.stats())),
         )
 
         return (tuple(cluster_stats.keys()), tuple(cluster_stats.values()))
@@ -85,7 +86,7 @@ class ClusterStats(EsctlShowOne):
         ]:
             if attribute in stats:
                 for key, value in self.objects_list_to_flat_dict(
-                    stats.get(attribute)
+                    stats.get(attribute),
                 ).items():
                     stats.update({f"{attribute}{key}": value})
 
@@ -117,7 +118,9 @@ class ClusterRoutingAllocationEnable(AbstractClusterSettings):
             help=("Set setting as transient (default)"),
         )
         persistency_group.add_argument(
-            "--persistent", action="store_true", help=("Set setting as persistent")
+            "--persistent",
+            action="store_true",
+            help=("Set setting as persistent"),
         )
 
         parser.add_argument(

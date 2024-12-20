@@ -35,16 +35,17 @@ class ClusterSettings(Settings):
 
         if key in settings.get(persistency):
             return Setting(key, settings.get(persistency).get(key), persistency)
-        else:
-            # If the setting cannot be found in the requested persistency
-            # look for it in the "defaults" values
-            if key in settings.get("defaults"):
-                return Setting(key, settings.get("defaults").get(key), "defaults")
-            else:
-                return Setting(key, None)
+        # If the setting cannot be found in the requested persistency
+        # look for it in the "defaults" values
+        if key in settings.get("defaults"):
+            return Setting(key, settings.get("defaults").get(key), "defaults")
+        return Setting(key, None)
 
     def __get_setting_for_persistency(
-        self, settings: dict[str, dict[str, Any]], key: str, persistency: str
+        self,
+        settings: dict[str, dict[str, Any]],
+        key: str,
+        persistency: str,
     ) -> Setting:
         if key in settings.get(persistency):
             return Setting(key, settings.get(persistency).get(key), persistency)
@@ -57,18 +58,16 @@ class ClusterSettings(Settings):
         return {
             "transient": self.__get_setting_for_persistency(settings, key, "transient"),
             "persistent": self.__get_setting_for_persistency(
-                settings, key, "persistent"
+                settings,
+                key,
+                "persistent",
             ),
             "defaults": self.__get_setting_for_persistency(settings, key, "defaults"),
         }
 
     def set(self, sections: str, value, persistency: str = "transient"):
         self.log.info(
-            "Changing {}'s {} to : {}".format(
-                persistency,
-                Color.colorize(sections, Color.ITALIC),
-                Color.colorize(value, Color.ITALIC),
-            )
+            f"Changing {persistency}'s {Color.colorize(sections, Color.ITALIC)} to : {Color.colorize(value, Color.ITALIC)}",
         )
         return self.es.cluster.put_settings(
             body={persistency: {sections: value}},
@@ -85,16 +84,22 @@ class IndexSettings(Settings):
         settings: dict[str, dict[str, Setting]] = {}
 
         for index_name, index_settings in self.es.indices.get_settings(
-            index=index, include_defaults=True, flat_settings=True
+            index=index,
+            include_defaults=True,
+            flat_settings=True,
         ).items():
             settings[index_name] = {}
             for setting_name, setting_value in index_settings.get("settings").items():
                 settings[index_name][setting_name] = Setting(
-                    setting_name, setting_value, "settings"
+                    setting_name,
+                    setting_value,
+                    "settings",
                 )
             for setting_name, setting_value in index_settings.get("defaults").items():
                 settings[index_name][setting_name] = Setting(
-                    setting_name, setting_value, "defaults"
+                    setting_name,
+                    setting_value,
+                    "defaults",
                 )
 
         return settings
@@ -106,9 +111,7 @@ class IndexSettings(Settings):
         settings: dict[str, list[Setting]] = {}
         requested_settings: list[str] = []
 
-        known_settings = [
-            list(index_settings.keys()) for _, index_settings in response.items()
-        ][0]
+        known_settings = [list(index_settings.keys()) for _, index_settings in response.items()][0]
 
         if "*" in key:
             requested_settings = fnmatch.filter(known_settings, key)

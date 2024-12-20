@@ -9,7 +9,7 @@ class RepositoryList(EsctlLister):
         repositories = self.es.cat.repositories(format="json")
 
         return JSONToCliffFormatter(repositories).format_for_lister(
-            columns=[("id"), ("type")]
+            columns=[("id"), ("type")],
         )
 
 
@@ -18,17 +18,19 @@ class RepositoryShow(EsctlShowOne):
 
     def take_action(self, parsed_args):
         repository = self.es.snapshot.get_repository(
-            repository=parsed_args.repository, format="json"
+            repository=parsed_args.repository,
+            format="json",
         ).get(parsed_args.repository)
 
         return JSONToCliffFormatter(repository).to_show_one(
-            lines=list(repository.keys())
+            lines=list(repository.keys()),
         )
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.add_argument(
-            "repository", help=("A comma-separated list of repository names")
+            "repository",
+            help=("A comma-separated list of repository names"),
         )
         return parser
 
@@ -38,7 +40,8 @@ class RepositoryVerify(EsctlCommand):
 
     def take_action(self, parsed_args):
         repository = self.es.snapshot.verify_repository(
-            repository=parsed_args.repository, format="json"
+            repository=parsed_args.repository,
+            format="json",
         )
 
         print(repository)

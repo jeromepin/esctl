@@ -14,8 +14,8 @@ class RawCommand(EsctlCommand):
 
         print(
             json.dumps(
-                self.request(verb=parsed_args.verb, route=parsed_args.route, body=body)
-            )
+                self.request(verb=parsed_args.verb, route=parsed_args.route, body=body),
+            ),
         )
 
     def get_parser(self, prog_name):

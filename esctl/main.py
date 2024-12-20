@@ -51,7 +51,7 @@ class Esctl(App):
         logging.getLogger("stevedore.extension").setLevel(logging.WARNING)
 
         # Disable urllib's warnings
-        # See https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings # noqa: E501
+        # See https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
         urllib3.disable_warnings()
 
         # Set up logging to a file
@@ -82,42 +82,42 @@ class Esctl(App):
         logging.addLevelName(
             logging.WARNING,
             utils.Color.colorize(
-                logging.getLevelName(logging.WARNING), utils.Color.YELLOW
+                logging.getLevelName(logging.WARNING),
+                utils.Color.YELLOW,
             ),
         )
         logging.addLevelName(
             logging.ERROR,
             utils.Color.colorize(
-                logging.getLevelName(logging.ERROR), utils.Color.PURPLE
+                logging.getLevelName(logging.ERROR),
+                utils.Color.PURPLE,
             ),
         )
         logging.addLevelName(
             logging.CRITICAL,
             utils.Color.colorize(
-                logging.getLevelName(logging.CRITICAL), utils.Color.RED
+                logging.getLevelName(logging.CRITICAL),
+                utils.Color.RED,
             ),
         )
         formatter = logging.Formatter(
-            "[%(levelname)-8s] " + self.CONSOLE_MESSAGE_FORMAT
+            "[%(levelname)-8s] " + self.CONSOLE_MESSAGE_FORMAT,
         )
         console.setFormatter(formatter)
         root_logger.addHandler(console)
-
-        return
 
     def insert_password_into_context(self):
         external_passowrd_definition = self.context.user.get("external_password")
         del self.context.user["external_password"]
 
-        if "command" in external_passowrd_definition:
-            if "run" in external_passowrd_definition.get("command"):
-                self.context.user["password"] = self._run_os_system_command(
-                    external_passowrd_definition.get("command").get("run")
-                )
+        if "command" in external_passowrd_definition and "run" in external_passowrd_definition.get("command"):
+            self.context.user["password"] = self._run_os_system_command(
+                external_passowrd_definition.get("command").get("run"),
+            )
 
     def initialize_app(self, argv):
         Esctl._config = Esctl._config_file_parser.load_configuration(
-            self.options.config_file
+            self.options.config_file,
         )
         self.context = Esctl._config_file_parser.create_context(self.options.context)
 
@@ -129,8 +129,7 @@ class Esctl(App):
 
             http_auth = (
                 (self.context.user.get("username"), self.context.user.get("password"))
-                if self.context.user.get("username")
-                and self.context.user.get("password")
+                if self.context.user.get("username") and self.context.user.get("password")
                 else None
             )
 
@@ -144,14 +143,17 @@ class Esctl(App):
         command = command.split(" ")
         self.log.debug(f"Running pre-command : {command}")
         process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
 
         return process
 
     def prepare_to_run_command(self, cmd):
         if (cmd.__class__.__name__ not in self.LOCAL_COMMANDS) and hasattr(
-            self.context, "pre_commands"
+            self.context,
+            "pre_commands",
         ):
             for i in range(len(self.context.pre_commands)):
                 command_block = self.context.pre_commands[i]
@@ -175,11 +177,11 @@ class Esctl(App):
 
                         if match is None:
                             self.log.debug(
-                                f"Expecting command output to match `{string_to_look_for}` but got `{line}`..."
+                                f"Expecting command output to match `{string_to_look_for}` but got `{line}`...",
                             )
                         else:
                             self.log.debug(
-                                f"Got `{string_to_look_for}` from `{command_block.get('command')}`"
+                                f"Got `{string_to_look_for}` from `{command_block.get('command')}`",
                             )
                             break
 
@@ -187,7 +189,8 @@ class Esctl(App):
 
     def clean_up(self, cmd, result, err):
         if (cmd.__class__.__name__ not in self.LOCAL_COMMANDS) and hasattr(
-            self.context, "pre_commands"
+            self.context,
+            "pre_commands",
         ):
             for pre_command in self.context.pre_commands:
                 pre_command.get("process").terminate()
@@ -199,10 +202,14 @@ class Esctl(App):
         """Return an argparse option parser for this application."""
         argparse_kwargs = argparse_kwargs or {}
         parser = argparse.ArgumentParser(
-            description=description, add_help=False, **argparse_kwargs
+            description=description,
+            add_help=False,
+            **argparse_kwargs,
         )
         parser.add_argument(
-            "--version", action="version", version=f"%(prog)s {version}"
+            "--version",
+            action="version",
+            version=f"%(prog)s {version}",
         )
         verbose_group = parser.add_mutually_exclusive_group()
         verbose_group.add_argument(
@@ -242,15 +249,7 @@ class Esctl(App):
                 action="store_true",
                 help="Show help message and exit.",
             )
-        # else:
-        #     parser.add_argument(
-        #         "-h",
-        #         "--help",
-        #         action=HelpAction,
-        #         nargs=0,
-        #         default=self,  # tricky
-        #         help="Show this help message and exit.",
-        #     )
+
         parser.add_argument(
             "--debug",
             default=False,
@@ -258,11 +257,16 @@ class Esctl(App):
             help="Show tracebacks on errors.",
         )
         parser.add_argument(
-            "--es-version", action="store", help="Elasticsearch version."
+            "--es-version",
+            action="store",
+            help="Elasticsearch version.",
         )
 
         parser.add_argument(
-            "--context", action="store", help="Context to use", type=str
+            "--context",
+            action="store",
+            help="Context to use",
+            type=str,
         )
 
         return parser

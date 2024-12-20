@@ -33,7 +33,7 @@ class IndexList(EsctlLister):
 
     def take_action(self, parsed_args):
         indices = self.transform(
-            self.es.cat.indices(format="json", index=parsed_args.index)
+            self.es.cat.indices(format="json", index=parsed_args.index),
         )
         return JSONToCliffFormatter(indices).format_for_lister(
             columns=[
@@ -47,7 +47,7 @@ class IndexList(EsctlLister):
                 ("docs.deleted"),
                 ("store.size"),
                 ("pri.store.size", "Primary Store Size"),
-            ]
+            ],
         )
 
     def transform(self, indices):
@@ -61,7 +61,8 @@ class IndexList(EsctlLister):
 
                 if indice.get("status") == "close":
                     indices[idx]["status"] = Color.colorize(
-                        indice.get("status"), Color.ITALIC
+                        indice.get("status"),
+                        Color.ITALIC,
                     )
 
         return indices
@@ -122,10 +123,12 @@ class IndexReindex(EsctlCommand):
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.add_argument(
-            "source_index", help="Name of the index to index document from"
+            "source_index",
+            help="Name of the index to index document from",
         )
         parser.add_argument(
-            "destination_index", help="Name of the index to index document to"
+            "destination_index",
+            help="Name of the index to index document to",
         )
         parser.add_argument(
             "--conflicts",

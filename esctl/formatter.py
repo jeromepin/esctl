@@ -32,7 +32,7 @@ class TableKey:
             for idx in range(len(splitted_string)):
                 # If there is an underscore anywhere in the word except at the beginning
                 if "_" in splitted_string[idx] and not splitted_string[idx].startswith(
-                    "_"
+                    "_",
                 ):
                     splitted_string[idx] = splitted_string[idx].split("_")
 
@@ -68,13 +68,12 @@ class TableKey:
             # Put the word to titlecase unless it contains at least an uppercase letter
             if all(char.islower() for char in name[idx]):
                 name[idx] = name[idx].title()
+            # If the word contains an uppercase letter somewhere, maintain the case
+            # but uppercase the first letter
+            elif name[idx].startswith("_"):
+                name[idx] = name[idx][0] + name[idx][1].upper() + name[idx][2:]
             else:
-                # If the word contains an uppercase letter somewhere, maintain the case
-                # but uppercase the first letter
-                if name[idx].startswith("_"):
-                    name[idx] = name[idx][0] + name[idx][1].upper() + name[idx][2:]
-                else:
-                    name[idx] = name[idx][0].upper() + name[idx][1:]
+                name[idx] = name[idx][0].upper() + name[idx][1:]
 
         name = " ".join(name)
 
@@ -168,7 +167,6 @@ class JSONToCliffFormatter:
         columns' headers and the second one the lines to display
         :rtype: tuple
         """
-
         columns = self._format_columns(columns)
 
         lst = []

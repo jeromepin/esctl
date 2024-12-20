@@ -19,15 +19,15 @@ class NodeExclude(EsctlCommand):
 
         else:
             self.print_output(
-                ("Changing node exclusion list" " ({}) to : {}").format(
-                    Color.colorize(setting_name, Color.ITALIC),
-                    Color.colorize(parsed_args.list, Color.ITALIC),
-                )
+                "Changing node exclusion list"
+                f" ({Color.colorize(setting_name, Color.ITALIC)}) to : {Color.colorize(parsed_args.list, Color.ITALIC)}",
             )
             self.print_success(
                 self.cluster_settings.set(
-                    setting_name, parsed_args.list, persistency="transient"
-                )
+                    setting_name,
+                    parsed_args.list,
+                    persistency="transient",
+                ),
             )
 
     def get_parser(self, prog_name):
@@ -46,10 +46,7 @@ class NodeExclude(EsctlCommand):
             "list",
             metavar="<list>",
             nargs="?",
-            help=(
-                "Comma-separated list of values nodes should have to be"
-                " excluded from shard allocation"
-            ),
+            help=("Comma-separated list of values nodes should have to be excluded from shard allocation"),
         )
 
         return parser
@@ -65,10 +62,7 @@ class NodeHotThreads(EsctlCommand):
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "--type",
-            help=(
-                "The type to sample (default: cpu), "
-                "valid choices are: ‘cpu’, ‘wait’, ‘block’"
-            ),
+            help=("The type to sample (default: cpu), valid choices are: 'cpu', 'wait', 'block'"),
             choices=["cpu", "wait", "block"],
             default="cpu",
         )
@@ -91,7 +85,7 @@ class NodeList(EsctlLister):
                 ("node.role", "Role"),
                 ("master"),
                 ("name"),
-            ]
+            ],
         )
 
 
@@ -115,7 +109,8 @@ class NodeStats(EsctlShowOne):
         stats = self.transform(stats)
 
         return JSONToCliffFormatter(
-            stats, pretty_key=not parsed_args.no_pretty
+            stats,
+            pretty_key=not parsed_args.no_pretty,
         ).to_show_one(lines=list(stats.keys()))
 
     def transform(self, raw_stats):

@@ -16,12 +16,12 @@ class ConfigClusterList(EsctlLister):
                 "servers": "\n".join(cluster_definition.get("servers")),
             }
             for cluster_name, cluster_definition in Esctl._config.get(
-                "clusters"
+                "clusters",
             ).items()
         ]
 
         return JSONToCliffFormatter(clusters).format_for_lister(
-            columns=[("name"), ("servers")]
+            columns=[("name"), ("servers")],
         )
 
 
@@ -36,12 +36,12 @@ class ConfigContextList(EsctlLister):
                 "cluster": context_definition.get("cluster"),
             }
             for context_name, context_definition in Esctl._config.get(
-                "contexts"
+                "contexts",
             ).items()
         ]
 
         return JSONToCliffFormatter(self.transform(contexts)).format_for_lister(
-            columns=[("name"), ("user"), ("cluster")]
+            columns=[("name"), ("user"), ("cluster")],
         )
 
     def transform(self, raw_contexts):
@@ -51,7 +51,8 @@ class ConfigContextList(EsctlLister):
             if context.get("name") == Esctl._config.get("default-context"):
                 for context_attribute_name, context_attribute_value in context.items():
                     context[context_attribute_name] = Color.colorize(
-                        context_attribute_value, Color.UNDERLINE
+                        context_attribute_value,
+                        Color.UNDERLINE,
                     )
 
             modified_contexts.append(context)
@@ -84,8 +85,11 @@ class ConfigShow(EsctlCommand):
         setup_yaml()
         print(
             yaml.safe_dump(
-                dict(Esctl._config), None, default_flow_style=False, width=500
-            )
+                dict(Esctl._config),
+                None,
+                default_flow_style=False,
+                width=500,
+            ),
         )
 
 
@@ -103,5 +107,5 @@ class ConfigUserList(EsctlLister):
         ]
 
         return JSONToCliffFormatter(users).format_for_lister(
-            columns=[("name"), ("username"), ("password")]
+            columns=[("name"), ("username"), ("password")],
         )

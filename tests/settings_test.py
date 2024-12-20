@@ -29,25 +29,29 @@ class TestClusterSettingsRetrieval(EsctlTestCase):
         cluster_settings = esctl.settings.ClusterSettings()
         self.assertEqual(
             cluster_settings.get(
-                "thread_pool.estimated_time_interval", persistency="transient"
+                "thread_pool.estimated_time_interval",
+                persistency="transient",
             ).value,
             "100ms",
         )
         self.assertEqual(
             cluster_settings.get(
-                "thread_pool.estimated_time_interval", persistency="persistent"
+                "thread_pool.estimated_time_interval",
+                persistency="persistent",
             ).value,
             "200ms",
         )
         self.assertEqual(
             cluster_settings.get(
-                "cluster.routing.allocation.allow_rebalance", persistency="persistent"
+                "cluster.routing.allocation.allow_rebalance",
+                persistency="persistent",
             ).value,
             "indices_all_active",
         )
         self.assertEqual(
             cluster_settings.get(
-                "cluster.routing.allocation.allow_rebalance", persistency="transient"
+                "cluster.routing.allocation.allow_rebalance",
+                persistency="transient",
             ).value,
             "always",
         )
@@ -67,7 +71,8 @@ class TestClusterSettingsRetrieval(EsctlTestCase):
         )
         self.assertEqual(
             cluster_settings.get(
-                "cluster.routing.allocation.foobar", persistency="transient"
+                "cluster.routing.allocation.foobar",
+                persistency="transient",
             ).value,
             None,
         )
@@ -90,7 +95,8 @@ class TestIndexSettingsRetrieval(EsctlTestCase):
 
         self.assertEqual(
             index_settings.get(
-                "foobar,qux", "index.analysis.analyzer.trigram.tokenizer"
+                "foobar,qux",
+                "index.analysis.analyzer.trigram.tokenizer",
             )
             .get("foobar")[0]
             .value,

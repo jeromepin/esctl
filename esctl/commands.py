@@ -40,7 +40,10 @@ class EsctlCommon:
             return sys.stdin.read()
 
     def request(
-        self, verb: str, route: str, body: dict[Any, Any] | None
+        self,
+        verb: str,
+        route: str,
+        body: dict[Any, Any] | None,
     ) -> dict[Any, Any]:
         return self.es.transport.perform_request(verb.upper(), route, body=body)
 
@@ -48,7 +51,8 @@ class EsctlCommon:
         """Convert a list of dict to a flattened dict with full name.
 
         :Example:
-                node.jvm.versions = [{"version":"12.0.1","vm_name":"OpenJDK 64-Bit Server VM","vm_version":"12.0.1+12","vm_vendor":"Oracle Corporation","bundled_jdk":true,"using_bundled_jdk":true,"count":1}] # noqa: E501
+                node.jvm.versions = [{"version":"12.0.1","vm_name":"OpenJDK 64-Bit Server VM","vm_version":"12.0.1+12",
+                "vm_vendor":"Oracle Corporation","bundled_jdk":true,"using_bundled_jdk":true,"count":1}] # noqa: E501
             becomes
                 {
                     "node.jvm.versions[0].version": "12.0.1",
@@ -68,7 +72,9 @@ class EsctlCommon:
         return flat_dict
 
     def _delete_and_merge_inner_dict_into_parent(
-        self, parent_dict: dict[str, Any], key: str
+        self,
+        parent_dict: dict[str, Any],
+        key: str,
     ) -> dict[str, Any]:
         """Merge a inner dictionnary into it's parent.
 
@@ -139,7 +145,9 @@ class EsctlCommandWithPersistency(EsctlCommand):
             help=("Set setting as transient (default)"),
         )
         persistency_group.add_argument(
-            "--persistent", action="store_true", help=("Set setting as persistent")
+            "--persistent",
+            action="store_true",
+            help=("Set setting as persistent"),
         )
         return parser
 
@@ -149,10 +157,7 @@ class EsctlCommandIndex(EsctlCommand):
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "index",
-            help=(
-                "Comma-separated list or wildcard expression of "
-                "index names used to limit the request."
-            ),
+            help=("Comma-separated list or wildcard expression of index names used to limit the request."),
         )
         return parser
 
@@ -180,7 +185,11 @@ class EsctlListerIndexSetting(EsctlLister):
         parser = super().get_parser(prog_name)
         parser.add_argument("index", metavar="<index>", help=("Index"))
         parser.add_argument(
-            "setting", metavar="<setting>", help=("Setting"), nargs="?", default="*"
+            "setting",
+            metavar="<setting>",
+            help=("Setting"),
+            nargs="?",
+            default="*",
         )
         return parser
 
@@ -196,14 +205,10 @@ class EsctlShowOne(ShowOne, EsctlCommon):
         parser.add_argument(
             "--no-pretty",
             action="store_true",
-            help=(
-                "Don't format keys. (Like `ingest.total.count` into `Ingest Total Count`)"
-            ),
+            help=("Don't format keys. (Like `ingest.total.count` into `Ingest Total Count`)"),
         )
         parser.add_argument(
             "--jmespath",
-            help=(
-                "[Experimental] Execute a JMESPath query on the response. See https://jmespath.org for help."
-            ),
+            help=("[Experimental] Execute a JMESPath query on the response. See https://jmespath.org for help."),
         )
         return parser

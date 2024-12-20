@@ -8,8 +8,8 @@ class SecurityRolesGet(EsctlLister):
     def take_action(self, parsed_args):
         roles = self.transform(
             self._sort_and_order_dict(
-                self.es.security.get_role(format="json", name=parsed_args.roles)
-            )
+                self.es.security.get_role(format="json", name=parsed_args.roles),
+            ),
         )
 
         return JSONToCliffFormatter(roles).format_for_lister(
@@ -19,7 +19,7 @@ class SecurityRolesGet(EsctlLister):
                 ("indices", "Index-level permissions"),
                 ("applications",),
                 ("run_as",),
-            ]
+            ],
         )
 
     def transform(self, raw_roles):
@@ -27,7 +27,7 @@ class SecurityRolesGet(EsctlLister):
 
         for role_name, role_definition in raw_roles.items():
             role_definition["cluster"] = ", ".join(role_definition.get("cluster"))
-            roles.append({**{"role": role_name}, **role_definition})
+            roles.append({"role": role_name, **role_definition})
 
         return roles
 
@@ -35,7 +35,10 @@ class SecurityRolesGet(EsctlLister):
         parser = super().get_parser(prog_name)
 
         parser.add_argument(
-            "roles", help=("A comma-separated list of roles"), nargs="?", default=None
+            "roles",
+            help=("A comma-separated list of roles"),
+            nargs="?",
+            default=None,
         )
 
         return parser

@@ -4,11 +4,12 @@ from esctl.formatter import JSONToCliffFormatter
 
 class MigrationDeprecations(EsctlLister):
     """Retrieve information about different cluster, node, and index level settings that use
-    deprecated features that will be removed or changed in a future version."""
+    deprecated features that will be removed or changed in a future version.
+    """
 
     def take_action(self, parsed_args):
         deprecations = self.transform(
-            self.request("GET", "/_migration/deprecations", None)
+            self.request("GET", "/_migration/deprecations", None),
         )
 
         return JSONToCliffFormatter(deprecations).format_for_lister(
@@ -17,7 +18,7 @@ class MigrationDeprecations(EsctlLister):
                 ("level",),
                 ("message"),
                 ("url", "Doc"),
-            ]
+            ],
         )
 
     def transform(
@@ -45,7 +46,7 @@ class MigrationDeprecations(EsctlLister):
                         "level": deprecation["level"],
                         "message": deprecation["message"],
                         "url": deprecation["url"],
-                    }
+                    },
                 )
 
         return foo

@@ -9,7 +9,7 @@ class AliasList(EsctlLister):
         aliases = self.es.cat.aliases(name=parsed_args.alias, format="json")
 
         return JSONToCliffFormatter(aliases).format_for_lister(
-            columns=[("index",), ("alias",)]
+            columns=[("index",), ("alias",)],
         )
 
     def get_parser(self, prog_name):

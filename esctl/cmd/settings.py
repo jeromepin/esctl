@@ -13,7 +13,7 @@ class AbstractClusterSettings(EsctlShowOne):
         self.log.debug("Persistency is " + persistency)
 
         self.log.debug(
-            self.cluster_settings.set(setting, value, persistency=persistency)
+            self.cluster_settings.set(setting, value, persistency=persistency),
         )
 
     def _settings_get(self, setting: str):
@@ -24,7 +24,7 @@ class AbstractClusterSettings(EsctlShowOne):
                 "transient": s.get("transient").value,
                 "persistent": s.get("persistent").value,
                 "defaults": s.get("defaults").value,
-            }
+            },
         ).to_show_one(
             lines=[("transient"), ("persistent"), ("defaults")],
             none_as="" if self.uses_table_formatter() else None,
@@ -87,7 +87,9 @@ class ClusterSettingsReset(AbstractClusterSettings):
             help=("Set setting as transient (default)"),
         )
         persistency_group.add_argument(
-            "--persistent", action="store_true", help=("Set setting as persistent")
+            "--persistent",
+            action="store_true",
+            help=("Set setting as persistent"),
         )
 
         return parser
@@ -114,7 +116,9 @@ class ClusterSettingsSet(AbstractClusterSettings):
             help=("Set setting as transient (default)"),
         )
         persistency_group.add_argument(
-            "--persistent", action="store_true", help=("Set setting as persistent")
+            "--persistent",
+            action="store_true",
+            help=("Set setting as persistent"),
         )
 
         parser.add_argument("value", metavar="<value>", help=("Setting value"))
@@ -141,14 +145,14 @@ class IndexSettingsGet(EsctlListerIndexSetting):
                         value = setting.value
 
                     settings.append(
-                        {"index": index_name, "setting": setting.name, "value": value}
+                        {"index": index_name, "setting": setting.name, "value": value},
                     )
 
         return settings
 
     def take_action(self, parsed_args):
         return JSONToCliffFormatter(
-            self.retrieve_setting(parsed_args.setting, parsed_args.index)
+            self.retrieve_setting(parsed_args.setting, parsed_args.index),
         ).format_for_lister(columns=[("index",), ("setting",), ("value",)])
 
 
@@ -160,7 +164,7 @@ class IndexSettingsList(EsctlShowOne):
     def take_action(self, parsed_args):
         settings = {}
         sample_index_name = self.es.cat.indices(format="json", h="index")[0].get(
-            "index"
+            "index",
         )
 
         settings_list = self.index_settings.list_(sample_index_name)
@@ -169,8 +173,8 @@ class IndexSettingsList(EsctlShowOne):
                 {
                     **settings_list.get("settings"),
                     **settings_list.get("defaults"),
-                }.items()
-            )
+                }.items(),
+            ),
         )
 
         for setting_name, setting_value in settings_list.items():
@@ -197,15 +201,11 @@ class IndexSettingsSet(EsctlCommandIndex):
             setting_name = f"index.{setting_name}"
 
         print(
-            "Changing {} to {} in index {}".format(
-                Color.colorize(setting_name, Color.ITALIC),
-                Color.colorize(parsed_args.value, Color.ITALIC),
-                Color.colorize(parsed_args.index, Color.ITALIC),
-            )
+            f"Changing {Color.colorize(setting_name, Color.ITALIC)} to {Color.colorize(parsed_args.value, Color.ITALIC)} in index {Color.colorize(parsed_args.index, Color.ITALIC)}",
         )
 
         print(
-            self.index_settings.set(setting_name, parsed_args.value, parsed_args.index)
+            self.index_settings.set(setting_name, parsed_args.value, parsed_args.index),
         )
 
     def get_parser(self, prog_name):

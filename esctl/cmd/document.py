@@ -8,7 +8,7 @@ class DocumentGet(EsctlShowOne):
 
     def take_action(self, parsed_args):
         document = flatten_dict(
-            self.es.get(format="json", index=parsed_args.index, id=parsed_args.id)
+            self.es.get(format="json", index=parsed_args.index, id=parsed_args.id),
         )
 
         return JSONToCliffFormatter(document).to_show_one(lines=list(document.keys()))
