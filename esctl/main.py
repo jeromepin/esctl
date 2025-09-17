@@ -1,11 +1,11 @@
 import argparse
+import importlib.metadata
 import logging
 import os
 import re
 import subprocess
 import sys
 
-import pkg_resources
 import urllib3
 from cliff.app import App
 from cliff.commandmanager import CommandManager
@@ -28,8 +28,8 @@ class Esctl(App):
     def __init__(self):
         os.environ["COLUMNS"] = "120"
         super().__init__(
-            description=pkg_resources.require("Esctl")[0].project_name,
-            version=pkg_resources.require("Esctl")[0].version,
+            description=importlib.metadata.metadata(self.__class__.__name__)["Summary"],
+            version=importlib.metadata.version(self.__class__.__name__),
             command_manager=CommandManager("esctl"),
             deferred_help=True,
             interactive_app_factory=InteractiveApp,

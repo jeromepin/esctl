@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "esctl"
-version = "1.11.1"
+version = "1.11.2"
 description = "Easy to use CLI tool to manage Elasticsearch, preventing long curl commands"
 keywords = ["elasticsearch", "es", "cli"]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = {text = "GNU-GPLv3"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
@@ -17,11 +17,11 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Utilities",
-    "Topic :: System :: Shells",
 ]
 requires-python = ">=3.10"
 authors = [
@@ -117,9 +117,11 @@ dev-dependencies = [
     "pyupgrade>=3.19.0",
     "ruff>=0.8.3",
     "setuptools>=75.6.0",
+    "uv>=0.5.11",
 ]
 
-[[index]]
+[[tool.uv.index]]
 name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
+explicit = true
