@@ -6,6 +6,8 @@ import re
 import shlex
 import subprocess
 import sys
+import threading
+from collections import deque
 
 import urllib3
 from cliff.app import App
@@ -23,6 +25,8 @@ from esctl.interactive import InteractiveApp
 
 # Seconds a pre-command gets to exit after SIGTERM before being killed
 PRE_COMMAND_STOP_TIMEOUT = 5
+# Lines of a background pre-command's stderr kept to explain its failure
+PRE_COMMAND_OUTPUT_TAIL = 50
 
 
 class Esctl(App):
@@ -42,6 +46,7 @@ class Esctl(App):
         self.config = None
         self._connected = False
         self._pre_command_processes: list[subprocess.Popen] = []
+        self._pre_command_drains: list[threading.Thread] = []
 
     def configure_logging(self):
         """Create logging handlers for any log output."""
@@ -200,10 +205,49 @@ class Esctl(App):
                         f"{stderr.decode(errors='replace').strip()}",
                     )
 
-            elif command_block.get("wait_for_output"):
-                self._wait_for_output(process, command, command_block.get("wait_for_output"))
+            else:
+                # Nobody else reads the pipes of a background command: if they
+                # fill up, the command blocks on its next write.
+                stderr_drain, stderr_tail = self._drain(process.stderr, command)
 
-    def _wait_for_output(self, process: subprocess.Popen, command: str, string_to_look_for: str):
+                if command_block.get("wait_for_output"):
+                    self._wait_for_output(
+                        process,
+                        command,
+                        command_block.get("wait_for_output"),
+                        stderr_drain,
+                        stderr_tail,
+                    )
+
+                self._drain(process.stdout, command)
+
+    def _drain(self, stream, command: str) -> tuple[threading.Thread, deque]:
+        """Read a pipe in the background, logging it and keeping its last lines."""
+        tail: deque[str] = deque(maxlen=PRE_COMMAND_OUTPUT_TAIL)
+
+        def drain():
+            try:
+                for raw_line in stream:
+                    line = raw_line.decode("utf-8", errors="replace").rstrip()
+                    tail.append(line)
+                    self.log.debug(f"[{command}] {line}")
+            except (OSError, ValueError):
+                # The pipe was closed while stopping the command
+                pass
+
+        thread = threading.Thread(target=drain, daemon=True)
+        thread.start()
+        self._pre_command_drains.append(thread)
+        return thread, tail
+
+    def _wait_for_output(
+        self,
+        process: subprocess.Popen,
+        command: str,
+        string_to_look_for: str,
+        stderr_drain: threading.Thread,
+        stderr_tail: deque,
+    ):
         pattern = re.compile(string_to_look_for)
 
         for raw_line in process.stdout:
@@ -217,10 +261,11 @@ class Esctl(App):
 
         # stdout was closed without the expected line: the command is gone or useless
         process.wait()
+        stderr_drain.join(timeout=PRE_COMMAND_STOP_TIMEOUT)
+        stderr = "\n".join(stderr_tail)
         raise ExternalCommandError(
             f"Pre-command `{command}` exited with code {process.returncode} "
-            f"before printing a line matching `{string_to_look_for}`\n"
-            f"{process.stderr.read().decode(errors='replace').strip()}",
+            f"before printing a line matching `{string_to_look_for}`\n{stderr}",
         )
 
     def clean_up(self, cmd, result, err):
@@ -232,6 +277,7 @@ class Esctl(App):
     def _stop_pre_commands(self):
         """Stop every pre-command started for the current command, even if starting them failed midway."""
         processes, self._pre_command_processes = self._pre_command_processes, []
+        drains, self._pre_command_drains = self._pre_command_drains, []
 
         for process in processes:
             if process.poll() is None:
@@ -242,6 +288,10 @@ class Esctl(App):
                     process.kill()
                     process.wait()
 
+        for drain in drains:
+            drain.join(timeout=PRE_COMMAND_STOP_TIMEOUT)
+
+        for process in processes:
             for stream in (process.stdout, process.stderr):
                 if stream is not None:
                     stream.close()
