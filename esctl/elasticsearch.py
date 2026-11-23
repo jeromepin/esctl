@@ -57,6 +57,8 @@ class Client:
             ssl_context.verify_mode = ssl.CERT_NONE
             elasticsearch_client_kwargs["ssl_context"] = ssl_context
             elasticsearch_client_kwargs["verify_certs"] = False
+            # Verification was explicitly disabled: don't warn on every request
+            elasticsearch_client_kwargs["ssl_show_warn"] = False
 
         if "max_retries" in context.settings:
             elasticsearch_client_kwargs["max_retries"] = context.settings.get(

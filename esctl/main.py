@@ -9,7 +9,6 @@ import sys
 import threading
 from collections import deque
 
-import urllib3
 from cliff.app import App
 from cliff.commandmanager import CommandManager
 
@@ -72,10 +71,6 @@ class Esctl(App):
         root_logger = logging.getLogger("")
         root_logger.setLevel(logging.DEBUG)
         logging.getLogger("stevedore.extension").setLevel(logging.WARNING)
-
-        # Disable urllib's warnings
-        # See https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
-        urllib3.disable_warnings()
 
         # Set up logging to a file
         if self.options.log_file:
