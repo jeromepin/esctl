@@ -23,36 +23,19 @@ class TableKey:
         return word
 
     def _split_string(self, string: str) -> list[str]:
-        splitted_string: list[str]
+        """Split a key into words on dots, then on underscores.
 
-        if "." in string:
-            splitted_string = string.split(".")
+        A leading underscore is part of the word (`_source`, `_index`) and is kept.
+        """
+        words: list[str] = []
 
-            # Check if words can also be splitted on underscores
-            for idx in range(len(splitted_string)):
-                # If there is an underscore anywhere in the word except at the beginning
-                if "_" in splitted_string[idx] and not splitted_string[idx].startswith(
-                    "_",
-                ):
-                    splitted_string[idx] = splitted_string[idx].split("_")
+        for part in string.split("."):
+            if "_" in part and not part.startswith("_"):
+                words.extend(part.split("_"))
+            else:
+                words.append(part)
 
-            flat_list = []
-            for sublist in splitted_string:
-                if sublist.__class__.__name__ == "list":
-                    for item in sublist:
-                        flat_list.append(item)
-                else:
-                    flat_list.append(sublist)
-
-            splitted_string = flat_list
-
-        elif "_" in string:
-            splitted_string = string.split("_")
-
-        else:
-            splitted_string = [string]
-
-        return splitted_string
+        return words
 
     def _create_name_from_id(self, pretty_key=True):
         """Extrapolate the column's name based on its ID."""
@@ -70,7 +53,7 @@ class TableKey:
                 name[idx] = name[idx].title()
             # If the word contains an uppercase letter somewhere, maintain the case
             # but uppercase the first letter
-            elif name[idx].startswith("_"):
+            elif name[idx].startswith("_") and len(name[idx]) > 1:
                 name[idx] = name[idx][0] + name[idx][1].upper() + name[idx][2:]
             else:
                 name[idx] = name[idx][0].upper() + name[idx][1:]

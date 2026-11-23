@@ -19,6 +19,9 @@ class TestCreateColumnNameFromId(EsctlTestCase):
             {"input": "foo_bar", "expected_output": "Foo Bar"},
             {"input": "foo-bar", "expected_output": "Foo-bar"},
             {"input": "foo.percent", "expected_output": "Foo %"},
+            {"input": "_index", "expected_output": "_Index"},
+            {"input": "_seq_no", "expected_output": "_Seq_no"},
+            {"input": "_", "expected_output": "_"},
             {
                 "input": "_source._metadata.createTime",
                 "expected_output": "_Source _Metadata CreateTime",
