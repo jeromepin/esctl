@@ -20,3 +20,39 @@ def test_console_levels_are_colored_once_and_names_stay_untouched(run_esctl, fak
     assert "[\x1b[95mERROR\x1b[0m]" in result.err
     assert "\x1b[95m\x1b[95m" not in result.err
     assert logging.getLevelName(logging.ERROR) == "ERROR"
+
+
+def urllib3_warnings_are_silenced() -> bool:
+    import warnings
+
+    from urllib3.exceptions import HTTPWarning
+
+    return any(
+        action == "ignore" and module is None and issubclass(HTTPWarning, category)
+        for action, _, category, module, _ in warnings.filters
+    )
+
+
+def test_tls_warnings_are_kept_when_certificates_are_verified(run_esctl, fake_es):
+    fake_es.on("GET", "/_cluster/health", {"status": "green"})
+
+    result = run_esctl("cluster", "health")
+
+    assert result.code == 0, result.err
+    assert not urllib3_warnings_are_silenced()
+
+
+def test_no_insecure_warning_when_certificate_checks_are_disabled_on_purpose(run_esctl, fake_es, default_config):
+    import warnings
+
+    from elastic_transport import SecurityWarning
+
+    fake_es.on("GET", "/_cluster/health", {"status": "green"})
+    default_config["settings"]["no_check_certificate"] = True
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        result = run_esctl("cluster", "health", config=default_config)
+
+    assert result.code == 0, result.err
+    assert not [w for w in caught if issubclass(w.category, SecurityWarning)]
