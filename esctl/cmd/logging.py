@@ -1,11 +1,11 @@
-from esctl.commands import EsctlCommandLogging
+from esctl.commands import EsctlCommandLogging, selected_persistency
 
 
 class LoggingGet(EsctlCommandLogging):
     """Get a logger value."""
 
     def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
+        persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is " + persistency)
 
         if not parsed_args.logger.startswith("logger"):
@@ -20,7 +20,7 @@ class LoggingReset(EsctlCommandLogging):
     """Reset a logger value."""
 
     def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
+        persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is " + persistency)
 
         if not parsed_args.logger.startswith("logger"):
@@ -36,7 +36,7 @@ class LoggingSet(EsctlCommandLogging):
     """Set a logger value."""
 
     def take_action(self, parsed_args):
-        persistency = "persistent" if parsed_args.persistent else "transient"
+        persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is " + persistency)
 
         if not parsed_args.logger.startswith("logger"):

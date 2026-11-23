@@ -1,7 +1,7 @@
 import elasticsearch
 
 from esctl.cmd.settings import AbstractClusterSettings
-from esctl.commands import EsctlShowOne
+from esctl.commands import EsctlShowOne, add_persistency_arguments, selected_persistency
 from esctl.utils import Color, flatten_dict
 
 
@@ -103,25 +103,13 @@ class ClusterRoutingAllocationEnable(AbstractClusterSettings):
             self._settings_set(
                 "cluster.routing.allocation.enable",
                 parsed_args.status,
-                persistency="persistent" if parsed_args.persistent else "transient",
+                persistency=selected_persistency(parsed_args),
             )
 
         return self._settings_get("cluster.routing.allocation.enable")
 
     def get_parser(self, prog_name):
-        parser = super(AbstractClusterSettings, self).get_parser(prog_name)
-
-        persistency_group = parser.add_mutually_exclusive_group()
-        persistency_group.add_argument(
-            "--transient",
-            action="store_true",
-            help=("Set setting as transient (default)"),
-        )
-        persistency_group.add_argument(
-            "--persistent",
-            action="store_true",
-            help=("Set setting as persistent"),
-        )
+        parser = add_persistency_arguments(super().get_parser(prog_name))
 
         parser.add_argument(
             "status",

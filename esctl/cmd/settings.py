@@ -1,4 +1,10 @@
-from esctl.commands import EsctlCommandIndex, EsctlListerIndexSetting, EsctlShowOne
+from esctl.commands import (
+    EsctlCommandIndex,
+    EsctlListerIndexSetting,
+    EsctlShowOne,
+    add_persistency_arguments,
+    selected_persistency,
+)
 from esctl.formatter import JSONToCliffFormatter
 from esctl.settings import ClusterSettings, IndexSettings
 from esctl.utils import Color
@@ -28,6 +34,10 @@ class AbstractClusterSettings(EsctlShowOne):
             none_as="" if self.uses_table_formatter() else None,
         )
 
+
+class AbstractClusterSetting(AbstractClusterSettings):
+    """A command acting on the cluster setting given as argument."""
+
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
 
@@ -36,7 +46,7 @@ class AbstractClusterSettings(EsctlShowOne):
         return parser
 
 
-class ClusterSettingsGet(AbstractClusterSettings):
+class ClusterSettingsGet(AbstractClusterSetting):
     """Get a setting value."""
 
     def take_action(self, parsed_args):
@@ -64,60 +74,40 @@ class ClusterSettingsList(EsctlShowOne):
         return (tuple(default_settings.keys()), tuple(default_settings.values()))
 
 
-class ClusterSettingsReset(AbstractClusterSettings):
+class ClusterSettingsReset(AbstractClusterSetting):
     """Reset a setting value."""
 
     def take_action(self, parsed_args):
         self._settings_set(
             parsed_args.setting,
             None,
-            persistency="persistent" if parsed_args.persistent else "transient",
+            persistency=selected_persistency(parsed_args),
         )
         return self._settings_get(parsed_args.setting)
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
 
-        persistency_group = parser.add_mutually_exclusive_group()
-        persistency_group.add_argument(
-            "--transient",
-            action="store_true",
-            help=("Set setting as transient (default)"),
-        )
-        persistency_group.add_argument(
-            "--persistent",
-            action="store_true",
-            help=("Set setting as persistent"),
-        )
+        add_persistency_arguments(parser)
 
         return parser
 
 
-class ClusterSettingsSet(AbstractClusterSettings):
+class ClusterSettingsSet(AbstractClusterSetting):
     """Set a setting value."""
 
     def take_action(self, parsed_args):
         self._settings_set(
             parsed_args.setting,
             parsed_args.value,
-            persistency="persistent" if parsed_args.persistent else "transient",
+            persistency=selected_persistency(parsed_args),
         )
         return self._settings_get(parsed_args.setting)
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
 
-        persistency_group = parser.add_mutually_exclusive_group()
-        persistency_group.add_argument(
-            "--transient",
-            action="store_true",
-            help=("Set setting as transient (default)"),
-        )
-        persistency_group.add_argument(
-            "--persistent",
-            action="store_true",
-            help=("Set setting as persistent"),
-        )
+        add_persistency_arguments(parser)
 
         parser.add_argument("value", metavar="<value>", help=("Setting value"))
 
