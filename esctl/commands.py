@@ -146,25 +146,34 @@ class EsctlCommand(Command, EsctlCommon):
     """Simple command to run. Doesn’t expect any output."""
 
 
+def add_persistency_arguments(parser):
+    """Add the mutually exclusive `--transient` (default) and `--persistent` flags."""
+    persistency_group = parser.add_mutually_exclusive_group()
+    persistency_group.add_argument(
+        "--transient",
+        action="store_true",
+        help=("Set setting as transient (default)"),
+    )
+    persistency_group.add_argument(
+        "--persistent",
+        action="store_true",
+        help=("Set setting as persistent"),
+    )
+    return parser
+
+
+def selected_persistency(parsed_args) -> str:
+    """The persistency selected with `add_persistency_arguments()` flags."""
+    return "persistent" if parsed_args.persistent else "transient"
+
+
 class EsctlCommandWithPersistency(EsctlCommand):
     """Add mutually exclusive arguments `transient` and `persistent` to
     be used when working with settings, logging, etc...
     """
 
     def get_parser(self, prog_name):
-        parser = super().get_parser(prog_name)
-        persistency_group = parser.add_mutually_exclusive_group()
-        persistency_group.add_argument(
-            "--transient",
-            action="store_true",
-            help=("Set setting as transient (default)"),
-        )
-        persistency_group.add_argument(
-            "--persistent",
-            action="store_true",
-            help=("Set setting as persistent"),
-        )
-        return parser
+        return add_persistency_arguments(super().get_parser(prog_name))
 
 
 class EsctlCommandIndex(EsctlCommand):
@@ -181,13 +190,6 @@ class EsctlCommandLogging(EsctlCommandWithPersistency):
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         parser.add_argument("logger", metavar="<logger>", help=("Logger"))
-        return parser
-
-
-class EsctlCommandSetting(EsctlCommandWithPersistency):
-    def get_parser(self, prog_name):
-        parser = super().get_parser(prog_name)
-        parser.add_argument("setting", metavar="<setting>", help=("Setting"))
         return parser
 
 
