@@ -68,3 +68,11 @@ def test_the_terminal_width_is_not_overridden(monkeypatch):
     Esctl()
 
     assert "COLUMNS" not in os.environ
+
+
+def test_unused_es_version_option_is_gone():
+    from esctl.main import Esctl
+
+    options = {option for action in Esctl().parser._actions for option in action.option_strings}
+
+    assert "--es-version" not in options
