@@ -8,6 +8,8 @@ from esctl.utils import Color, setup_yaml
 class ConfigClusterList(EsctlLister):
     """List all configured clusters."""
 
+    requires_cluster = False
+
     def take_action(self, parsed_args):
         clusters = [
             {
@@ -26,6 +28,8 @@ class ConfigClusterList(EsctlLister):
 
 class ConfigContextList(EsctlLister):
     """List all contexts."""
+
+    requires_cluster = False
 
     def take_action(self, parsed_args):
         contexts = [
@@ -62,6 +66,8 @@ class ConfigContextList(EsctlLister):
 class ConfigContextSet(EsctlCommand):
     """Set the default context."""
 
+    requires_cluster = False
+
     def take_action(self, parsed_args):
         self.app.config["default-context"] = parsed_args.context
         self.app.config_file_parser.write_config_file(dict(self.app.config))
@@ -80,6 +86,8 @@ class ConfigContextSet(EsctlCommand):
 class ConfigShow(EsctlCommand):
     """Print the config."""
 
+    requires_cluster = False
+
     def take_action(self, parsed_args):
         setup_yaml()
         print(
@@ -94,6 +102,8 @@ class ConfigShow(EsctlCommand):
 
 class ConfigUserList(EsctlLister):
     """List all configured users."""
+
+    requires_cluster = False
 
     def take_action(self, parsed_args):
         users = [

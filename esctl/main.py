@@ -35,14 +35,7 @@ class Esctl(App):
         self.interactive_mode = False
         self.config_file_parser = ConfigFileParser()
         self.config = None
-
-        self.LOCAL_COMMANDS: list[str] = [
-            "ConfigClusterList",
-            "ConfigContextList",
-            "ConfigContextSet",
-            "ConfigShow",
-            "ConfigUserList",
-        ]
+        self._connected = False
 
     def configure_logging(self):
         """Create logging handlers for any log output."""
@@ -119,6 +112,16 @@ class Esctl(App):
         )
         self.context = self.config_file_parser.create_context(self.options.context)
 
+    @staticmethod
+    def _requires_cluster(cmd) -> bool:
+        # cliff's own commands (help, complete) don't define it and are local too
+        return getattr(cmd, "requires_cluster", False)
+
+    def connect(self):
+        """Resolve the credentials and configure the Elasticsearch client, once."""
+        if self._connected:
+            return
+
         http_auth = None
 
         if self.context.user is not None:
@@ -132,6 +135,7 @@ class Esctl(App):
             )
 
         Client.configure(self.context, http_auth)
+        self._connected = True
 
     def _run_os_system_command(self, raw_command: str, purpose: str) -> str:
         """Run a shell command from the configuration file and return its output."""
@@ -169,10 +173,12 @@ class Esctl(App):
         return process
 
     def prepare_to_run_command(self, cmd):
-        if (cmd.__class__.__name__ not in self.LOCAL_COMMANDS) and hasattr(
-            self.context,
-            "pre_commands",
-        ):
+        if not self._requires_cluster(cmd):
+            return
+
+        self.connect()
+
+        if hasattr(self.context, "pre_commands"):
             for i in range(len(self.context.pre_commands)):
                 command_block = self.context.pre_commands[i]
                 process = self._run_shell_subcommand(command_block.get("command"))
@@ -206,10 +212,7 @@ class Esctl(App):
                 self.context.pre_commands[i]["process"] = process
 
     def clean_up(self, cmd, result, err):
-        if (cmd.__class__.__name__ not in self.LOCAL_COMMANDS) and hasattr(
-            self.context,
-            "pre_commands",
-        ):
+        if self._requires_cluster(cmd) and hasattr(self.context, "pre_commands"):
             for pre_command in self.context.pre_commands:
                 pre_command.get("process").terminate()
 
