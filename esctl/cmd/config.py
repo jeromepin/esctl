@@ -48,6 +48,9 @@ class ConfigContextList(EsctlLister):
         )
 
     def transform(self, raw_contexts):
+        if not self.uses_table_formatter():
+            return raw_contexts
+
         modified_contexts = []
 
         for context in raw_contexts:

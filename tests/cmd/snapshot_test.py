@@ -1,3 +1,5 @@
+from cliff.formatters.table import TableFormatter
+
 from esctl.cmd.snapshot import SnapshotList
 
 from ..base_test_class import EsctlTestCase
@@ -27,6 +29,7 @@ class TestSnapshotList(EsctlTestCase):
         ]
 
         snapshot_list_cmd = SnapshotList(self.app, [])
+        snapshot_list_cmd.formatter = TableFormatter()
         for case in cases:
             self.assertEqual(
                 snapshot_list_cmd.transform([case.get("input")])[0],
