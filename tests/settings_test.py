@@ -7,7 +7,9 @@ from .base_test_class import EsctlTestCase
 class TestClusterSettingsRetrieval(EsctlTestCase):
     def setUp(self):
         super().setUp()
-        self.mock = unittest.mock.patch("esctl.settings.Settings.es").start()
+        patcher = unittest.mock.patch("esctl.settings.Settings.es")
+        self.mock = patcher.start()
+        self.addCleanup(patcher.stop)
         self.mock.cluster.get_settings.return_value = self.fixtures()
 
     def fixtures(self):
@@ -81,7 +83,9 @@ class TestClusterSettingsRetrieval(EsctlTestCase):
 class TestIndexSettingsRetrieval(EsctlTestCase):
     def setUp(self):
         super().setUp()
-        self.mock = unittest.mock.patch("esctl.settings.Settings.es").start()
+        patcher = unittest.mock.patch("esctl.settings.Settings.es")
+        self.mock = patcher.start()
+        self.addCleanup(patcher.stop)
         self.mock.indices.get_settings.return_value = self.fixtures()
 
     def fixtures(self):
