@@ -104,3 +104,50 @@ def test_transform(mock_request: MagicMock, capsys):
             ],
         ),
     )
+
+
+def test_migration_deprecations(run_esctl, fake_es):
+    fake_es.on(
+        "GET",
+        "/_migration/deprecations",
+        {
+            "cluster_settings": [{"level": "critical", "message": "m", "url": "u", "details": "d"}],
+            "node_settings": [],
+            "index_settings": {},
+        },
+    )
+
+    result = run_esctl("migration", "deprecations", "-f", "json")
+
+    assert result.code == 0, result.err
+    assert result.json() == [{"Kind": "cluster_settings", "Level": "critical", "Message": "m", "Doc": "u"}]
+
+
+def test_migration_deprecations_grouped_by_resource(run_esctl, fake_es):
+    def deprecation(message):
+        return {"level": "warning", "message": message, "url": "u", "details": "d"}
+
+    fake_es.on(
+        "GET",
+        "/_migration/deprecations",
+        {
+            "cluster_settings": [],
+            "node_settings": [deprecation("node")],
+            "index_settings": {"logs": [deprecation("index")]},
+            "data_streams": {"metrics-ds": [deprecation("data stream")]},
+            "templates": {"logs-template": [deprecation("template")]},
+            "ilm_policies": {"hot-warm": [deprecation("policy")]},
+            "ml_settings": [],
+        },
+    )
+
+    result = run_esctl("migration", "deprecations", "-f", "json")
+
+    assert result.code == 0, result.err
+    assert [(row["Kind"], row["Message"]) for row in result.json()] == [
+        ("node_settings", "node"),
+        ("index_settings", "[logs] index"),
+        ("data_streams", "[metrics-ds] data stream"),
+        ("templates", "[logs-template] template"),
+        ("ilm_policies", "[hot-warm] policy"),
+    ]

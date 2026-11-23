@@ -25,22 +25,20 @@ class MigrationDeprecations(EsctlLister):
         self,
         deprecations: dict[str, list[dict[str, str]] | dict[str, list[dict[str, str]]]],
     ) -> list[dict[str, str]]:
-        foo: list[dict[str, str]] = []
-
-        # Convert index_settings which is a dict[str, list[dict[str, str]]] to the same format
-        # as other keys (i.e list[dict[str, str]])
-        if "index_settings" in deprecations and len(deprecations["index_settings"]) > 0:
-            flattened_index_settings_deprecations = []
-            for index_name, deprecation_list in deprecations["index_settings"].items():
-                for deprecation in deprecation_list:
-                    deprecation["message"] = f"[{index_name}] {deprecation['message']}"
-                    flattened_index_settings_deprecations.append(deprecation)
-
-            deprecations["index_settings"] = flattened_index_settings_deprecations
+        rows: list[dict[str, str]] = []
 
         for kind, elements in deprecations.items():
+            # Some kinds (index_settings, data_streams, templates, ilm_policies...)
+            # group their deprecations by resource name: prefix messages with it
+            if isinstance(elements, dict):
+                elements = [
+                    {**deprecation, "message": f"[{name}] {deprecation['message']}"}
+                    for name, resource_deprecations in elements.items()
+                    for deprecation in resource_deprecations
+                ]
+
             for deprecation in elements:
-                foo.append(
+                rows.append(
                     {
                         "kind": kind,
                         "level": deprecation["level"],
@@ -49,4 +47,4 @@ class MigrationDeprecations(EsctlLister):
                     },
                 )
 
-        return foo
+        return rows
