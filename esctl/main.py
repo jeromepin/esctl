@@ -7,7 +7,7 @@ import subprocess
 import sys
 import threading
 from collections import deque
-from typing import Any
+from typing import Any, ClassVar
 
 from cliff.app import App
 from cliff.commandmanager import CommandManager
@@ -29,7 +29,7 @@ class ColoredLevelFormatter(logging.Formatter):
     """Colorize the level name, without touching the global level names
     (which would also color log files and accumulate across app instances)."""
 
-    COLORS = {
+    COLORS: ClassVar[dict[int, str]] = {
         logging.DEBUG: utils.Color.END,
         logging.INFO: utils.Color.BLUE,
         logging.WARNING: utils.Color.YELLOW,
@@ -139,7 +139,7 @@ class Esctl(App):
         """Run a shell command from the configuration file and return its output."""
         self.log.debug(f"Running command : {raw_command}")
         # Running through a shell is intended: users write pipelines in their config file
-        completed = subprocess.run(  # noqa: S602
+        completed = subprocess.run(
             raw_command,
             shell=True,
             capture_output=True,

@@ -25,7 +25,7 @@ class SecurityUsersGet(EsctlLister):
 
     def transform(self, raw_users):
         users: list[dict[str, str]] = []
-        for _, user in raw_users.items():
+        for user in raw_users.values():
             user["roles"] = ", ".join(user.get("roles"))
             users.append(user)
 
