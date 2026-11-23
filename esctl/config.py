@@ -58,7 +58,8 @@ class ConfigFileParser:
 
     def _create_default_config_file(self) -> "OrderedDict[str, Any]":
         self.log.info(
-            f"{self.path} config file does not exists. Creating a default one...",
+            "%s config file does not exists. Creating a default one...",
+            self.path,
         )
         default_config = OrderedDict(
             {
@@ -153,13 +154,13 @@ class ConfigFileParser:
 
         if not cerberus_validator.validate(document):
             for field, problem in _flatten_validation_errors(cerberus_validator.errors):
-                self.log.error(f"Invalid configuration at '{field}': {problem}")
+                self.log.error("Invalid configuration at '%s': %s", field, problem)
 
             raise ConfigurationError(f"{self.path} doesn't match expected schema")
 
     def load_configuration(self, path: str = "~/.esctlrc") -> OrderedDict:
         self.path = os.path.expanduser(path)
-        self.log.debug(f"Trying to load config file : {self.path}")
+        self.log.debug("Trying to load config file : %s", self.path)
         expected_config_blocks = [
             "clusters",
             "contexts",
@@ -188,7 +189,9 @@ class ConfigFileParser:
             self.__setattr__(config_block, value)
 
             self.log.debug(
-                f"Loaded {config_block}: {self.__getattribute__(config_block)}",
+                "Loaded %s: %s",
+                config_block,
+                self.__getattribute__(config_block),
             )
 
         return raw_config_file
@@ -242,7 +245,7 @@ class ConfigFileParser:
 
     def create_context(self, context_name: str | None = None) -> Context:
         if context_name:
-            self.log.debug(f"Using provided context : {context_name}")
+            self.log.debug("Using provided context : %s", context_name)
         else:
             context_name = self.__getattribute__("default-context")
             if context_name is None:

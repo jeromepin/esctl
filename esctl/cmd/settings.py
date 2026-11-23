@@ -14,7 +14,7 @@ class AbstractClusterSettings(EsctlShowOne):
     cluster_settings: ClusterSettings
 
     def _settings_set(self, setting: str, value: str | None, persistency: Persistency) -> None:
-        self.log.debug("Persistency is " + persistency)
+        self.log.debug("Persistency is %s", persistency)
 
         self.log.debug(
             self.cluster_settings.set(setting, value, persistency=persistency),

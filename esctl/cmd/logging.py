@@ -6,7 +6,7 @@ class LoggingGet(EsctlCommandLogging):
 
     def take_action(self, parsed_args):
         persistency = selected_persistency(parsed_args)
-        self.log.debug("Persistency is " + persistency)
+        self.log.debug("Persistency is %s", persistency)
 
         if not parsed_args.logger.startswith("logger"):
             parsed_args.logger = "logger." + parsed_args.logger
@@ -21,7 +21,7 @@ class LoggingReset(EsctlCommandLogging):
 
     def take_action(self, parsed_args):
         persistency = selected_persistency(parsed_args)
-        self.log.debug("Persistency is " + persistency)
+        self.log.debug("Persistency is %s", persistency)
 
         if not parsed_args.logger.startswith("logger"):
             parsed_args.logger = "logger." + parsed_args.logger
@@ -37,7 +37,7 @@ class LoggingSet(EsctlCommandLogging):
 
     def take_action(self, parsed_args):
         persistency = selected_persistency(parsed_args)
-        self.log.debug("Persistency is " + persistency)
+        self.log.debug("Persistency is %s", persistency)
 
         if not parsed_args.logger.startswith("logger"):
             parsed_args.logger = "logger." + parsed_args.logger

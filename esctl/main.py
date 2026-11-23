@@ -137,7 +137,7 @@ class Esctl(App):
 
     def _run_os_system_command(self, raw_command: str, purpose: str) -> str:
         """Run a shell command from the configuration file and return its output."""
-        self.log.debug(f"Running command : {raw_command}")
+        self.log.debug("Running command : %s", raw_command)
         # Running through a shell is intended: users write pipelines in their config file
         completed = subprocess.run(
             raw_command,
@@ -161,7 +161,7 @@ class Esctl(App):
 
     def _run_shell_subcommand(self, command):
         command = shlex.split(command)
-        self.log.debug(f"Running pre-command : {command}")
+        self.log.debug("Running pre-command : %s", command)
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
@@ -215,7 +215,7 @@ class Esctl(App):
                 for raw_line in stream:
                     line = raw_line.decode("utf-8", errors="replace").rstrip()
                     tail.append(line)
-                    self.log.debug(f"[{command}] {line}")
+                    self.log.debug("[%s] %s", command, line)
             except (OSError, ValueError):
                 # The pipe was closed while stopping the command
                 pass
@@ -243,10 +243,10 @@ class Esctl(App):
             line = raw_line.decode("utf-8", errors="replace").strip()
 
             if pattern.search(line):
-                self.log.debug(f"Got `{string_to_look_for}` from `{command}`")
+                self.log.debug("Got `%s` from `%s`", string_to_look_for, command)
                 return
 
-            self.log.debug(f"Expecting command output to match `{string_to_look_for}` but got `{line}`...")
+            self.log.debug("Expecting command output to match `%s` but got `%s`...", string_to_look_for, line)
 
         # stdout was closed without the expected line: the command is gone or useless
         process.wait()

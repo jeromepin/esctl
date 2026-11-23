@@ -75,7 +75,10 @@ class ClusterSettings(Settings):
 
     def set(self, sections: str, value: Any, persistency: Persistency = "transient") -> ObjectApiResponse[Any]:
         self.log.info(
-            f"Changing {persistency}'s {Color.colorize(sections, Color.ITALIC)} to : {Color.colorize(value, Color.ITALIC)}",
+            "Changing %s's %s to : %s",
+            persistency,
+            Color.colorize(sections, Color.ITALIC),
+            Color.colorize(value, Color.ITALIC),
         )
         if persistency == "persistent":
             return self.es.cluster.put_settings(persistent={sections: value}, flat_settings=True)
@@ -86,7 +89,7 @@ class IndexSettings(Settings):
     """Handle index-level settings."""
 
     def list_(self, index: str) -> dict[str, dict[str, Setting]]:
-        self.log.debug(f"Retrieving settings list for indices : {index}")
+        self.log.debug("Retrieving settings list for indices : %s", index)
 
         settings: dict[str, dict[str, Setting]] = {}
 
@@ -117,7 +120,7 @@ class IndexSettings(Settings):
         `key` is a comma-separated list of setting names, each one possibly
         containing `*` wildcards.
         """
-        self.log.debug(f"Retrieving setting(s) '{key}' for indices : {index}")
+        self.log.debug("Retrieving setting(s) '%s' for indices : %s", key, index)
 
         response = self.list_(index)
         # Indices can define different settings: match patterns against all of them

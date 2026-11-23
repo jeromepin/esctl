@@ -11,7 +11,7 @@ class NodeExclude(AbstractClusterSettings):
         setting_name = f"cluster.routing.allocation.exclude.{parsed_args.by}"
 
         if parsed_args.list is not None:
-            self.log.info(f"Changing node exclusion list ({setting_name}) to : {parsed_args.list}")
+            self.log.info("Changing node exclusion list (%s) to : %s", setting_name, parsed_args.list)
             self._settings_set(setting_name, parsed_args.list, persistency=selected_persistency(parsed_args))
 
         # Show both: an exclusion can be set as transient, persistent, or both

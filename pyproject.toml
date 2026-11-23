@@ -106,11 +106,11 @@ extend-exclude = [
 extend-select = [
   "DTZ",  # naive datetimes (and the deprecated utcfromtimestamp/utcnow)
   "B006",  # mutable default arguments, shared between calls
+  "G",  # logging calls must let logging format their message lazily
 ]
 ignore = [
   "ANN",
   "D",
-  "G004",
 ]
 
 [tool.ty.environment]
