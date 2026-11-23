@@ -153,7 +153,7 @@ def run_esctl(write_config, fake_es, capsys):
         try:
             code = app_class().run(["--config", str(config_path), *argv])
         except SystemExit as exit_:
-            code = exit_.code
+            code = exit_.code if isinstance(exit_.code, int) else 1
         out, err = capsys.readouterr()
         return Result(code, out, err)
 

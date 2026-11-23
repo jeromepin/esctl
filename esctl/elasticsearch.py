@@ -1,4 +1,5 @@
 import ssl
+from typing import Any
 
 from elasticsearch import Elasticsearch
 
@@ -46,7 +47,7 @@ class Client:
         context: Context,
         http_auth: tuple[str, str] | None = None,
     ) -> Elasticsearch:
-        elasticsearch_client_kwargs = {
+        elasticsearch_client_kwargs: dict[str, Any] = {
             "basic_auth": http_auth,
         }
 

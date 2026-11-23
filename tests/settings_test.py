@@ -1,6 +1,8 @@
 import json
 import unittest.mock
 
+from elastic_transport import ObjectApiResponse
+
 from .base_test_class import EsctlTestCase
 
 
@@ -10,7 +12,7 @@ class TestClusterSettingsRetrieval(EsctlTestCase):
         patcher = unittest.mock.patch("esctl.settings.Settings.es")
         self.mock = patcher.start()
         self.addCleanup(patcher.stop)
-        self.mock.cluster.get_settings.return_value = self.fixtures()
+        self.mock.cluster.get_settings.return_value = ObjectApiResponse(body=self.fixtures(), meta=None)
 
     def fixtures(self):
         return {
@@ -86,7 +88,7 @@ class TestIndexSettingsRetrieval(EsctlTestCase):
         patcher = unittest.mock.patch("esctl.settings.Settings.es")
         self.mock = patcher.start()
         self.addCleanup(patcher.stop)
-        self.mock.indices.get_settings.return_value = self.fixtures()
+        self.mock.indices.get_settings.return_value = ObjectApiResponse(body=self.fixtures(), meta=None)
 
     def fixtures(self):
         with open(f"{self.fixtures_path}/index_settings.json") as json_file:
@@ -101,8 +103,6 @@ class TestIndexSettingsRetrieval(EsctlTestCase):
             index_settings.get(
                 "foobar,qux",
                 "index.analysis.analyzer.trigram.tokenizer",
-            )
-            .get("foobar")[0]
-            .value,
+            )["foobar"][0].value,
             "standard",
         )

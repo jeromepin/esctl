@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import sys
@@ -5,17 +6,21 @@ from typing import Any
 
 import jmespath
 from cliff.command import Command
+from cliff.formatters.table import TableFormatter
 from cliff.lister import Lister
 from cliff.show import ShowOne
+from elastic_transport import ObjectApiResponse, TextApiResponse
 from elasticsearch import Elasticsearch
 
 from esctl.elasticsearch import Client
-from esctl.settings import ClusterSettings, IndexSettings
+from esctl.settings import ClusterSettings, IndexSettings, Persistency
 from esctl.utils import Color
 
 
 class EsctlCommon:
     log = logging.getLogger(__name__)
+    # Set by cliff on display commands (listers and show-ones) when they run
+    formatter: object = None
     # Whether the command talks to Elasticsearch. Local commands neither
     # resolve credentials nor run the context's pre-commands.
     requires_cluster = True
@@ -35,8 +40,17 @@ class EsctlCommon:
     def print_output(self, message):
         print(f"{message}")
 
-    def uses_table_formatter(self):
-        return self.formatter.__class__.__name__ == "TableFormatter"
+    def uses_table_formatter(self) -> bool:
+        return isinstance(self.formatter, TableFormatter)
+
+    @staticmethod
+    def rows(response: ObjectApiResponse[Any] | TextApiResponse) -> list[dict[str, Any]]:
+        """Rows of a `cat` API response requested with `format="json"`."""
+        body = response.body
+        if not isinstance(body, list):
+            msg = f"Expected a list of rows, got {type(body).__name__}"
+            raise TypeError(msg)
+        return body
 
     def read_from_file_or_stdin(self, path: str) -> str:
         """Read some content from a file, or from stdin when the path is undefined or `-`."""
@@ -135,7 +149,7 @@ class EsctlCommon:
         :return: The parent dict with the merged inner dict
         :rtype: dict
         """
-        for k, v in parent_dict.get(key).items():
+        for k, v in parent_dict[key].items():
             parent_dict[f"{key}.{k}"] = v
         del parent_dict[key]
 
@@ -162,7 +176,7 @@ def add_persistency_arguments(parser):
     return parser
 
 
-def selected_persistency(parsed_args) -> str:
+def selected_persistency(parsed_args: argparse.Namespace) -> Persistency:
     """The persistency selected with `add_persistency_arguments()` flags."""
     return "persistent" if parsed_args.persistent else "transient"
 

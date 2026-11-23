@@ -11,7 +11,7 @@ class CatAllocation(EsctlLister):
     """
 
     def take_action(self, parsed_args):
-        allocation = self.transform(self.es.cat.allocation(format="json"))
+        allocation = self.transform(self.rows(self.es.cat.allocation(format="json")))
 
         return JSONToCliffFormatter(allocation).format_for_lister(
             columns=[
@@ -53,7 +53,7 @@ class CatPlugins(EsctlLister):
     """Returns informations about installed plugins across nodes."""
 
     def take_action(self, parsed_args):
-        plugins = self.transform(self.es.cat.plugins(format="json"))
+        plugins = self.transform(self.rows(self.es.cat.plugins(format="json")))
 
         return JSONToCliffFormatter(plugins).format_for_lister(
             columns=[("name", "node"), ("component", "plugin"), ("version")],
@@ -67,12 +67,14 @@ class CatShards(EsctlLister):
     """Provides a detailed view of shard allocation on nodes."""
 
     def take_action(self, parsed_args):
-        nodes = [n.get("name") for n in self.es.cat.nodes(format="json", h="name")]
+        nodes = [n["name"] for n in self.rows(self.es.cat.nodes(format="json", h="name"))]
         shards = self.transform(
-            self.es.cat.shards(
-                format="json",
-                index=parsed_args.index,
-                h="index,node,shard,prirep",
+            self.rows(
+                self.es.cat.shards(
+                    format="json",
+                    index=parsed_args.index,
+                    h="index,node,shard,prirep",
+                )
             ),
             nodes,
         )
@@ -137,10 +139,12 @@ class CatThreadpool(EsctlLister):
         headers = parsed_args.headers if parsed_args.headers else self._default_headers
 
         thread_pools = self.transform(
-            self.es.cat.thread_pool(
-                format="json",
-                h=headers,
-                thread_pool_patterns=parsed_args.thread_pool_patterns,
+            self.rows(
+                self.es.cat.thread_pool(
+                    format="json",
+                    h=headers,
+                    thread_pool_patterns=parsed_args.thread_pool_patterns,
+                )
             ),
         )
 
@@ -185,7 +189,7 @@ class CatTemplates(EsctlLister):
     """Returns information about existing templates."""
 
     def take_action(self, parsed_args):
-        templates = self.es.cat.templates(name=parsed_args.name, format="json")
+        templates = self.rows(self.es.cat.templates(name=parsed_args.name, format="json"))
 
         return JSONToCliffFormatter(templates).format_for_lister(
             columns=[("name",), ("index_patterns",), ("order",), ("version")],

@@ -6,14 +6,14 @@ from esctl.commands import (
     selected_persistency,
 )
 from esctl.formatter import JSONToCliffFormatter
-from esctl.settings import ClusterSettings, IndexSettings
+from esctl.settings import ClusterSettings, IndexSettings, Persistency
 from esctl.utils import Color
 
 
 class AbstractClusterSettings(EsctlShowOne):
     cluster_settings: ClusterSettings
 
-    def _settings_set(self, setting: str, value: str, persistency: str):
+    def _settings_set(self, setting: str, value: str | None, persistency: Persistency) -> None:
         self.log.debug("Persistency is " + persistency)
 
         self.log.debug(
@@ -23,9 +23,9 @@ class AbstractClusterSettings(EsctlShowOne):
     def _settings_get(self, setting: str):
         s = self.cluster_settings.mget(setting)
         self.response = {
-            "transient": s.get("transient").value,
-            "persistent": s.get("persistent").value,
-            "defaults": s.get("defaults").value,
+            "transient": s["transient"].value,
+            "persistent": s["persistent"].value,
+            "defaults": s["defaults"].value,
         }
 
         return JSONToCliffFormatter(self.response, pretty_key=self.pretty_keys).to_show_one(
@@ -59,7 +59,7 @@ class ClusterSettingsList(EsctlShowOne):
 
     def take_action(self, parsed_args):
         default_settings = {}
-        settings_list = self.cluster_settings.list_().get("defaults")
+        settings_list = self.cluster_settings.list_().get("defaults", {})
         self.response = settings_list
 
         for setting_name, setting_value in settings_list.items():
@@ -151,12 +151,12 @@ class IndexSettingsList(EsctlShowOne):
     index_settings: IndexSettings
 
     def take_action(self, parsed_args):
-        indices = self.es.cat.indices(format="json", h="index")
+        indices = self.rows(self.es.cat.indices(format="json", h="index"))
         if not indices:
             self.log.warning("There is no index to list settings from.")
             return ((), ())
 
-        sample_index_name = indices[0].get("index")
+        sample_index_name = indices[0]["index"]
         # {setting name: Setting}, merged from the index' explicit settings and defaults
         index_settings = self.index_settings.list_(sample_index_name)[sample_index_name]
         self.response = {name: setting.value for name, setting in index_settings.items()}
