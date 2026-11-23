@@ -22,10 +22,11 @@ class IndexCreate(EsctlCommand):
 
         unknown_keys = set(configuration) - INDEX_CONFIGURATION_KEYS
         if unknown_keys:
-            raise ValueError(
+            msg = (
                 f"Unknown index configuration keys: {', '.join(sorted(unknown_keys))}. "
-                f"Expected any of: {', '.join(sorted(INDEX_CONFIGURATION_KEYS))}",
+                f"Expected any of: {', '.join(sorted(INDEX_CONFIGURATION_KEYS))}"
             )
+            raise ValueError(msg)
 
         self.log.info("Creating index %s", parsed_args.index)
         print(self.es.indices.create(index=parsed_args.index, **configuration))

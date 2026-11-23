@@ -33,9 +33,8 @@ class Client:
     @classmethod
     def get(cls) -> Elasticsearch:
         if cls._es is None:
-            raise ClientNotConfiguredError(
-                "The Elasticsearch client was used before the application configured it",
-            )
+            msg = "The Elasticsearch client was used before the application configured it"
+            raise ClientNotConfiguredError(msg)
         return cls._es
 
     @classmethod

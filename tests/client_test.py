@@ -59,7 +59,8 @@ def test_a_failing_node_is_retried_on_another_one(run_esctl, fake_es, default_co
 
     def perform_request(node, *args, **kwargs):
         if node.config.host == "down":
-            raise ConnectionError("connection refused")
+            msg = "connection refused"
+            raise ConnectionError(msg)
         return healthy(node, *args, **kwargs)
 
     monkeypatch.setattr(Urllib3HttpNode, "perform_request", perform_request)

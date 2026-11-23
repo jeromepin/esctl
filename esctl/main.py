@@ -148,14 +148,16 @@ class Esctl(App):
         )
 
         if completed.returncode != 0:
-            raise ExternalCommandError(
+            msg = (
                 f"The command retrieving the {purpose} failed with exit code {completed.returncode}: "
-                f"`{raw_command}`\n{completed.stderr.strip()}",
+                f"`{raw_command}`\n{completed.stderr.strip()}"
             )
+            raise ExternalCommandError(msg)
 
         value = completed.stdout.strip()
         if not value:
-            raise ExternalCommandError(f"The command retrieving the {purpose} printed nothing: `{raw_command}`")
+            msg = f"The command retrieving the {purpose} printed nothing: `{raw_command}`"
+            raise ExternalCommandError(msg)
 
         return value
 
@@ -185,10 +187,11 @@ class Esctl(App):
                 _, stderr = process.communicate()
 
                 if process.returncode != 0:
-                    raise ExternalCommandError(
+                    msg = (
                         f"Pre-command `{command}` failed with exit code {process.returncode}\n"
-                        f"{stderr.decode(errors='replace').strip()}",
+                        f"{stderr.decode(errors='replace').strip()}"
                     )
+                    raise ExternalCommandError(msg)
 
             else:
                 # Nobody else reads the pipes of a background command: if they
@@ -252,9 +255,12 @@ class Esctl(App):
         process.wait()
         stderr_drain.join(timeout=PRE_COMMAND_STOP_TIMEOUT)
         stderr = "\n".join(stderr_tail)
-        raise ExternalCommandError(
+        msg_0 = (
             f"Pre-command `{command}` exited with code {process.returncode} "
-            f"before printing a line matching `{string_to_look_for}`\n{stderr}",
+            f"before printing a line matching `{string_to_look_for}`\n{stderr}"
+        )
+        raise ExternalCommandError(
+            msg_0,
         )
 
     def clean_up(self, cmd, result, err):

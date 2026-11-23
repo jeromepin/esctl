@@ -156,7 +156,8 @@ class ConfigFileParser:
             for field, problem in _flatten_validation_errors(cerberus_validator.errors):
                 self.log.error("Invalid configuration at '%s': %s", field, problem)
 
-            raise ConfigurationError(f"{self.path} doesn't match expected schema")
+            msg = f"{self.path} doesn't match expected schema"
+            raise ConfigurationError(msg)
 
     def load_configuration(self, path: str = "~/.esctlrc") -> OrderedDict:
         self.path = os.path.expanduser(path)
@@ -175,7 +176,8 @@ class ConfigFileParser:
                     # An empty file loads as None
                     raw_config_file = OrderedDict(yaml.safe_load(config_file) or {})
                 except yaml.YAMLError as err:
-                    raise ConfigurationError(f"Cannot read YAML from {self.path}: {err}") from err
+                    msg = f"Cannot read YAML from {self.path}: {err}"
+                    raise ConfigurationError(msg) from err
         else:
             raw_config_file = self._create_default_config_file()
 
@@ -201,28 +203,29 @@ class ConfigFileParser:
         # running processes...) while the raw configuration may be written back
         # to disk: never share objects between them.
         if context_name not in self.contexts:
-            raise ConfigurationError(
-                f"Unknown context `{context_name}`. Here are the contexts I know : {', '.join(self.contexts.keys())}",
-            )
+            msg = f"Unknown context `{context_name}`. Here are the contexts I know : {', '.join(self.contexts.keys())}"
+            raise ConfigurationError(msg)
 
         raw_context = copy.deepcopy(self.contexts[context_name])
         cluster = copy.deepcopy(self.clusters.get(raw_context.get("cluster")))
         user = None
         if raw_context.get("user") is not None:
             if raw_context.get("user") not in self.users:
-                raise ConfigurationError(
+                msg = (
                     f"Malformed context `{context_name}` in configuration file : "
                     f"it requires a user named `{raw_context.get('user')}` but none could be found ! "
-                    f"Here are the users I know : {', '.join(self.users.keys())}",
+                    f"Here are the users I know : {', '.join(self.users.keys())}"
                 )
+                raise ConfigurationError(msg)
             user = copy.deepcopy(self.users.get(raw_context.get("user")))
 
         if cluster is None:
-            raise ConfigurationError(
+            msg = (
                 f"Malformed context `{context_name}` in configuration file : "
                 f"it requires a cluster named `{raw_context.get('cluster')}` but none could be found ! "
-                f"Here are the clusters I know : {', '.join(list(self.clusters.keys()))}",
+                f"Here are the clusters I know : {', '.join(list(self.clusters.keys()))}"
             )
+            raise ConfigurationError(msg)
 
         # Merge global settings and per-cluster settings.
         # Cluster-level settings override global settings
@@ -249,9 +252,8 @@ class ConfigFileParser:
         else:
             context_name = self.__getattribute__("default-context")
             if context_name is None:
-                raise ConfigurationError(
-                    "No context selected: pass --context or set `default-context` in the configuration file.",
-                )
+                msg = "No context selected: pass --context or set `default-context` in the configuration file."
+                raise ConfigurationError(msg)
             self.log.debug("No context provided. Using default context")
 
         context = self.get_context_informations(context_name)
