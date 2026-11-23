@@ -7,6 +7,7 @@ import jmespath
 from cliff.command import Command
 from cliff.lister import Lister
 from cliff.show import ShowOne
+from elasticsearch import Elasticsearch
 
 from esctl.elasticsearch import Client
 from esctl.settings import ClusterSettings, IndexSettings
@@ -15,9 +16,12 @@ from esctl.utils import Color
 
 class EsctlCommon:
     log = logging.getLogger(__name__)
-    es = Client().es
     cluster_settings = ClusterSettings()
     index_settings = IndexSettings()
+
+    @property
+    def es(self) -> Elasticsearch:
+        return Client.get()
 
     def _sort_and_order_dict(self, dct):
         return {e[0]: e[1] for e in sorted(dct.items())}

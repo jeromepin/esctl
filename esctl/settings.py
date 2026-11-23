@@ -3,6 +3,8 @@ import logging
 from abc import ABC
 from typing import Any
 
+from elasticsearch import Elasticsearch
+
 from esctl.elasticsearch import Client
 from esctl.utils import Color
 
@@ -11,7 +13,10 @@ class Settings(ABC):
     """Abstract class for settings management."""
 
     log = logging.getLogger(__name__)
-    es = Client().es
+
+    @property
+    def es(self) -> Elasticsearch:
+        return Client.get()
 
 
 class Setting:
