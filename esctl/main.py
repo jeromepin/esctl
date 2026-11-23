@@ -23,6 +23,25 @@ from esctl.interactive import InteractiveApp
 # and are modified
 
 
+class ColoredLevelFormatter(logging.Formatter):
+    """Colorize the level name, without touching the global level names
+    (which would also color log files and accumulate across app instances)."""
+
+    COLORS = {
+        logging.DEBUG: utils.Color.END,
+        logging.INFO: utils.Color.BLUE,
+        logging.WARNING: utils.Color.YELLOW,
+        logging.ERROR: utils.Color.PURPLE,
+        logging.CRITICAL: utils.Color.RED,
+    }
+
+    def format(self, record: logging.LogRecord) -> str:
+        # Work on a copy: the same record goes through the other handlers
+        record = logging.makeLogRecord(record.__dict__)
+        record.levelname = utils.Color.colorize(record.levelname, self.COLORS.get(record.levelno, utils.Color.END))
+        return super().format(record)
+
+
 # Seconds a pre-command gets to exit after SIGTERM before being killed
 PRE_COMMAND_STOP_TIMEOUT = 5
 # Lines of a background pre-command's stderr kept to explain its failure
@@ -75,36 +94,7 @@ class Esctl(App):
         }.get(self.options.verbose_level, logging.DEBUG)
         console.setLevel(console_level)
 
-        logging.addLevelName(
-            logging.DEBUG,
-            utils.Color.colorize(logging.getLevelName(logging.DEBUG), utils.Color.END),
-        )
-        logging.addLevelName(
-            logging.INFO,
-            utils.Color.colorize(logging.getLevelName(logging.INFO), utils.Color.BLUE),
-        )
-        logging.addLevelName(
-            logging.WARNING,
-            utils.Color.colorize(
-                logging.getLevelName(logging.WARNING),
-                utils.Color.YELLOW,
-            ),
-        )
-        logging.addLevelName(
-            logging.ERROR,
-            utils.Color.colorize(
-                logging.getLevelName(logging.ERROR),
-                utils.Color.PURPLE,
-            ),
-        )
-        logging.addLevelName(
-            logging.CRITICAL,
-            utils.Color.colorize(
-                logging.getLevelName(logging.CRITICAL),
-                utils.Color.RED,
-            ),
-        )
-        formatter = logging.Formatter(
+        formatter = ColoredLevelFormatter(
             "[%(levelname)-8s] " + self.CONSOLE_MESSAGE_FORMAT,
         )
         console.setFormatter(formatter)
