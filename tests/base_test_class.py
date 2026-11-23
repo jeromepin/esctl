@@ -1,5 +1,5 @@
-import os
 from argparse import Namespace
+from pathlib import Path
 from unittest import TestCase
 
 import esctl.main
@@ -7,7 +7,7 @@ import esctl.main
 
 class EsctlTestCase(TestCase):
     def setUp(self):
-        self.tests_path = os.path.dirname(os.path.realpath(__file__))
+        self.tests_path = Path(__file__).resolve().parent
         self.fixtures_path = f"{self.tests_path}/files"
 
         self.app = esctl.main.Esctl()
