@@ -1,7 +1,6 @@
 import argparse
 import importlib.metadata
 import logging
-import os
 import re
 import shlex
 import subprocess
@@ -51,7 +50,6 @@ class Esctl(App):
     log = App.LOG
 
     def __init__(self):
-        os.environ["COLUMNS"] = "120"
         super().__init__(
             description=importlib.metadata.metadata(self.__class__.__name__)["Summary"],
             version=importlib.metadata.version(self.__class__.__name__),
