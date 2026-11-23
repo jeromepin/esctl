@@ -1,16 +1,19 @@
 import fnmatch
 import logging
-from abc import ABC
-from typing import Any
+from typing import Any, Literal
 
+from elastic_transport import ObjectApiResponse
 from elasticsearch import Elasticsearch
 
 from esctl.elasticsearch import Client
 from esctl.utils import Color
 
+# Where a cluster setting is written
+Persistency = Literal["transient", "persistent"]
 
-class Settings(ABC):
-    """Abstract class for settings management."""
+
+class Settings:
+    """Base class of the settings helpers."""
 
     log = logging.getLogger(__name__)
 
@@ -33,17 +36,17 @@ class ClusterSettings(Settings):
     """Handle cluster-level settings."""
 
     def list_(self) -> dict[str, dict[str, Any]]:
-        return self.es.cluster.get_settings(include_defaults=True, flat_settings=True)
+        return self.es.cluster.get_settings(include_defaults=True, flat_settings=True).body
 
     def get(self, key: str, persistency: str = "transient") -> Setting:
-        settings: dict[str, dict[str, Any]] = self.list_()
+        settings = self.list_()
 
-        if key in settings.get(persistency):
-            return Setting(key, settings.get(persistency).get(key), persistency)
+        if key in settings.get(persistency, {}):
+            return Setting(key, settings[persistency][key], persistency)
         # If the setting cannot be found in the requested persistency
         # look for it in the "defaults" values
-        if key in settings.get("defaults"):
-            return Setting(key, settings.get("defaults").get(key), "defaults")
+        if key in settings.get("defaults", {}):
+            return Setting(key, settings["defaults"][key], "defaults")
         return Setting(key, None)
 
     def __get_setting_for_persistency(
@@ -52,13 +55,13 @@ class ClusterSettings(Settings):
         key: str,
         persistency: str,
     ) -> Setting:
-        if key in settings.get(persistency):
-            return Setting(key, settings.get(persistency).get(key), persistency)
+        if key in settings.get(persistency, {}):
+            return Setting(key, settings[persistency][key], persistency)
 
         return Setting(key, None)
 
     def mget(self, key: str) -> dict[str, Setting]:
-        settings: dict[str, dict[str, Any]] = self.list_()
+        settings = self.list_()
 
         return {
             "transient": self.__get_setting_for_persistency(settings, key, "transient"),
@@ -70,14 +73,13 @@ class ClusterSettings(Settings):
             "defaults": self.__get_setting_for_persistency(settings, key, "defaults"),
         }
 
-    def set(self, sections: str, value, persistency: str = "transient"):
+    def set(self, sections: str, value: Any, persistency: Persistency = "transient") -> ObjectApiResponse[Any]:
         self.log.info(
             f"Changing {persistency}'s {Color.colorize(sections, Color.ITALIC)} to : {Color.colorize(value, Color.ITALIC)}",
         )
-        return self.es.cluster.put_settings(
-            **{persistency: {sections: value}},
-            flat_settings=True,
-        )
+        if persistency == "persistent":
+            return self.es.cluster.put_settings(persistent={sections: value}, flat_settings=True)
+        return self.es.cluster.put_settings(transient={sections: value}, flat_settings=True)
 
 
 class IndexSettings(Settings):
@@ -92,15 +94,15 @@ class IndexSettings(Settings):
             index=index,
             include_defaults=True,
             flat_settings=True,
-        ).items():
+        ).body.items():
             settings[index_name] = {}
-            for setting_name, setting_value in index_settings.get("settings").items():
+            for setting_name, setting_value in index_settings.get("settings", {}).items():
                 settings[index_name][setting_name] = Setting(
                     setting_name,
                     setting_value,
                     "settings",
                 )
-            for setting_name, setting_value in index_settings.get("defaults").items():
+            for setting_name, setting_value in index_settings.get("defaults", {}).items():
                 settings[index_name][setting_name] = Setting(
                     setting_name,
                     setting_value,
@@ -131,5 +133,5 @@ class IndexSettings(Settings):
             for index_name, index_settings in response.items()
         }
 
-    def set(self, setting: str, value: Any, index: str):
+    def set(self, setting: str, value: Any, index: str) -> ObjectApiResponse[Any]:
         return self.es.indices.put_settings(index=index, settings={setting: value})

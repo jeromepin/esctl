@@ -7,6 +7,7 @@ import subprocess
 import sys
 import threading
 from collections import deque
+from typing import Any
 
 from cliff.app import App
 from cliff.commandmanager import CommandManager
@@ -96,12 +97,12 @@ class Esctl(App):
         console.setFormatter(formatter)
         root_logger.addHandler(console)
 
-    def resolve_external_credentials(self):
+    def resolve_external_credentials(self, user: dict[str, Any]) -> None:
         """Replace `external_username`/`external_password` by the output of their command."""
         for field in ("username", "password"):
-            definition = self.context.user.pop(f"external_{field}", None)
+            definition = user.pop(f"external_{field}", None)
             if definition is not None:
-                self.context.user[field] = self._run_os_system_command(
+                user[field] = self._run_os_system_command(
                     definition["command"]["run"],
                     purpose=field,
                 )
@@ -122,16 +123,14 @@ class Esctl(App):
         if self._connected:
             return
 
-        http_auth = None
+        http_auth: tuple[str, str] | None = None
 
         if self.context.user is not None:
-            self.resolve_external_credentials()
+            self.resolve_external_credentials(self.context.user)
 
-            http_auth = (
-                (self.context.user.get("username"), self.context.user.get("password"))
-                if self.context.user.get("username") and self.context.user.get("password")
-                else None
-            )
+            username, password = self.context.user.get("username"), self.context.user.get("password")
+            if username and password:
+                http_auth = (username, password)
 
         Client.configure(self.context, http_auth)
         self._connected = True
@@ -178,7 +177,7 @@ class Esctl(App):
         self.connect()
 
         for command_block in self.context.pre_commands:
-            command = command_block.get("command")
+            command: str = command_block["command"]
             process = self._run_shell_subcommand(command)
             self._pre_command_processes.append(process)
 
@@ -200,7 +199,7 @@ class Esctl(App):
                     self._wait_for_output(
                         process,
                         command,
-                        command_block.get("wait_for_output"),
+                        command_block["wait_for_output"],
                         stderr_drain,
                         stderr_tail,
                     )
@@ -235,8 +234,12 @@ class Esctl(App):
         stderr_tail: deque,
     ):
         pattern = re.compile(string_to_look_for)
+        stdout = process.stdout
+        if stdout is None:
+            msg = "Pre-commands must be started with a piped stdout"
+            raise RuntimeError(msg)
 
-        for raw_line in process.stdout:
+        for raw_line in stdout:
             line = raw_line.decode("utf-8", errors="replace").strip()
 
             if pattern.search(line):

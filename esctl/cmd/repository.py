@@ -6,7 +6,7 @@ class RepositoryList(EsctlLister):
     """Returns information about snapshot repositories registered in the cluster."""
 
     def take_action(self, parsed_args):
-        repositories = self.es.cat.repositories(format="json")
+        repositories = self.rows(self.es.cat.repositories(format="json"))
 
         return JSONToCliffFormatter(repositories).format_for_lister(
             columns=[("id"), ("type")],

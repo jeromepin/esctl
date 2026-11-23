@@ -46,7 +46,7 @@ class IndexList(EsctlLister):
 
     def take_action(self, parsed_args):
         indices = self.transform(
-            self.es.cat.indices(format="json", index=parsed_args.index),
+            self.rows(self.es.cat.indices(format="json", index=parsed_args.index)),
         )
         return JSONToCliffFormatter(indices).format_for_lister(
             columns=[

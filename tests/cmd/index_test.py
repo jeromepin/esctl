@@ -31,6 +31,6 @@ class TestIndexReindex(EsctlTestCase):
         index_reindex_cmd = IndexReindex(self.app, [])
         for case in cases:
             self.assertEqual(
-                index_reindex_cmd._build_request_body(case.get("input")),
+                index_reindex_cmd._build_request_body(case["input"]),
                 case.get("expected_output"),
             )

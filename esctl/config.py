@@ -23,18 +23,21 @@ def _flatten_validation_errors(errors: dict, path: tuple[str, ...] = ()):
 
 
 class Context:
-    def __init__(self, name, user, cluster, settings, **kwargs):
-        super().__init__()
-        self.log = logging.getLogger(__name__)
+    def __init__(
+        self,
+        name: str,
+        user: dict[str, Any] | None,
+        cluster: dict[str, Any],
+        settings: dict[str, Any],
+        pre_commands: list[dict[str, Any]] | None = None,
+    ) -> None:
         self.name = name
         self.user = user
         self.cluster = cluster
         self.settings = settings
+        self.pre_commands = pre_commands or []
 
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Context {self.name} user={self.user} cluster={self.cluster} settings={self.settings}>"
 
 
@@ -200,7 +203,7 @@ class ConfigFileParser:
                 f"Here are the contexts I know : {', '.join(self.contexts.keys())}",
             )
 
-        raw_context = copy.deepcopy(self.contexts.get(context_name))
+        raw_context = copy.deepcopy(self.contexts[context_name])
         cluster = copy.deepcopy(self.clusters.get(raw_context.get("cluster")))
         user = None
         if raw_context.get("user") is not None:
@@ -223,19 +226,10 @@ class ConfigFileParser:
         # Cluster-level settings override global settings
         settings = {**self.settings, **(cluster.get("settings") or {})}
 
-        pre_commands: list[dict] = []
-        if "pre_commands" in raw_context:
-            pre_commands = raw_context.get("pre_commands")
-
-            for i in range(len(pre_commands)):
-                pre_command = pre_commands[i]
-                pre_command = {
-                    "wait_for_exit": True,
-                    "wait_for_output": "",
-                    **pre_command,
-                }
-
-                pre_commands[i] = pre_command
+        pre_commands = [
+            {"wait_for_exit": True, "wait_for_output": "", **pre_command}
+            for pre_command in raw_context.get("pre_commands", [])
+        ]
 
         context = Context(
             context_name,
@@ -247,7 +241,7 @@ class ConfigFileParser:
 
         return context
 
-    def create_context(self, context_name: str = None) -> Context:
+    def create_context(self, context_name: str | None = None) -> Context:
         if context_name:
             self.log.debug(f"Using provided context : {context_name}")
         else:

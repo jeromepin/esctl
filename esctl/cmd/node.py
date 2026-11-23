@@ -60,7 +60,7 @@ class NodeList(EsctlLister):
     """List nodes."""
 
     def take_action(self, parsed_args):
-        return JSONToCliffFormatter(self.es.cat.nodes(format="json")).format_for_lister(
+        return JSONToCliffFormatter(self.rows(self.es.cat.nodes(format="json"))).format_for_lister(
             columns=[
                 ("ip", "IP"),
                 ("heap.percent",),

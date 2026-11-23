@@ -8,7 +8,7 @@ class SnapshotList(EsctlLister):
 
     def take_action(self, parsed_args):
         snapshots = self.transform(
-            self.es.cat.snapshots(repository=parsed_args.repository, format="json"),
+            self.rows(self.es.cat.snapshots(repository=parsed_args.repository, format="json")),
         )
 
         return JSONToCliffFormatter(snapshots).format_for_lister(

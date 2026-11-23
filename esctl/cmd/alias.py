@@ -6,7 +6,7 @@ class AliasList(EsctlLister):
     """List all aliases."""
 
     def take_action(self, parsed_args):
-        aliases = self.es.cat.aliases(name=parsed_args.alias, format="json")
+        aliases = self.rows(self.es.cat.aliases(name=parsed_args.alias, format="json"))
 
         return JSONToCliffFormatter(aliases).format_for_lister(
             columns=[("index",), ("alias",)],
