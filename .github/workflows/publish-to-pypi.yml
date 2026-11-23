@@ -14,6 +14,10 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
+        with:
+          # Pinned for reproducible builds. uv >= 0.13 can't extract the prettytable 0.7.2 sdist
+          # required by cliff 3.2: keep an older uv until cliff is upgraded.
+          version: "0.9.30"
 
       - name: Set up Python
         run: uv python install 3.12

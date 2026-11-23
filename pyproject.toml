@@ -151,8 +151,12 @@ dev = [
     "ruff>=0.17.6",
     "setuptools>=75.6.0",
     "ty==0.0.108",
-    "uv>=0.5.11",
 ]
+
+[tool.uv]
+# Enforced on the uv running the project (uv is not a dependency: install it on your system).
+# 0.5.14 is the first version that reads this setting.
+required-version = ">=0.5.14"
 
 [[tool.uv.index]]
 name = "testpypi"
