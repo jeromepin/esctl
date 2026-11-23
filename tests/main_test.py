@@ -56,3 +56,15 @@ def test_no_insecure_warning_when_certificate_checks_are_disabled_on_purpose(run
 
     assert result.code == 0, result.err
     assert not [w for w in caught if issubclass(w.category, SecurityWarning)]
+
+
+def test_the_terminal_width_is_not_overridden(monkeypatch):
+    import os
+
+    from esctl.main import Esctl
+
+    monkeypatch.delenv("COLUMNS", raising=False)
+
+    Esctl()
+
+    assert "COLUMNS" not in os.environ
