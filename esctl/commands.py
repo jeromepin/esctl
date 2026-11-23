@@ -76,11 +76,12 @@ class EsctlCommon:
             raise TypeError(msg)
         return body
 
-    def read_from_file_or_stdin(self, path: str) -> str:
+    def read_from_file_or_stdin(self, path: str | None) -> str:
         """Read some content from a file, or from stdin when the path is undefined or `-`."""
         if path is not None and path != "-":
             return Path(path).expanduser().read_text()
-        return sys.stdin.read()
+        # typeshed types sys.stdin as possibly missing (`TextIO | Any`)
+        return str(sys.stdin.read())
 
     def request(
         self,

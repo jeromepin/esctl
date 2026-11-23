@@ -3,7 +3,7 @@ import logging
 from collections import OrderedDict
 from collections.abc import Iterator, Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import cerberus
 import yaml
@@ -15,6 +15,13 @@ from esctl.utils import setup_yaml
 DEFAULT_CONFIGURATION_PATH = "~/.esctlrc"
 
 
+def _block(config: Mapping[str, Any], name: str) -> dict[str, Any]:
+    """A top-level block of the configuration, empty when omitted."""
+    value = config.get(name)
+    # The configuration was validated against the schema: blocks are mappings of names to definitions
+    return cast("dict[str, Any]", value) if isinstance(value, dict) else {}
+
+
 def _flatten_validation_errors(errors: dict[str, list[Any]], path: tuple[str, ...] = ()) -> Iterator[tuple[str, str]]:
     """Turn cerberus' nested `errors` into ("clusters.foo.servers", "must be of list type") pairs."""
     for field, problems in errors.items():
@@ -22,7 +29,7 @@ def _flatten_validation_errors(errors: dict[str, list[Any]], path: tuple[str, ..
             if isinstance(problem, dict):
                 yield from _flatten_validation_errors(problem, (*path, str(field)))
             else:
-                yield ".".join((*path, str(field))), problem
+                yield ".".join((*path, str(field))), str(problem)
 
 
 class Context:
@@ -51,10 +58,11 @@ class ConfigFileParser:
     def __init__(self) -> None:
         # Replaced by load_configuration()
         self.path = Path(DEFAULT_CONFIGURATION_PATH).expanduser()
-        self.users = {}
-        self.contexts = {}
-        self.clusters = {}
-        self.settings = {}
+        self.users: dict[str, Any] = {}
+        self.contexts: dict[str, Any] = {}
+        self.clusters: dict[str, Any] = {}
+        self.settings: dict[str, Any] = {}
+        self.default_context: str | None = None
 
     def write_config_file(self, content: Mapping[str, Any]) -> None:
         setup_yaml()
@@ -165,17 +173,9 @@ class ConfigFileParser:
             msg = f"{self.path} doesn't match expected schema"
             raise ConfigurationError(msg)
 
-    def load_configuration(self, path: str = DEFAULT_CONFIGURATION_PATH) -> OrderedDict:
+    def load_configuration(self, path: str = DEFAULT_CONFIGURATION_PATH) -> OrderedDict[str, Any]:
         self.path = Path(path).expanduser()
         self.log.debug("Trying to load config file : %s", self.path)
-        expected_config_blocks = [
-            "clusters",
-            "contexts",
-            "default-context",
-            "settings",
-            "users",
-        ]
-
         if self.path.is_file():
             with self.path.open() as config_file:
                 try:
@@ -189,18 +189,21 @@ class ConfigFileParser:
 
         self._ensure_config_file_is_valid(raw_config_file)
 
-        for config_block in expected_config_blocks:
-            value = raw_config_file.get(config_block)
-            # Optional blocks may be omitted: treat them as empty
-            if value is None and config_block != "default-context":
-                value = {}
-            self.__setattr__(config_block, value)
-
-            self.log.debug(
-                "Loaded %s: %s",
-                config_block,
-                self.__getattribute__(config_block),
-            )
+        # Optional blocks may be omitted: treat them as empty
+        self.clusters = _block(raw_config_file, "clusters")
+        self.contexts = _block(raw_config_file, "contexts")
+        self.settings = _block(raw_config_file, "settings")
+        self.users = _block(raw_config_file, "users")
+        default_context = raw_config_file.get("default-context")
+        self.default_context = default_context if isinstance(default_context, str) else None
+        self.log.debug(
+            "Loaded clusters: %s, contexts: %s, settings: %s, users: %s, default context: %s",
+            self.clusters,
+            self.contexts,
+            self.settings,
+            self.users,
+            self.default_context,
+        )
 
         return raw_config_file
 
@@ -251,10 +254,10 @@ class ConfigFileParser:
         )
 
     def create_context(self, context_name: str | None = None) -> Context:
-        if context_name:
+        if context_name is not None:
             self.log.debug("Using provided context : %s", context_name)
         else:
-            context_name = self.__getattribute__("default-context")
+            context_name = self.default_context
             if context_name is None:
                 msg = "No context selected: pass --context or set `default-context` in the configuration file."
                 raise ConfigurationError(msg)

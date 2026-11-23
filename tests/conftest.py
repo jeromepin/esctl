@@ -122,7 +122,7 @@ def fake_es(monkeypatch):
 
 
 @pytest.fixture
-def write_config(tmp_path):
+def write_config(tmp_path: Path):
     def write(config: dict[str, Any] | None = None, name: str = "esctlrc.yml") -> Path:
         path = tmp_path / name
         path.write_text(yaml.safe_dump(DEFAULT_CONFIG if config is None else config))

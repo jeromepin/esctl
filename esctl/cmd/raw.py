@@ -11,10 +11,10 @@ class RawCommand(EsctlCommand):
 
     @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
-        body: str = parsed_args.body
+        body: str | None = None if parsed_args.body is None else str(parsed_args.body)
 
-        if parsed_args.body is not None and parsed_args.body.startswith("@"):
-            body = self.read_from_file_or_stdin(parsed_args.body[1:])
+        if body is not None and body.startswith("@"):
+            body = self.read_from_file_or_stdin(body[1:])
 
         response = self.request(verb=parsed_args.verb, route=parsed_args.route, body=body)
 

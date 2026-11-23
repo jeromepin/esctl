@@ -69,7 +69,7 @@ class Esctl(App):
         # Loaded by initialize_app(), before any command runs
         self.config: dict[str, Any] = {}
         self._connected = False
-        self._pre_command_processes: list[subprocess.Popen] = []
+        self._pre_command_processes: list[subprocess.Popen[bytes]] = []
         self._pre_command_drains: list[threading.Thread] = []
 
     @override
@@ -122,7 +122,7 @@ class Esctl(App):
     @staticmethod
     def _requires_cluster(cmd: Command) -> bool:
         # cliff's own commands (help, complete) don't define it and are local too
-        return getattr(cmd, "requires_cluster", False)
+        return bool(getattr(cmd, "requires_cluster", False))
 
     def connect(self) -> None:
         """Resolve the credentials and configure the Elasticsearch client, once."""
@@ -136,7 +136,7 @@ class Esctl(App):
 
             username, password = self.context.user.get("username"), self.context.user.get("password")
             if username and password:
-                http_auth = (username, password)
+                http_auth = (str(username), str(password))
 
         Client.configure(self.context, http_auth)
         self._connected = True
@@ -185,7 +185,7 @@ class Esctl(App):
         self.connect()
 
         for command_block in self.context.pre_commands:
-            command: str = command_block["command"]
+            command = str(command_block["command"])
             process = self._run_shell_subcommand(command)
             self._pre_command_processes.append(process)
 
@@ -240,11 +240,11 @@ class Esctl(App):
 
     def _wait_for_output(
         self,
-        process: subprocess.Popen,
+        process: subprocess.Popen[bytes],
         command: str,
         string_to_look_for: str,
         stderr_drain: threading.Thread,
-        stderr_tail: deque,
+        stderr_tail: deque[str],
     ) -> None:
         pattern = re.compile(string_to_look_for)
         stdout = process.stdout
