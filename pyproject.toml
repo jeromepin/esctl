@@ -103,7 +103,7 @@ extend-exclude = [
 
 [tool.ruff.lint.per-file-ignores]
 # Tests are pragmatic: plain asserts, literal expected values, and as many fixtures as needed
-"tests/**" = ["S101", "PLR2004", "PLR0913", "PLR0917"]
+"tests/**" = ["S101", "PLR2004", "PLR0913", "PLR0917", "S603"]
 
 [tool.ruff.lint.pycodestyle]
 # The formatter wraps code at `line-length`; comments and docstrings, which it doesn't wrap, may go up to 200 columns
@@ -125,6 +125,7 @@ extend-select = [
   "FBT",  # booleans are passed by keyword
   "PL",  # pylint
   "E", "W",  # pycodestyle
+  "S",  # security (bandit)
 ]
 ignore = [
   "ANN",
