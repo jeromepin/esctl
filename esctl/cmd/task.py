@@ -11,7 +11,7 @@ class TaskList(EsctlLister):
         tasks = self.transform(
             self.es.tasks.list(
                 actions=parsed_args.actions,
-                detailed=True,
+                detailed=parsed_args.detailed,
                 parent_task_id=parsed_args.parent_task_id,
             ).get("nodes"),
         )
