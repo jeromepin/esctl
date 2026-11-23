@@ -140,8 +140,8 @@ exclude = [
   "esctl/interactive.py",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pipx>=1.7.1",
     "pre-commit>=4.0.1",
     "pytest-clarity>=1.0.1",
