@@ -95,9 +95,9 @@ class EsctlCommon:
 
         :Example:
                 {
-                    "name" : "prod-monolith-us-searchill-es-01",
-                    "cluster_name" : "prod-lumsites-cluster",
-                    "cluster_uuid" : "Z0FeT4oVSw2GQ3bMs0vEZw",
+                    "name" : "es-node-01",
+                    "cluster_name" : "my-cluster",
+                    "cluster_uuid" : "aBcDeFgHiJkLmNoPqRsTuV",
                     "version" : {
                         "number" : "7.0.1",
                         "build_flavor" : "default",
@@ -113,9 +113,9 @@ class EsctlCommon:
                 }
             becomes
                 {
-                    "name" : "prod-monolith-us-searchill-es-01",
-                    "cluster_name" : "prod-lumsites-cluster",
-                    "cluster_uuid" : "Z0FeT4oVSw2GQ3bMs0vEZw",
+                    "name" : "es-node-01",
+                    "cluster_name" : "my-cluster",
+                    "cluster_uuid" : "aBcDeFgHiJkLmNoPqRsTuV",
                     "version.number" : "7.0.1",
                     "version.build_flavor" : "default",
                     "version.build_type" : "deb",
