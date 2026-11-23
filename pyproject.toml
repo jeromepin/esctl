@@ -109,6 +109,7 @@ extend-select = [
   "G",  # logging calls must let logging format their message lazily
   "EM",  # exception messages are assigned first, so tracebacks don't repeat them
   "T20",  # commands write to cliff's stdout, not with print()
+  "PTH",  # pathlib instead of os.path and open()
 ]
 ignore = [
   "ANN",

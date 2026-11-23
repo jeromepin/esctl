@@ -1,5 +1,6 @@
 import json
 import unittest.mock
+from pathlib import Path
 
 from elastic_transport import ObjectApiResponse
 
@@ -91,8 +92,7 @@ class TestIndexSettingsRetrieval(EsctlTestCase):
         self.mock.indices.get_settings.return_value = ObjectApiResponse(body=self.fixtures(), meta=None)
 
     def fixtures(self):
-        with open(f"{self.fixtures_path}/index_settings.json") as json_file:
-            return json.load(json_file)
+        return json.loads(Path(f"{self.fixtures_path}/index_settings.json").read_text())
 
     def test_settings_list(self):
         import esctl.settings

@@ -1,6 +1,5 @@
 import copy
 import logging
-import os
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any
@@ -10,6 +9,8 @@ import yaml
 
 from esctl.exceptions import ConfigurationError
 from esctl.utils import setup_yaml
+
+DEFAULT_CONFIGURATION_PATH = "~/.esctlrc"
 
 
 def _flatten_validation_errors(errors: dict, path: tuple[str, ...] = ()):
@@ -45,6 +46,8 @@ class ConfigFileParser:
     log = logging.getLogger(__name__)
 
     def __init__(self):
+        # Replaced by load_configuration()
+        self.path = Path(DEFAULT_CONFIGURATION_PATH).expanduser()
         self.users = {}
         self.contexts = {}
         self.clusters = {}
@@ -53,7 +56,7 @@ class ConfigFileParser:
     def write_config_file(self, content):
         setup_yaml()
 
-        with open(self.path, "w") as config_file:
+        with self.path.open("w") as config_file:
             yaml.dump(content, config_file, default_flow_style=False, width=500)
 
     def _create_default_config_file(self) -> "OrderedDict[str, Any]":
@@ -159,8 +162,8 @@ class ConfigFileParser:
             msg = f"{self.path} doesn't match expected schema"
             raise ConfigurationError(msg)
 
-    def load_configuration(self, path: str = "~/.esctlrc") -> OrderedDict:
-        self.path = os.path.expanduser(path)
+    def load_configuration(self, path: str = DEFAULT_CONFIGURATION_PATH) -> OrderedDict:
+        self.path = Path(path).expanduser()
         self.log.debug("Trying to load config file : %s", self.path)
         expected_config_blocks = [
             "clusters",
@@ -170,8 +173,8 @@ class ConfigFileParser:
             "users",
         ]
 
-        if Path(self.path).is_file():
-            with open(self.path) as config_file:
+        if self.path.is_file():
+            with self.path.open() as config_file:
                 try:
                     # An empty file loads as None
                     raw_config_file = OrderedDict(yaml.safe_load(config_file) or {})

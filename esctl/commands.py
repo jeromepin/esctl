@@ -1,7 +1,7 @@
 import argparse
 import logging
-import os
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import jmespath
@@ -63,8 +63,7 @@ class EsctlCommon:
     def read_from_file_or_stdin(self, path: str) -> str:
         """Read some content from a file, or from stdin when the path is undefined or `-`."""
         if path is not None and path != "-":
-            with open(os.path.expanduser(path)) as reader:
-                return reader.read()
+            return Path(path).expanduser().read_text()
         else:
             return sys.stdin.read()
 
