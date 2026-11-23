@@ -193,9 +193,23 @@ class ConfigFileParser:
         # The context gets mutated at runtime (resolved credentials, defaults,
         # running processes...) while the raw configuration may be written back
         # to disk: never share objects between them.
+        if context_name not in self.contexts:
+            raise ConfigurationError(
+                f"Unknown context `{context_name}`. "
+                f"Here are the contexts I know : {', '.join(self.contexts.keys())}",
+            )
+
         raw_context = copy.deepcopy(self.contexts.get(context_name))
-        user = copy.deepcopy(self.users.get(raw_context.get("user")))
         cluster = copy.deepcopy(self.clusters.get(raw_context.get("cluster")))
+        user = None
+        if raw_context.get("user") is not None:
+            if raw_context.get("user") not in self.users:
+                raise ConfigurationError(
+                    f"Malformed context `{context_name}` in configuration file : "
+                    f"it requires a user named `{raw_context.get('user')}` but none could be found ! "
+                    f"Here are the users I know : {', '.join(self.users.keys())}",
+                )
+            user = copy.deepcopy(self.users.get(raw_context.get("user")))
 
         if cluster is None:
             raise ConfigurationError(
@@ -237,12 +251,13 @@ class ConfigFileParser:
             self.log.debug(f"Using provided context : {context_name}")
         else:
             context_name = self.__getattribute__("default-context")
+            if context_name is None:
+                raise ConfigurationError(
+                    "No context selected: pass --context or set `default-context` in the configuration file.",
+                )
             self.log.debug("No context provided. Using default context")
 
-        try:
-            context = self.get_context_informations(context_name)
-            self.log.debug(context)
-        except AttributeError as err:
-            raise ConfigurationError(f"Cannot load context '{context_name}'.") from err
+        context = self.get_context_informations(context_name)
+        self.log.debug(context)
 
         return context

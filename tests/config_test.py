@@ -42,3 +42,49 @@ def test_the_cli_exits_with_1_on_an_invalid_config(run_esctl, tmp_path):
 
     assert result.code == 1
     assert "doesn't match expected schema" in result.err
+
+
+def load(tmp_path, content):
+    path = tmp_path / "esctlrc"
+    path.write_text(content)
+    parser = ConfigFileParser()
+    parser.load_configuration(str(path))
+    return parser
+
+
+BASE = """
+clusters:
+  c:
+    servers: [https://localhost:9200]
+users:
+  u:
+    username: bob
+    password: pw
+"""
+
+
+def test_unknown_context_names_the_known_ones(tmp_path):
+    parser = load(tmp_path, BASE + "contexts:\n  a:\n    cluster: c\n")
+
+    with pytest.raises(ConfigurationError, match="Unknown context `nope`.*: a"):
+        parser.create_context("nope")
+
+
+def test_missing_default_context_asks_for_one(tmp_path):
+    parser = load(tmp_path, BASE + "contexts:\n  a:\n    cluster: c\n")
+
+    with pytest.raises(ConfigurationError, match="No context selected"):
+        parser.create_context(None)
+
+
+def test_unknown_user_is_an_error_instead_of_silently_unauthenticated(tmp_path):
+    parser = load(tmp_path, BASE + "contexts:\n  a:\n    cluster: c\n    user: typo\n")
+
+    with pytest.raises(ConfigurationError, match="requires a user named `typo`.*: u"):
+        parser.create_context("a")
+
+
+def test_context_without_user_has_no_user(tmp_path):
+    parser = load(tmp_path, BASE + "contexts:\n  a:\n    cluster: c\n")
+
+    assert parser.create_context("a").user is None
