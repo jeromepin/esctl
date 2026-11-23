@@ -1,6 +1,8 @@
 import argparse
 from typing import Any
 
+from typing_extensions import override
+
 from esctl.commands import (
     EsctlCommandIndex,
     EsctlListerIndexSetting,
@@ -49,6 +51,7 @@ class AbstractClusterSettings(EsctlShowOne):
 class AbstractClusterSetting(AbstractClusterSettings):
     """A command acting on the cluster setting given as argument."""
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
@@ -60,6 +63,7 @@ class AbstractClusterSetting(AbstractClusterSettings):
 class ClusterSettingsGet(AbstractClusterSetting):
     """Get a setting value."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         return self._settings_get(parsed_args.setting)
 
@@ -69,6 +73,7 @@ class ClusterSettingsList(EsctlShowOne):
 
     cluster_settings: ClusterSettings
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         settings_list = self.cluster_settings.list_().get("defaults", {})
         self.response = settings_list
@@ -80,6 +85,7 @@ class ClusterSettingsList(EsctlShowOne):
 class ClusterSettingsReset(AbstractClusterSetting):
     """Reset a setting value."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self._settings_set(
             parsed_args.setting,
@@ -88,6 +94,7 @@ class ClusterSettingsReset(AbstractClusterSetting):
         )
         return self._settings_get(parsed_args.setting)
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
@@ -99,6 +106,7 @@ class ClusterSettingsReset(AbstractClusterSetting):
 class ClusterSettingsSet(AbstractClusterSetting):
     """Set a setting value."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self._settings_set(
             parsed_args.setting,
@@ -107,6 +115,7 @@ class ClusterSettingsSet(AbstractClusterSetting):
         )
         return self._settings_get(parsed_args.setting)
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
@@ -138,6 +147,7 @@ class IndexSettingsGet(EsctlListerIndexSetting):
             if setting.value is not None
         ]
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         return JSONToCliffFormatter(
             self.retrieve_setting(parsed_args.setting, parsed_args.index),
@@ -149,6 +159,7 @@ class IndexSettingsList(EsctlShowOne):
 
     index_settings: IndexSettings
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         indices = self.rows(self.es.cat.indices(format="json", h="index"))
         if not indices:
@@ -170,6 +181,7 @@ class IndexSettingsSet(EsctlCommandIndex):
 
     index_settings: IndexSettings
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         setting_name = parsed_args.setting
 
@@ -185,6 +197,7 @@ class IndexSettingsSet(EsctlCommandIndex):
             self.index_settings.set(setting_name, parsed_args.value, parsed_args.index),
         )
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("setting", metavar="<setting>", help=("Setting"))

@@ -137,6 +137,7 @@ dependencies = [
     { name = "cliff" },
     { name = "elasticsearch" },
     { name = "jmespath" },
+    { name = "typing-extensions" },
 ]
 
 [package.dev-dependencies]
@@ -160,6 +161,7 @@ requires-dist = [
     { name = "cliff", specifier = "==3.2" },
     { name = "elasticsearch", specifier = "==8.*" },
     { name = "jmespath", specifier = ">=1.0.1" },
+    { name = "typing-extensions", specifier = ">=4.4" },
 ]
 
 [package.metadata.requires-dev]

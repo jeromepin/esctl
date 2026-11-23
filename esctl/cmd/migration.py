@@ -1,5 +1,7 @@
 import argparse
 
+from typing_extensions import override
+
 from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 
@@ -9,6 +11,7 @@ class MigrationDeprecations(EsctlLister):
     deprecated features that will be removed or changed in a future version.
     """
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         response = self.request("GET", "/_migration/deprecations", None)
         if not isinstance(response, dict):

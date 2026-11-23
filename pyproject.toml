@@ -36,6 +36,7 @@ dependencies = [
     "cliff==3.2",
     "elasticsearch==8.*",
     "jmespath>=1.0.1",
+    "typing-extensions>=4.4",
 ]
 
 [tool.setuptools.packages.find]
@@ -132,7 +133,7 @@ extend-select = [
   "PT",  # pytest style
   "TID", "SLF",  # absolute imports, no private access from outside
   "ERA", "TD", "FIX",  # no commented-out code or TODOs: open an issue or an xfail test instead
-  "ARG001",  # unused function arguments
+  "ARG",  # unused arguments (except in methods overriding a base class signature)
   "ANN",  # type annotations (see per-file-ignores for tests)
 ]
 ignore = [
@@ -144,6 +145,9 @@ ignore = [
 python-version = "3.10"
 # Type stubs for untyped dependencies
 extra-paths = ["stubs"]
+
+[tool.ty.rules]
+missing-override-decorator = "error"
 
 [tool.ty.src]
 include = ["esctl", "tests"]

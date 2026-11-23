@@ -7,6 +7,7 @@ from typing import Any
 
 import cerberus
 import yaml
+from typing_extensions import override
 
 from esctl.exceptions import ConfigurationError
 from esctl.utils import setup_yaml
@@ -39,6 +40,7 @@ class Context:
         self.settings = settings
         self.pre_commands = pre_commands or []
 
+    @override
     def __repr__(self) -> str:
         return f"<Context {self.name} user={self.user} cluster={self.cluster} settings={self.settings}>"
 

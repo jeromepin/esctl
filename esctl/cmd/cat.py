@@ -1,6 +1,8 @@
 import argparse
 from typing import Any
 
+from typing_extensions import override
+
 from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
@@ -18,6 +20,7 @@ class CatAllocation(EsctlLister):
     and their disk space.
     """
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         allocation = self.transform(self.rows(self.es.cat.allocation(format="json")))
 
@@ -60,6 +63,7 @@ class CatAllocation(EsctlLister):
 class CatPlugins(EsctlLister):
     """Returns informations about installed plugins across nodes."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         plugins = self.transform(self.rows(self.es.cat.plugins(format="json")))
 
@@ -74,6 +78,7 @@ class CatPlugins(EsctlLister):
 class CatShards(EsctlLister):
     """Provides a detailed view of shard allocation on nodes."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         nodes = [n["name"] for n in self.rows(self.es.cat.nodes(format="json", h="name"))]
         shards = self.transform(
@@ -125,6 +130,7 @@ class CatShards(EsctlLister):
 
         return list(indices.values())
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -143,6 +149,7 @@ class CatThreadpool(EsctlLister):
 
     _default_headers = "node_name,name,active,queue,rejected,type"
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         headers = parsed_args.headers or self._default_headers
 
@@ -160,6 +167,7 @@ class CatThreadpool(EsctlLister):
             columns=[(h,) for h in headers.split(",")],
         )
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
@@ -196,6 +204,7 @@ class CatThreadpool(EsctlLister):
 class CatTemplates(EsctlLister):
     """Returns information about existing templates."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         templates = self.rows(self.es.cat.templates(name=parsed_args.name, format="json"))
 
@@ -203,6 +212,7 @@ class CatTemplates(EsctlLister):
             columns=[("name",), ("index_patterns",), ("order",), ("version")],
         )
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(

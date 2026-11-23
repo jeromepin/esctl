@@ -2,6 +2,7 @@ import argparse
 from typing import Any
 
 import yaml
+from typing_extensions import override
 
 from esctl.commands import EsctlCommand, EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
@@ -13,6 +14,7 @@ class ConfigClusterList(EsctlLister):
 
     requires_cluster = False
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         clusters = [
             {
@@ -32,6 +34,7 @@ class ConfigContextList(EsctlLister):
 
     requires_cluster = False
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         contexts = [
             {
@@ -70,10 +73,12 @@ class ConfigContextSet(EsctlCommand):
 
     requires_cluster = False
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.esctl.config["default-context"] = parsed_args.context
         self.esctl.config_file_parser.write_config_file(dict(self.esctl.config))
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -90,6 +95,7 @@ class ConfigShow(EsctlCommand):
 
     requires_cluster = False
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         setup_yaml()
         self.print_output(
@@ -107,6 +113,7 @@ class ConfigUserList(EsctlLister):
 
     requires_cluster = False
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         users = [
             {

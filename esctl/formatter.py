@@ -1,6 +1,8 @@
 from collections.abc import Iterable, Mapping
 from typing import Any
 
+from typing_extensions import override
+
 
 class TableKey:
     def __init__(self, key: str, name: str | None = None, *, pretty_key: bool = True) -> None:
@@ -64,6 +66,7 @@ class TableKey:
 
         return " ".join(name)
 
+    @override
     def __repr__(self) -> str:
         return f"({self.key}, {self.name})"
 
