@@ -1,7 +1,6 @@
 import copy
 import logging
 import os
-import sys
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any
@@ -9,7 +8,18 @@ from typing import Any
 import cerberus
 import yaml
 
+from esctl.exceptions import ConfigurationError
 from esctl.utils import setup_yaml
+
+
+def _flatten_validation_errors(errors: dict, path: tuple[str, ...] = ()):
+    """Turn cerberus' nested `errors` into ("clusters.foo.servers", "must be of list type") pairs."""
+    for field, problems in errors.items():
+        for problem in problems:
+            if isinstance(problem, dict):
+                yield from _flatten_validation_errors(problem, (*path, str(field)))
+            else:
+                yield ".".join((*path, str(field))), problem
 
 
 class Context:
@@ -138,19 +148,10 @@ class ConfigFileParser:
         cerberus_validator = cerberus.Validator(schema)
 
         if not cerberus_validator.validate(document):
-            for root_error in cerberus_validator._errors:
-                for inner_error in root_error.info[0]:
-                    self.log.error(
-                        "Unknown configuration : {}".format(
-                            ".".join(inner_error.document_path),
-                        ),
-                    )
-                self.log.error(
-                    f"Invalid type or schema for configuration field '{root_error.field}'."
-                    f" Should be {root_error.constraint}. Got '{root_error.value}'",
-                )
+            for field, problem in _flatten_validation_errors(cerberus_validator.errors):
+                self.log.error(f"Invalid configuration at '{field}': {problem}")
 
-            raise SyntaxError(f"{self.path} doesn't match expected schema")
+            raise ConfigurationError(f"{self.path} doesn't match expected schema")
 
     def load_configuration(self, path: str = "~/.esctlrc") -> OrderedDict:
         self.path = os.path.expanduser(path)
@@ -168,16 +169,11 @@ class ConfigFileParser:
                 try:
                     raw_config_file = OrderedDict(yaml.safe_load(config_file))
                 except yaml.YAMLError as err:
-                    self.log.critical(f"Cannot read YAML from {self.path}")
-                    self.log.critical(str(err.problem) + str(err.problem_mark))
-                    sys.exit(1)
+                    raise ConfigurationError(f"Cannot read YAML from {self.path}: {err}") from err
         else:
             raw_config_file = self._create_default_config_file()
 
-        try:
-            self._ensure_config_file_is_valid(raw_config_file)
-        except SyntaxError:
-            sys.exit(1)
+        self._ensure_config_file_is_valid(raw_config_file)
 
         for config_block in expected_config_blocks:
             self.__setattr__(config_block, raw_config_file.get(config_block))
@@ -197,12 +193,11 @@ class ConfigFileParser:
         cluster = copy.deepcopy(self.clusters.get(raw_context.get("cluster")))
 
         if cluster is None:
-            self.log.error(
+            raise ConfigurationError(
                 f"Malformed context `{context_name}` in configuration file : "
                 f"it requires a cluster named `{raw_context.get('cluster')}` but none could be found ! "
                 f"Here are the clusters I know : {', '.join(list(self.clusters.keys()))}",
             )
-            sys.exit(1)
 
         # Merge global settings and per-cluster settings.
         # Cluster-level settings override global settings
@@ -245,8 +240,7 @@ class ConfigFileParser:
         try:
             context = self.get_context_informations(context_name)
             self.log.debug(context)
-        except AttributeError:
-            self.log.fatal(f"Cannot load context '{context_name}'.")
-            sys.exit(1)
+        except AttributeError as err:
+            raise ConfigurationError(f"Cannot load context '{context_name}'.") from err
 
         return context
