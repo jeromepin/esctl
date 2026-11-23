@@ -2,6 +2,7 @@ import pytest
 from cliff.formatters.table import TableFormatter
 
 from esctl.cmd.snapshot import SnapshotList
+from esctl.main import Esctl
 
 
 @pytest.mark.parametrize(
@@ -19,7 +20,7 @@ from esctl.cmd.snapshot import SnapshotList
     ],
 )
 def test_value_based_color(snapshot, expected):
-    command = SnapshotList(None, None)
+    command = SnapshotList(Esctl(), None)
     command.formatter = TableFormatter()
 
     assert command.transform([snapshot])[0] == expected

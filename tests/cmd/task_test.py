@@ -3,6 +3,7 @@ import warnings
 import pytest
 
 from esctl.cmd.task import TaskList
+from esctl.main import Esctl
 
 TASKS = {
     "nodes": {
@@ -45,7 +46,7 @@ def test_detailed_follows_the_flag(run_esctl, fake_es, argv, expected):
     ],
 )
 def test_start_time_keeps_three_digit_milliseconds(timestamp, expected):
-    assert TaskList(None, None).convert_timestamp_in_ms_to_human_readable(timestamp) == expected
+    assert TaskList(Esctl(), None).convert_timestamp_in_ms_to_human_readable(timestamp) == expected
 
 
 def test_technical_preview_warning_is_not_shown(run_esctl, fake_es):

@@ -38,6 +38,9 @@ dependencies = [
     "jmespath>=1.0.1",
 ]
 
+[tool.setuptools.packages.find]
+include = ["esctl*"]
+
 [project.urls]
 Homepage = "https://github.com/jeromepin/esctl"
 Repository = "https://github.com/jeromepin/esctl"
@@ -139,6 +142,8 @@ ignore = [
 [tool.ty.environment]
 # Check against the oldest supported Python
 python-version = "3.10"
+# Type stubs for untyped dependencies
+extra-paths = ["stubs"]
 
 [tool.ty.src]
 include = ["esctl", "tests"]

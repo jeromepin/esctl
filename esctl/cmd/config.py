@@ -19,7 +19,7 @@ class ConfigClusterList(EsctlLister):
                 "name": cluster_name,
                 "servers": "\n".join(cluster_definition.get("servers")),
             }
-            for cluster_name, cluster_definition in self.app.config["clusters"].items()
+            for cluster_name, cluster_definition in self.esctl.config["clusters"].items()
         ]
 
         return JSONToCliffFormatter(clusters).format_for_lister(
@@ -39,7 +39,7 @@ class ConfigContextList(EsctlLister):
                 "user": context_definition.get("user"),
                 "cluster": context_definition.get("cluster"),
             }
-            for context_name, context_definition in self.app.config["contexts"].items()
+            for context_name, context_definition in self.esctl.config["contexts"].items()
         ]
 
         return JSONToCliffFormatter(self.transform(contexts)).format_for_lister(
@@ -53,7 +53,7 @@ class ConfigContextList(EsctlLister):
         modified_contexts = []
 
         for context in raw_contexts:
-            if context.get("name") == self.app.config.get("default-context"):
+            if context.get("name") == self.esctl.config.get("default-context"):
                 for context_attribute_name, context_attribute_value in context.items():
                     context[context_attribute_name] = Color.colorize(
                         context_attribute_value,
@@ -71,15 +71,15 @@ class ConfigContextSet(EsctlCommand):
     requires_cluster = False
 
     def take_action(self, parsed_args: argparse.Namespace) -> None:
-        self.app.config["default-context"] = parsed_args.context
-        self.app.config_file_parser.write_config_file(dict(self.app.config))
+        self.esctl.config["default-context"] = parsed_args.context
+        self.esctl.config_file_parser.write_config_file(dict(self.esctl.config))
 
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "context",
             help=("Context to set as default"),
-            choices=self.app.config.get("contexts"),
+            choices=self.esctl.config.get("contexts"),
         )
 
         return parser
@@ -94,7 +94,7 @@ class ConfigShow(EsctlCommand):
         setup_yaml()
         self.print_output(
             yaml.safe_dump(
-                dict(self.app.config),
+                dict(self.esctl.config),
                 None,
                 default_flow_style=False,
                 width=500,
@@ -115,7 +115,7 @@ class ConfigUserList(EsctlLister):
                 "password": user_definition.get("password"),
             }
             # `users` is optional
-            for user_name, user_definition in (self.app.config.get("users") or {}).items()
+            for user_name, user_definition in (self.esctl.config.get("users") or {}).items()
         ]
 
         return JSONToCliffFormatter(users).format_for_lister(

@@ -3,9 +3,10 @@ import logging
 import sys
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import jmespath
+from cliff.app import App
 from cliff.command import Command
 from cliff.formatters.table import TableFormatter
 from cliff.lister import Lister
@@ -33,7 +34,15 @@ class EsctlCommon:
     # Set by cliff on display commands (listers and show-ones) when they run
     formatter: object = None
     # Set by cliff's Command constructor
-    app: "Esctl"
+    app: App
+
+    @property
+    def esctl(self) -> "Esctl":
+        """The running app, which cliff types as its base App."""
+        # Not checked with isinstance(): when run with `python -m esctl.main`, the app is an instance of
+        # `__main__.Esctl`, which is not `esctl.main.Esctl`
+        return cast("Esctl", self.app)
+
     # Whether the command talks to Elasticsearch. Local commands neither
     # resolve credentials nor run the context's pre-commands.
     requires_cluster = True
