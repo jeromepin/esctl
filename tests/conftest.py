@@ -172,3 +172,10 @@ def _isolate_global_state():
             handler.close()
     root.setLevel(level)
     Client.reset()
+
+    # A test that starts a patch without stopping it leaks into every later test.
+    from esctl.commands import EsctlCommon
+    from esctl.settings import Settings
+
+    for owner in (EsctlCommon, Settings):
+        assert isinstance(owner.__dict__["es"], property), f"{owner.__name__}.es was left patched"
