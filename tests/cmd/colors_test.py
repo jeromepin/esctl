@@ -14,10 +14,12 @@ SNAPSHOTS = [
 def routes(fake_es):
     fake_es.on("GET", "/_cat/thread_pool", THREAD_POOLS)
     fake_es.on("GET", "/_cat/snapshots/backups", SNAPSHOTS)
+    fake_es.on("GET", "/logs/_settings", {"logs": {"settings": {}, "defaults": {"index.refresh_interval": "1s"}}})
 
 
 COMMANDS = [
     ("cat", "thread-pool"),
+    ("index", "settings", "get", "logs", "refresh_interval"),
     ("snapshot", "list", "backups"),
     ("config", "context", "list"),
 ]
@@ -35,7 +37,7 @@ def test_machine_readable_formats_have_no_color_codes(run_esctl, fake_es, argv, 
     assert "[0m" not in result.out
 
 
-@pytest.mark.parametrize("argv", COMMANDS)
+@pytest.mark.parametrize("argv", [argv for argv in COMMANDS if argv[0] != "index"])
 def test_tables_are_still_colored(run_esctl, fake_es, argv):
     routes(fake_es)
 

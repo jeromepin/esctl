@@ -79,3 +79,15 @@ def test_no_matching_index(run_esctl, fake_es):
 
     assert result.code == 0, result.err
     assert result.json() == []
+
+
+def test_default_values_are_flagged_in_their_own_column(run_esctl, fake_es):
+    fake_es.on("GET", "/logs,metrics/_settings", INDEX_SETTINGS)
+
+    result = run_esctl("index", "settings", "get", "logs,metrics", "refresh_interval", "-f", "json")
+
+    assert result.code == 0, result.err
+    assert result.json() == [
+        {"Index": "logs", "Setting": "index.refresh_interval", "Value": "5s", "Default": False},
+        {"Index": "metrics", "Setting": "index.refresh_interval", "Value": "1s", "Default": True},
+    ]
