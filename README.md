@@ -108,6 +108,8 @@ contexts:
 default-context: foo
 ```
 
+Instead of storing them in clear text, `username` and `password` can be retrieved from the output of a shell command with `external_username` and `external_password`. esctl stops if the command fails or prints nothing.
+
 ### Running pre-commands
 
 Sometimes, you need to execute a shell command right before running the `esctl` command. Like running a `kubectl port-forward` in order to connect to your Kubernetes cluster.

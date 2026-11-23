@@ -93,3 +93,16 @@ def test_the_password_command_runs_once_per_session(write_config, default_config
     app.connect()
 
     assert counter.read_text().splitlines() == ["call"]
+
+
+def test_username_can_come_from_a_command_too(run_esctl, fake_es, default_config):
+    fake_es.on("GET", "/_cluster/health", {"status": "green"})
+    default_config["users"]["admin"] = {
+        "external_username": {"command": {"run": "echo bob"}},
+        "external_password": {"command": {"run": "echo s3cret"}},
+    }
+
+    result = run_esctl("cluster", "health", config=default_config)
+
+    assert result.code == 0, result.err
+    assert fake_es.last("GET", "/_cluster/health").headers["authorization"] == basic_auth("bob", "s3cret")

@@ -99,12 +99,15 @@ class Esctl(App):
         console.setFormatter(formatter)
         root_logger.addHandler(console)
 
-    def insert_password_into_context(self):
-        external_password_definition = self.context.user.pop("external_password")
-        self.context.user["password"] = self._run_os_system_command(
-            external_password_definition["command"]["run"],
-            purpose="password",
-        )
+    def resolve_external_credentials(self):
+        """Replace `external_username`/`external_password` by the output of their command."""
+        for field in ("username", "password"):
+            definition = self.context.user.pop(f"external_{field}", None)
+            if definition is not None:
+                self.context.user[field] = self._run_os_system_command(
+                    definition["command"]["run"],
+                    purpose=field,
+                )
 
     def initialize_app(self, argv):
         self.config = self.config_file_parser.load_configuration(
@@ -125,8 +128,7 @@ class Esctl(App):
         http_auth = None
 
         if self.context.user is not None:
-            if "external_password" in self.context.user:
-                self.insert_password_into_context()
+            self.resolve_external_credentials()
 
             http_auth = (
                 (self.context.user.get("username"), self.context.user.get("password"))
