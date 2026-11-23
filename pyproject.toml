@@ -109,9 +109,19 @@ ignore = [
   "G004",
 ]
 
+[tool.ty.environment]
+# Check against the oldest supported Python
+python-version = "3.10"
+
+[tool.ty.src]
+include = ["esctl", "tests"]
+exclude = [
+  # Copied from cliff for cmd2 0.8: to be replaced when upgrading cliff and cmd2
+  "esctl/interactive.py",
+]
+
 [tool.uv]
 dev-dependencies = [
-    "mypy>=1.13.0",
     "pipx>=1.7.1",
     "pre-commit>=4.0.1",
     "pytest-clarity>=1.0.1",
@@ -120,6 +130,7 @@ dev-dependencies = [
     "pyupgrade>=3.19.0",
     "ruff>=0.8.3",
     "setuptools>=75.6.0",
+    "ty==0.0.108",
     "uv>=0.5.11",
 ]
 
