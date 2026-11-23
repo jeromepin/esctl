@@ -1,4 +1,3 @@
-import random
 import ssl
 
 from elasticsearch import Elasticsearch
@@ -69,6 +68,7 @@ class Client:
             elasticsearch_client_kwargs["timeout"] = context.settings.get("timeout")
 
         return Elasticsearch(
-            random.choice(context.cluster["servers"]),
+            # The client spreads requests over every node and retries on another one when a node fails
+            context.cluster["servers"],
             **elasticsearch_client_kwargs,
         )
