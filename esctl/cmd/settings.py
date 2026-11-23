@@ -1,9 +1,12 @@
+import argparse
 from typing import Any
 
 from esctl.commands import (
     EsctlCommandIndex,
     EsctlListerIndexSetting,
     EsctlShowOne,
+    ListerResult,
+    ShowOneResult,
     add_persistency_arguments,
     selected_persistency,
 )
@@ -12,7 +15,7 @@ from esctl.settings import ClusterSettings, IndexSettings, Persistency
 from esctl.utils import Color
 
 
-def displayed_value(value: Any) -> Any:
+def displayed_value(value: object) -> object:
     """Show list values one item per line, and `[]` when empty."""
     if isinstance(value, list):
         return ",\n".join(value) if value else "[]"
@@ -29,7 +32,7 @@ class AbstractClusterSettings(EsctlShowOne):
             self.cluster_settings.set(setting, value, persistency=persistency),
         )
 
-    def _settings_get(self, setting: str):
+    def _settings_get(self, setting: str) -> ShowOneResult:
         s = self.cluster_settings.mget(setting)
         self.response = {
             "transient": s["transient"].value,
@@ -46,7 +49,7 @@ class AbstractClusterSettings(EsctlShowOne):
 class AbstractClusterSetting(AbstractClusterSettings):
     """A command acting on the cluster setting given as argument."""
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
         parser.add_argument("setting", metavar="<setting>", help=("Setting"))
@@ -57,7 +60,7 @@ class AbstractClusterSetting(AbstractClusterSettings):
 class ClusterSettingsGet(AbstractClusterSetting):
     """Get a setting value."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         return self._settings_get(parsed_args.setting)
 
 
@@ -66,7 +69,7 @@ class ClusterSettingsList(EsctlShowOne):
 
     cluster_settings: ClusterSettings
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         settings_list = self.cluster_settings.list_().get("defaults", {})
         self.response = settings_list
         default_settings = {name: displayed_value(value) for name, value in settings_list.items()}
@@ -77,7 +80,7 @@ class ClusterSettingsList(EsctlShowOne):
 class ClusterSettingsReset(AbstractClusterSetting):
     """Reset a setting value."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self._settings_set(
             parsed_args.setting,
             None,
@@ -85,7 +88,7 @@ class ClusterSettingsReset(AbstractClusterSetting):
         )
         return self._settings_get(parsed_args.setting)
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
         add_persistency_arguments(parser)
@@ -96,7 +99,7 @@ class ClusterSettingsReset(AbstractClusterSetting):
 class ClusterSettingsSet(AbstractClusterSetting):
     """Set a setting value."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self._settings_set(
             parsed_args.setting,
             parsed_args.value,
@@ -104,7 +107,7 @@ class ClusterSettingsSet(AbstractClusterSetting):
         )
         return self._settings_get(parsed_args.setting)
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
         add_persistency_arguments(parser)
@@ -117,7 +120,7 @@ class ClusterSettingsSet(AbstractClusterSetting):
 class IndexSettingsGet(EsctlListerIndexSetting):
     """Get an index-level setting value."""
 
-    def retrieve_setting(self, setting_name, index):
+    def retrieve_setting(self, setting_name: str, index: str) -> list[dict[str, Any]]:
         setting_name = ",".join(
             name if name.startswith("index.") else f"index.{name}" for name in setting_name.split(",")
         )
@@ -135,7 +138,7 @@ class IndexSettingsGet(EsctlListerIndexSetting):
             if setting.value is not None
         ]
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         return JSONToCliffFormatter(
             self.retrieve_setting(parsed_args.setting, parsed_args.index),
         ).format_for_lister(columns=[("index",), ("setting",), ("value",), ("default",)])
@@ -146,7 +149,7 @@ class IndexSettingsList(EsctlShowOne):
 
     index_settings: IndexSettings
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         indices = self.rows(self.es.cat.indices(format="json", h="index"))
         if not indices:
             self.log.warning("There is no index to list settings from.")
@@ -167,7 +170,7 @@ class IndexSettingsSet(EsctlCommandIndex):
 
     index_settings: IndexSettings
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         setting_name = parsed_args.setting
 
         if not setting_name.startswith("index."):
@@ -182,7 +185,7 @@ class IndexSettingsSet(EsctlCommandIndex):
             self.index_settings.set(setting_name, parsed_args.value, parsed_args.index),
         )
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("setting", metavar="<setting>", help=("Setting"))
         parser.add_argument("value", metavar="<value>", help=("Setting value"))

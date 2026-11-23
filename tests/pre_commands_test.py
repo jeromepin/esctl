@@ -3,8 +3,8 @@ import os
 import subprocess
 import sys
 import time
-from types import SimpleNamespace
 
+from esctl.cmd.cluster import ClusterHealth
 from esctl.main import Esctl
 
 
@@ -140,7 +140,7 @@ def test_output_printed_after_the_expected_line_keeps_being_read(write_config, d
     app = Esctl()
     app.options, _ = app.parser.parse_known_args(["--config", str(write_config(config))])
     app.initialize_app([])
-    cmd = SimpleNamespace(requires_cluster=True)
+    cmd = ClusterHealth(app, None)
 
     app.prepare_to_run_command(cmd)
     try:

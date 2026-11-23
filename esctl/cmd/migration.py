@@ -1,4 +1,6 @@
-from esctl.commands import EsctlLister
+import argparse
+
+from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 
 
@@ -7,10 +9,13 @@ class MigrationDeprecations(EsctlLister):
     deprecated features that will be removed or changed in a future version.
     """
 
-    def take_action(self, parsed_args):
-        deprecations = self.transform(
-            self.request("GET", "/_migration/deprecations", None),
-        )
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
+        response = self.request("GET", "/_migration/deprecations", None)
+        if not isinstance(response, dict):
+            msg = f"Unexpected deprecations response: {response!r}"
+            raise TypeError(msg)
+
+        deprecations = self.transform(response)
 
         return JSONToCliffFormatter(deprecations).format_for_lister(
             columns=[

@@ -1,4 +1,7 @@
-from esctl.commands import EsctlLister
+import argparse
+from typing import Any
+
+from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
 
@@ -15,7 +18,7 @@ class CatAllocation(EsctlLister):
     and their disk space.
     """
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         allocation = self.transform(self.rows(self.es.cat.allocation(format="json")))
 
         return JSONToCliffFormatter(allocation).format_for_lister(
@@ -32,20 +35,20 @@ class CatAllocation(EsctlLister):
             ],
         )
 
-    def transform(self, allocation):
+    def transform(self, allocation: list[dict[str, Any]]) -> list[dict[str, Any]]:
         nodes = []
 
         for node in allocation:
             if self.uses_table_formatter() and node.get("disk.percent") is not None:
-                if int(node.get("disk.percent")) > DISK_PERCENT_CRITICAL:
+                if int(node["disk.percent"]) > DISK_PERCENT_CRITICAL:
                     node["disk.percent"] = Color.colorize(
-                        node.get("disk.percent"),
+                        node["disk.percent"],
                         Color.RED,
                     )
 
-                elif int(node.get("disk.percent")) > DISK_PERCENT_WARNING:
+                elif int(node["disk.percent"]) > DISK_PERCENT_WARNING:
                     node["disk.percent"] = Color.colorize(
-                        node.get("disk.percent"),
+                        node["disk.percent"],
                         Color.YELLOW,
                     )
 
@@ -57,21 +60,21 @@ class CatAllocation(EsctlLister):
 class CatPlugins(EsctlLister):
     """Returns informations about installed plugins across nodes."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         plugins = self.transform(self.rows(self.es.cat.plugins(format="json")))
 
         return JSONToCliffFormatter(plugins).format_for_lister(
             columns=[("name", "node"), ("component", "plugin"), ("version")],
         )
 
-    def transform(self, plugins):
+    def transform(self, plugins: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return sorted(plugins, key=lambda i: i["name"])
 
 
 class CatShards(EsctlLister):
     """Provides a detailed view of shard allocation on nodes."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         nodes = [n["name"] for n in self.rows(self.es.cat.nodes(format="json", h="name"))]
         shards = self.transform(
             self.rows(
@@ -97,7 +100,7 @@ class CatShards(EsctlLister):
 
         return JSONToCliffFormatter(shards).format_for_lister(columns=columns)
 
-    def transform(self, shards_list: list[dict[str, str]], nodes: list[str]):
+    def transform(self, shards_list: list[dict[str, Any]], nodes: list[str]) -> list[dict[str, Any]]:
         indices = {}
         self.has_unassigned_shards: bool = False
 
@@ -122,7 +125,7 @@ class CatShards(EsctlLister):
 
         return list(indices.values())
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "index",
@@ -140,7 +143,7 @@ class CatThreadpool(EsctlLister):
 
     _default_headers = "node_name,name,active,queue,rejected,type"
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         headers = parsed_args.headers or self._default_headers
 
         thread_pools = self.transform(
@@ -157,7 +160,7 @@ class CatThreadpool(EsctlLister):
             columns=[(h,) for h in headers.split(",")],
         )
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
         parser.add_argument(
@@ -173,7 +176,7 @@ class CatThreadpool(EsctlLister):
 
         return parser
 
-    def transform(self, raw_thread_pools):
+    def transform(self, raw_thread_pools: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not self.uses_table_formatter():
             return raw_thread_pools
 
@@ -193,14 +196,14 @@ class CatThreadpool(EsctlLister):
 class CatTemplates(EsctlLister):
     """Returns information about existing templates."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         templates = self.rows(self.es.cat.templates(name=parsed_args.name, format="json"))
 
         return JSONToCliffFormatter(templates).format_for_lister(
             columns=[("name",), ("index_patterns",), ("order",), ("version")],
         )
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "name",

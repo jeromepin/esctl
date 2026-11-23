@@ -1,14 +1,17 @@
-from esctl.commands import EsctlLister
+import argparse
+from typing import Any
+
+from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 
 
 class SecurityUsersGet(EsctlLister):
     """Retrieves information about users in the native realm and built-in users."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         users = self.transform(
             self._sort_and_order_dict(
-                self.es.security.get_user(username=parsed_args.username),
+                self.es.security.get_user(username=parsed_args.username).body,
             ),
         )
 
@@ -23,15 +26,15 @@ class SecurityUsersGet(EsctlLister):
             ],
         )
 
-    def transform(self, raw_users):
-        users: list[dict[str, str]] = []
+    def transform(self, raw_users: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+        users: list[dict[str, Any]] = []
         for user in raw_users.values():
-            user["roles"] = ", ".join(user.get("roles"))
+            user["roles"] = ", ".join(user.get("roles", []))
             users.append(user)
 
         return users
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
 
         parser.add_argument(

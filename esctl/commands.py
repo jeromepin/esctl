@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -15,6 +16,11 @@ from elasticsearch import Elasticsearch
 from esctl.elasticsearch import Client
 from esctl.settings import ClusterSettings, IndexSettings, Persistency
 from esctl.utils import Color
+
+# What cliff's Lister.take_action() returns: column names, then one sequence of values per row
+ListerResult = tuple[tuple[str, ...], Iterable[Sequence[Any]]]
+# What cliff's ShowOne.take_action() returns: field names, then their values
+ShowOneResult = tuple[tuple[str, ...], tuple[Any, ...]]
 
 if TYPE_CHECKING:
     # Not imported at runtime: when run with `python -m esctl.main`, it would
@@ -38,13 +44,13 @@ class EsctlCommon:
     def es(self) -> Elasticsearch:
         return Client.get()
 
-    def _sort_and_order_dict(self, dct):
+    def _sort_and_order_dict(self, dct: Mapping[str, Any]) -> dict[str, Any]:
         return {e[0]: e[1] for e in sorted(dct.items())}
 
-    def print_success(self, message):
+    def print_success(self, message: object) -> None:
         self.print_output(f"{Color.colorize('==>', Color.GREEN)} {message}")
 
-    def print_output(self, message):
+    def print_output(self, message: object) -> None:
         # Write where cliff expects commands to write, instead of sys.stdout
         self.app.stdout.write(f"{message}\n")
 
@@ -70,8 +76,8 @@ class EsctlCommon:
         self,
         verb: str,
         route: str,
-        body: dict[Any, Any] | str | None,
-    ) -> Any:
+        body: dict[str, Any] | str | None,
+    ) -> object:
         """Send an arbitrary request and return the decoded response body."""
         headers = {"accept": "application/json"}
         if body is not None:
@@ -166,7 +172,7 @@ class EsctlCommand(Command, EsctlCommon):
     """Simple command to run. Doesn't expect any output."""
 
 
-def add_persistency_arguments(parser):
+def add_persistency_arguments(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """Add the mutually exclusive `--transient` (default) and `--persistent` flags."""
     persistency_group = parser.add_mutually_exclusive_group()
     persistency_group.add_argument(
@@ -192,12 +198,12 @@ class EsctlCommandWithPersistency(EsctlCommand):
     be used when working with settings, logging, etc...
     """
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         return add_persistency_arguments(super().get_parser(prog_name))
 
 
 class EsctlCommandIndex(EsctlCommand):
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "index",
@@ -207,7 +213,7 @@ class EsctlCommandIndex(EsctlCommand):
 
 
 class EsctlCommandLogging(EsctlCommandWithPersistency):
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("logger", metavar="<logger>", help=("Logger"))
         return parser
@@ -218,7 +224,7 @@ class EsctlLister(Lister, EsctlCommon):
 
 
 class EsctlListerIndexSetting(EsctlLister):
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("index", metavar="<index>", help=("Index"))
         parser.add_argument(
@@ -242,21 +248,23 @@ class EsctlShowOne(ShowOne, EsctlCommon):
     response: Any = None
     pretty_keys: bool = True
 
-    def run(self, parsed_args):
+    def run(self, parsed_args: argparse.Namespace) -> int:
         self.pretty_keys = not parsed_args.no_pretty
         return super().run(parsed_args)
 
-    def produce_output(self, parsed_args, column_names, data):
+    def produce_output(
+        self, parsed_args: argparse.Namespace, column_names: Sequence[str], data: Sequence[object]
+    ) -> int:
         if parsed_args.jmespath is not None:
             source = self.response if self.response is not None else dict(zip(column_names, data, strict=True))
             column_names, data = ("Result",), (self.jmespath_search(parsed_args.jmespath, source),)
 
         return super().produce_output(parsed_args, column_names, data)
 
-    def jmespath_search(self, expression, data, options=None):
+    def jmespath_search(self, expression: str, data: object, options: jmespath.Options | None = None) -> object:
         return jmespath.search(expression, data, options=options)
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "--no-pretty",

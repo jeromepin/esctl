@@ -1,3 +1,4 @@
+import argparse
 import json
 
 from esctl.commands import EsctlCommand
@@ -6,7 +7,7 @@ from esctl.commands import EsctlCommand
 class RawCommand(EsctlCommand):
     """Performs a raw HTTP call. Useful when esctl doesn't provide a nice interface for a specific route."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         body: str = parsed_args.body
 
         if parsed_args.body is not None and parsed_args.body.startswith("@"):
@@ -17,7 +18,7 @@ class RawCommand(EsctlCommand):
         # Some routes only answer plain text (e.g. hot threads)
         self.print_output(response if isinstance(response, str) else json.dumps(response))
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "-d",

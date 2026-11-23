@@ -1,14 +1,17 @@
+import argparse
+from typing import Any
+
 import elasticsearch
 
 from esctl.cmd.settings import AbstractClusterSettings
-from esctl.commands import EsctlShowOne, add_persistency_arguments, selected_persistency
+from esctl.commands import EsctlShowOne, ShowOneResult, add_persistency_arguments, selected_persistency
 from esctl.utils import Color, flatten_dict
 
 
 class ClusterAllocationExplain(EsctlShowOne):
     """Provide explanations for shard allocations failures."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         try:
             response = self.es.cluster.allocation_explain()
             self.response = response.body
@@ -41,14 +44,14 @@ class ClusterAllocationExplain(EsctlShowOne):
 class ClusterHealth(EsctlShowOne):
     """Show the cluster health."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self.response = self.es.cluster.health().body
         health = self._sort_and_order_dict(self.response)
 
         if self.uses_table_formatter():
             health["status"] = Color.colorize(
-                health.get("status"),
-                getattr(Color, health.get("status").upper()),
+                health["status"],
+                getattr(Color, health["status"].upper()),
             )
 
         return (tuple(health.keys()), tuple(health.values()))
@@ -57,7 +60,7 @@ class ClusterHealth(EsctlShowOne):
 class ClusterInfo(EsctlShowOne):
     """Show basic informations about the cluster."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self.response = self.es.info().body
         # Flattening edits the top-level keys: keep the response intact for --jmespath
         infos = dict(self.response)
@@ -71,7 +74,7 @@ class ClusterInfo(EsctlShowOne):
 class ClusterStats(EsctlShowOne):
     """Show cluster stats."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self.response = self.es.cluster.stats().body
         cluster_stats = self._sort_and_order_dict(
             self.transform(flatten_dict(self.response)),
@@ -79,7 +82,7 @@ class ClusterStats(EsctlShowOne):
 
         return (tuple(cluster_stats.keys()), tuple(cluster_stats.values()))
 
-    def transform(self, stats):
+    def transform(self, stats: dict[str, Any]) -> dict[str, Any]:
         for attribute in [
             "nodes.jvm.versions",
             "nodes.os.cpu",
@@ -89,9 +92,7 @@ class ClusterStats(EsctlShowOne):
             "nodes.packaging_types",
         ]:
             if attribute in stats:
-                for key, value in self.objects_list_to_flat_dict(
-                    stats.get(attribute),
-                ).items():
+                for key, value in self.objects_list_to_flat_dict(stats[attribute]).items():
                     stats.update({f"{attribute}{key}": value})
 
                 del stats[attribute]
@@ -102,7 +103,7 @@ class ClusterStats(EsctlShowOne):
 class ClusterRoutingAllocationEnable(AbstractClusterSettings):
     """Get and set the cluster's routing allocation policy."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         if parsed_args.status is not None:
             self._settings_set(
                 "cluster.routing.allocation.enable",
@@ -112,7 +113,7 @@ class ClusterRoutingAllocationEnable(AbstractClusterSettings):
 
         return self._settings_get("cluster.routing.allocation.enable")
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = add_persistency_arguments(super().get_parser(prog_name))
 
         parser.add_argument(

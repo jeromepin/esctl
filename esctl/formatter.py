@@ -1,5 +1,9 @@
+from collections.abc import Iterable, Mapping
+from typing import Any
+
+
 class TableKey:
-    def __init__(self, key, name=None, *, pretty_key=True):
+    def __init__(self, key: str, name: str | None = None, *, pretty_key: bool = True) -> None:
         self.key = key
         if name is None:
             self.name = self._create_name_from_key(pretty_key=pretty_key)
@@ -37,7 +41,7 @@ class TableKey:
 
         return words
 
-    def _create_name_from_key(self, *, pretty_key=True):
+    def _create_name_from_key(self, *, pretty_key: bool = True) -> str:
         """Extrapolate the column's name based on its ID."""
         if not pretty_key:
             return self.key
@@ -60,18 +64,18 @@ class TableKey:
 
         return " ".join(name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"({self.key}, {self.name})"
 
 
 class JSONToCliffFormatter:
     """Format a JSON object to one of the cliff's class expected inputs."""
 
-    def __init__(self, json, *, pretty_key=True):
+    def __init__(self, json: Mapping[str, Any] | Iterable[Mapping[str, Any]], *, pretty_key: bool = True) -> None:
         self.json = json
         self.pretty_key = pretty_key
 
-    def _format_columns(self, columns):
+    def _format_columns(self, columns: Iterable[str | tuple[str, ...]]) -> list[TableKey]:
         """Ensure all elements given as column names are formatted as needed.
 
         Each element must finally be a TableKey object containing the column ID
@@ -104,7 +108,9 @@ class JSONToCliffFormatter:
             for column in columns
         ]
 
-    def format_for_lister(self, columns=(), none_as=None):
+    def format_for_lister(
+        self, columns: Iterable[str | tuple[str, ...]] = (), none_as: object = None
+    ) -> tuple[tuple[str, ...], tuple[tuple[object, ...], ...]]:
         """Convert a JSON object to an object compliant with
         cliff's Lister class.
 
@@ -143,14 +149,18 @@ class JSONToCliffFormatter:
         columns' headers and the second one the lines to display
         :rtype: tuple
         """
-        columns = self._format_columns(columns)
+        if isinstance(self.json, Mapping):
+            msg = "Expected a list of rows to format for a lister"
+            raise TypeError(msg)
+
+        keys = self._format_columns(columns)
 
         lst = []
         # For every line in the JSON object, pick the value corresponding to
         # the given column ID
         for raw_line in self.json:
             line = []
-            for column in columns:
+            for column in keys:
                 element = raw_line.get(column.key)
 
                 if element is None:
@@ -160,9 +170,11 @@ class JSONToCliffFormatter:
 
             lst.append(tuple(line))
 
-        return (tuple([c.name for c in columns]), tuple(lst))
+        return (tuple([c.name for c in keys]), tuple(lst))
 
-    def to_show_one(self, lines=(), none_as=None):
+    def to_show_one(
+        self, lines: Iterable[str | tuple[str, ...]] = (), none_as: object = None
+    ) -> tuple[tuple[str, ...], tuple[object, ...]]:
         """For every given element, retrieve the value in the original
         json object based on the key provided
 
@@ -175,12 +187,14 @@ class JSONToCliffFormatter:
         keys and the second one the values to display
         :rtype: tuple
         """
-        lines = self._format_columns(lines)
+        if not isinstance(self.json, Mapping):
+            msg = "Expected a mapping to format for a show-one"
+            raise TypeError(msg)
 
         keys = []
         values = []
 
-        for line in lines:
+        for line in self._format_columns(lines):
             keys.append(line.name)
 
             element = self.json.get(line.key)

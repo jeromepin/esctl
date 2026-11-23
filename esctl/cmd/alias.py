@@ -1,18 +1,20 @@
-from esctl.commands import EsctlLister
+import argparse
+
+from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 
 
 class AliasList(EsctlLister):
     """List all aliases."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         aliases = self.rows(self.es.cat.aliases(name=parsed_args.alias, format="json"))
 
         return JSONToCliffFormatter(aliases).format_for_lister(
             columns=[("index",), ("alias",)],
         )
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "alias",

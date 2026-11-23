@@ -1,4 +1,6 @@
 from collections import OrderedDict
+from collections.abc import Mapping
+from typing import Any
 
 import yaml
 
@@ -17,12 +19,12 @@ class Color:
     YELLOW = "\033[93m"
 
     @classmethod
-    def colorize(cls, text, color):
+    def colorize(cls, text: object, color: str) -> str:
         return f"{color}{text}{cls.END}"
 
 
-def flatten_dict(dictionary):
-    def expand(key, value):
+def flatten_dict(dictionary: Mapping[str, Any]) -> dict[str, Any]:
+    def expand(key: str, value: object) -> list[tuple[str, Any]]:
         if isinstance(value, dict):
             return [(key + "." + k, v) for k, v in flatten_dict(value).items()]
         return [(key, value)]
@@ -32,7 +34,7 @@ def flatten_dict(dictionary):
     return dict(items)
 
 
-def setup_yaml():
+def setup_yaml() -> None:
     """https://stackoverflow.com/a/8661021"""
     yaml.add_representer(
         OrderedDict,
