@@ -133,7 +133,7 @@ class Esctl(App):
                 else None
             )
 
-        Client(self.context, http_auth)
+        Client.configure(self.context, http_auth)
 
     def _run_os_system_command(self, raw_command: str) -> str:
         self.log.debug(f"Running command : {raw_command}")
