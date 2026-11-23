@@ -11,9 +11,9 @@ class LoggingGet(EsctlCommandLogging):
         if not parsed_args.logger.startswith("logger"):
             parsed_args.logger = "logger." + parsed_args.logger
 
-        level = self.cluster_settings.get(parsed_args.logger, persistency=persistency) or ""
+        setting = self.cluster_settings.get(parsed_args.logger, persistency=persistency)
 
-        print(f"{parsed_args.logger!s} : {level!s}")
+        print(f"{parsed_args.logger} : {setting.value or ''}")
 
 
 class LoggingReset(EsctlCommandLogging):
