@@ -88,3 +88,20 @@ def test_context_without_user_has_no_user(tmp_path):
     parser = load(tmp_path, BASE + "contexts:\n  a:\n    cluster: c\n")
 
     assert parser.create_context("a").user is None
+
+
+@pytest.mark.parametrize(
+    ("cluster", "expected"),
+    [
+        ("settings: {}", "'clusters.c.servers': required field"),
+        ("servers: []", "'clusters.c.servers': min length is 1"),
+    ],
+)
+def test_clusters_need_at_least_one_server(tmp_path, caplog, cluster, expected):
+    path = tmp_path / "esctlrc"
+    path.write_text(f"clusters:\n  c:\n    {cluster}\ncontexts: {{}}\n")
+
+    with pytest.raises(ConfigurationError):
+        ConfigFileParser().load_configuration(str(path))
+
+    assert expected in caplog.text

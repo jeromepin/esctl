@@ -102,7 +102,7 @@ class ConfigFileParser:
                 "valuesrules": {
                     "type": "dict",
                     "schema": {
-                        "servers": {"type": "list"},
+                        "servers": {"type": "list", "required": True, "minlength": 1, "schema": {"type": "string"}},
                         "settings": {"type": "dict", "schema": settings_schema},
                     },
                 },
