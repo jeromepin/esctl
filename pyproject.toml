@@ -108,7 +108,6 @@ ignore = [
   "D",
   "G004",
 ]
-exclude = ["tests/**.py"]
 
 [tool.uv]
 dev-dependencies = [
