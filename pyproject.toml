@@ -105,40 +105,23 @@ extend-exclude = [
   "esctl/interactive.py",
 ]
 
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "D",  # docstrings are welcome but not required
+  "CPY001",  # the license is in LICENSE, not repeated in each file
+  "TRY003",  # exception messages are written where they are raised
+  "COM812",  # conflicts with the formatter
+]
+
 [tool.ruff.lint.per-file-ignores]
-# Tests are pragmatic: plain asserts, literal expected values, and as many fixtures as needed
-"tests/**" = ["S101", "PLR2004", "PLR0913", "PLR0917", "S603", "ANN"]
+# Tests are pragmatic: plain asserts, literal expected values, unannotated, as many fixtures as needed, running esctl
+"tests/**" = ["S101", "PLR2004", "ANN", "PLR0913", "PLR0917", "S603"]
 
 [tool.ruff.lint.pycodestyle]
 # The formatter wraps code at `line-length`; comments and docstrings, which it doesn't wrap, may go up to 200 columns
 max-line-length = 200
 max-doc-length = 200
-
-[tool.ruff.lint]
-# select = ["ALL"]
-extend-select = [
-  "DTZ",  # naive datetimes (and the deprecated utcfromtimestamp/utcnow)
-  "B006",  # mutable default arguments, shared between calls
-  "G",  # logging calls must let logging format their message lazily
-  "EM",  # exception messages are assigned first, so tracebacks don't repeat them
-  "T20",  # commands write to cliff's stdout, not with print()
-  "PTH",  # pathlib instead of os.path and open()
-  "RET", "SIM", "FURB", "C4", "PERF", "PLW", "RUF", "ICN",  # simpler, more idiomatic code
-  "B",  # likely bugs (bugbear)
-  "A",  # no shadowing of builtins
-  "FBT",  # booleans are passed by keyword
-  "PL",  # pylint
-  "E", "W",  # pycodestyle
-  "S",  # security (bandit)
-  "PT",  # pytest style
-  "TID", "SLF",  # absolute imports, no private access from outside
-  "ERA", "TD", "FIX",  # no commented-out code or TODOs: open an issue or an xfail test instead
-  "ARG",  # unused arguments (except in methods overriding a base class signature)
-  "ANN",  # type annotations (see per-file-ignores for tests)
-]
-ignore = [
-  "D",
-]
 
 [tool.ty.environment]
 # Check against the oldest supported Python
