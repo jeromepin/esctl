@@ -56,7 +56,7 @@ class NodeHotThreads(EsctlCommand):
     """Print hot threads on each nodes."""
 
     def take_action(self, parsed_args):
-        print(self.es.nodes.hot_threads(doc_type=parsed_args.type))
+        print(self.es.nodes.hot_threads(type=parsed_args.type))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
@@ -94,7 +94,6 @@ class NodeStats(EsctlShowOne):
 
     def take_action(self, parsed_args):
         stats = self.es.nodes.stats(
-            format="json",
             node_id=parsed_args.node,
             metric=parsed_args.metric,
             index_metric=parsed_args.index_metric,
