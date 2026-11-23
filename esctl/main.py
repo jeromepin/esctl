@@ -139,8 +139,8 @@ class Esctl(App):
     def _run_os_system_command(self, raw_command: str, purpose: str) -> str:
         """Run a shell command from the configuration file and return its output."""
         self.log.debug("Running command : %s", raw_command)
-        # Running through a shell is intended: users write pipelines in their config file
-        completed = subprocess.run(
+        # Running through a shell is intended: users write pipelines in their own config file
+        completed = subprocess.run(  # noqa: S602
             raw_command,
             shell=True,
             capture_output=True,
@@ -165,7 +165,8 @@ class Esctl(App):
     def _run_shell_subcommand(self, command):
         command = shlex.split(command)
         self.log.debug("Running pre-command : %s", command)
-        return subprocess.Popen(
+        # The command comes from the user's own config file
+        return subprocess.Popen(  # noqa: S603
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
