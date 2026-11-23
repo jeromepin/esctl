@@ -18,8 +18,7 @@ class RepositoryShow(EsctlShowOne):
 
     def take_action(self, parsed_args):
         repository = self.es.snapshot.get_repository(
-            repository=parsed_args.repository,
-            format="json",
+            name=parsed_args.repository,
         ).get(parsed_args.repository)
 
         return JSONToCliffFormatter(repository).to_show_one(
@@ -40,8 +39,7 @@ class RepositoryVerify(EsctlCommand):
 
     def take_action(self, parsed_args):
         repository = self.es.snapshot.verify_repository(
-            repository=parsed_args.repository,
-            format="json",
+            name=parsed_args.repository,
         )
 
         print(repository)

@@ -8,7 +8,7 @@ class SecurityUsersGet(EsctlLister):
     def take_action(self, parsed_args):
         users = self.transform(
             self._sort_and_order_dict(
-                self.es.security.get_user(format="json", username=parsed_args.username),
+                self.es.security.get_user(username=parsed_args.username),
             ),
         )
 
