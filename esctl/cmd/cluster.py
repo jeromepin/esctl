@@ -57,7 +57,8 @@ class ClusterInfo(EsctlShowOne):
     """Show basic informations about the cluster."""
 
     def take_action(self, parsed_args):
-        infos = self.es.info()
+        # The response object is read-only: work on its body
+        infos = self.es.info().body
 
         if self.uses_table_formatter():
             infos = self._delete_and_merge_inner_dict_into_parent(infos, "version")
