@@ -111,7 +111,7 @@ class JSONToCliffFormatter:
 
         return valid_list
 
-    def format_for_lister(self, columns=[], none_as=None):
+    def format_for_lister(self, columns=(), none_as=None):
         """Convert a JSON object to an object compliant with
         cliff's Lister class.
 
@@ -169,7 +169,7 @@ class JSONToCliffFormatter:
 
         return (tuple([c.name for c in columns]), tuple(lst))
 
-    def to_show_one(self, lines=[], none_as=None):
+    def to_show_one(self, lines=(), none_as=None):
         """For every given element, retrieve the value in the original
         json object based on the key provided
 
