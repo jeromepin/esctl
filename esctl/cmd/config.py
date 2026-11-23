@@ -1,6 +1,9 @@
+import argparse
+from typing import Any
+
 import yaml
 
-from esctl.commands import EsctlCommand, EsctlLister
+from esctl.commands import EsctlCommand, EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color, setup_yaml
 
@@ -10,7 +13,7 @@ class ConfigClusterList(EsctlLister):
 
     requires_cluster = False
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         clusters = [
             {
                 "name": cluster_name,
@@ -29,7 +32,7 @@ class ConfigContextList(EsctlLister):
 
     requires_cluster = False
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         contexts = [
             {
                 "name": context_name,
@@ -43,7 +46,7 @@ class ConfigContextList(EsctlLister):
             columns=[("name"), ("user"), ("cluster")],
         )
 
-    def transform(self, raw_contexts):
+    def transform(self, raw_contexts: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not self.uses_table_formatter():
             return raw_contexts
 
@@ -67,11 +70,11 @@ class ConfigContextSet(EsctlCommand):
 
     requires_cluster = False
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.app.config["default-context"] = parsed_args.context
         self.app.config_file_parser.write_config_file(dict(self.app.config))
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "context",
@@ -87,7 +90,7 @@ class ConfigShow(EsctlCommand):
 
     requires_cluster = False
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         setup_yaml()
         self.print_output(
             yaml.safe_dump(
@@ -104,7 +107,7 @@ class ConfigUserList(EsctlLister):
 
     requires_cluster = False
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         users = [
             {
                 "name": user_name,

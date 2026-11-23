@@ -1,16 +1,18 @@
+import argparse
 import datetime as dt
 import warnings
+from typing import Any
 
 from elasticsearch.exceptions import GeneralAvailabilityWarning
 
-from esctl.commands import EsctlLister
+from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 
 
 class TaskList(EsctlLister):
     """Returns a list of tasks."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         with warnings.catch_warnings():
             # The client warns on every call that the task management API is in
             # technical preview: that's not actionable for esctl users
@@ -44,11 +46,11 @@ class TaskList(EsctlLister):
         start = dt.datetime.fromtimestamp(seconds, tz=dt.timezone.utc)
         return f"{start:%Y-%m-%d %H:%M:%S}.{milliseconds:03d}"
 
-    def transform(self, nodes):
+    def transform(self, nodes: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
         tasks = []
 
         for node_definition in nodes.values():
-            for task_name, task in node_definition.get("tasks").items():
+            for task_name, task in node_definition["tasks"].items():
                 task["name"] = task_name
 
                 if "parent_task_id" not in task:
@@ -62,7 +64,7 @@ class TaskList(EsctlLister):
 
         return tasks
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "--actions",

@@ -1,4 +1,7 @@
-from esctl.commands import EsctlLister
+import argparse
+from typing import Any
+
+from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
 
@@ -6,7 +9,7 @@ from esctl.utils import Color
 class SnapshotList(EsctlLister):
     """Returns all snapshots in a specific repository."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         snapshots = self.transform(
             self.rows(self.es.cat.snapshots(repository=parsed_args.repository, format="json")),
         )
@@ -25,7 +28,7 @@ class SnapshotList(EsctlLister):
             ],
         )
 
-    def transform(self, snapshots):
+    def transform(self, snapshots: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not self.uses_table_formatter():
             return snapshots
 
@@ -47,7 +50,7 @@ class SnapshotList(EsctlLister):
 
         return snapshots
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "repository",

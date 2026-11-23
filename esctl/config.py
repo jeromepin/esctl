@@ -1,6 +1,7 @@
 import copy
 import logging
 from collections import OrderedDict
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +14,7 @@ from esctl.utils import setup_yaml
 DEFAULT_CONFIGURATION_PATH = "~/.esctlrc"
 
 
-def _flatten_validation_errors(errors: dict, path: tuple[str, ...] = ()):
+def _flatten_validation_errors(errors: dict[str, list[Any]], path: tuple[str, ...] = ()) -> Iterator[tuple[str, str]]:
     """Turn cerberus' nested `errors` into ("clusters.foo.servers", "must be of list type") pairs."""
     for field, problems in errors.items():
         for problem in problems:
@@ -45,7 +46,7 @@ class Context:
 class ConfigFileParser:
     log = logging.getLogger(__name__)
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Replaced by load_configuration()
         self.path = Path(DEFAULT_CONFIGURATION_PATH).expanduser()
         self.users = {}
@@ -53,7 +54,7 @@ class ConfigFileParser:
         self.clusters = {}
         self.settings = {}
 
-    def write_config_file(self, content):
+    def write_config_file(self, content: Mapping[str, Any]) -> None:
         setup_yaml()
 
         with self.path.open("w") as config_file:
@@ -78,7 +79,7 @@ class ConfigFileParser:
 
         return default_config
 
-    def _ensure_config_file_is_valid(self, document):
+    def _ensure_config_file_is_valid(self, document: Mapping[str, Any]) -> None:
         settings_schema = {
             "no_check_certificate": {"type": "boolean"},
             "max_retries": {"type": "integer"},
@@ -201,7 +202,7 @@ class ConfigFileParser:
 
         return raw_config_file
 
-    def get_context_informations(self, context_name: str):
+    def get_context_informations(self, context_name: str) -> Context:
         # The context gets mutated at runtime (resolved credentials, defaults,
         # running processes...) while the raw configuration may be written back
         # to disk: never share objects between them.

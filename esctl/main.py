@@ -7,9 +7,10 @@ import subprocess
 import sys
 import threading
 from collections import deque
-from typing import Any, ClassVar
+from typing import IO, Any, ClassVar
 
 from cliff.app import App
+from cliff.command import Command
 from cliff.commandmanager import CommandManager
 
 from esctl import utils
@@ -53,7 +54,7 @@ PRE_COMMAND_OUTPUT_TAIL = 50
 class Esctl(App):
     log = App.LOG
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             description=importlib.metadata.metadata(DISTRIBUTION_NAME)["Summary"],
             version=importlib.metadata.version(DISTRIBUTION_NAME),
@@ -69,7 +70,7 @@ class Esctl(App):
         self._pre_command_processes: list[subprocess.Popen] = []
         self._pre_command_drains: list[threading.Thread] = []
 
-    def configure_logging(self):
+    def configure_logging(self) -> None:
         """Create logging handlers for any log output."""
         root_logger = logging.getLogger("")
         root_logger.setLevel(logging.DEBUG)
@@ -108,18 +109,18 @@ class Esctl(App):
                     purpose=field,
                 )
 
-    def initialize_app(self, argv):
+    def initialize_app(self, argv: list[str]) -> None:
         self.config = self.config_file_parser.load_configuration(
             self.options.config_file,
         )
         self.context = self.config_file_parser.create_context(self.options.context)
 
     @staticmethod
-    def _requires_cluster(cmd) -> bool:
+    def _requires_cluster(cmd: Command) -> bool:
         # cliff's own commands (help, complete) don't define it and are local too
         return getattr(cmd, "requires_cluster", False)
 
-    def connect(self):
+    def connect(self) -> None:
         """Resolve the credentials and configure the Elasticsearch client, once."""
         if self._connected:
             return
@@ -162,17 +163,17 @@ class Esctl(App):
 
         return value
 
-    def _run_shell_subcommand(self, command):
-        command = shlex.split(command)
-        self.log.debug("Running pre-command : %s", command)
+    def _run_shell_subcommand(self, command: str) -> subprocess.Popen[bytes]:
+        args = shlex.split(command)
+        self.log.debug("Running pre-command : %s", args)
         # The command comes from the user's own config file
         return subprocess.Popen(  # noqa: S603
-            command,
+            args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
 
-    def prepare_to_run_command(self, cmd):
+    def prepare_to_run_command(self, cmd: Command) -> None:
         if not self._requires_cluster(cmd):
             return
 
@@ -209,11 +210,15 @@ class Esctl(App):
 
                 self._drain(process.stdout, command)
 
-    def _drain(self, stream, command: str) -> tuple[threading.Thread, deque]:
+    def _drain(self, stream: IO[bytes] | None, command: str) -> tuple[threading.Thread, deque[str]]:
         """Read a pipe in the background, logging it and keeping its last lines."""
+        if stream is None:
+            msg = "Pre-commands must be started with piped outputs"
+            raise RuntimeError(msg)
+
         tail: deque[str] = deque(maxlen=PRE_COMMAND_OUTPUT_TAIL)
 
-        def drain():
+        def drain() -> None:
             try:
                 for raw_line in stream:
                     line = raw_line.decode("utf-8", errors="replace").rstrip()
@@ -235,7 +240,7 @@ class Esctl(App):
         string_to_look_for: str,
         stderr_drain: threading.Thread,
         stderr_tail: deque,
-    ):
+    ) -> None:
         pattern = re.compile(string_to_look_for)
         stdout = process.stdout
         if stdout is None:
@@ -263,13 +268,13 @@ class Esctl(App):
             msg_0,
         )
 
-    def clean_up(self, cmd, result, err):
+    def clean_up(self, cmd: Command, result: int, err: BaseException | None) -> None:
         self._stop_pre_commands()
 
         if err:
             self.log.debug("got an error: %s", err)
 
-    def _stop_pre_commands(self):
+    def _stop_pre_commands(self) -> None:
         """Stop every pre-command started for the current command, even if starting them failed midway."""
         processes, self._pre_command_processes = self._pre_command_processes, []
         drains, self._pre_command_drains = self._pre_command_drains, []
@@ -291,7 +296,9 @@ class Esctl(App):
                 if stream is not None:
                     stream.close()
 
-    def build_option_parser(self, description, version, argparse_kwargs=None):
+    def build_option_parser(
+        self, description: str, version: str, argparse_kwargs: dict[str, Any] | None = None
+    ) -> argparse.ArgumentParser:
         """Return an argparse option parser for this application."""
         argparse_kwargs = argparse_kwargs or {}
         parser = argparse.ArgumentParser(
@@ -360,9 +367,9 @@ class Esctl(App):
         return parser
 
 
-def main(argv=sys.argv[1:]):
+def main(argv: list[str] | None = None) -> int:
     esctl = Esctl()
-    return esctl.run(argv)
+    return esctl.run(sys.argv[1:] if argv is None else argv)
 
 
 if __name__ == "__main__":

@@ -103,7 +103,7 @@ extend-exclude = [
 
 [tool.ruff.lint.per-file-ignores]
 # Tests are pragmatic: plain asserts, literal expected values, and as many fixtures as needed
-"tests/**" = ["S101", "PLR2004", "PLR0913", "PLR0917", "S603"]
+"tests/**" = ["S101", "PLR2004", "PLR0913", "PLR0917", "S603", "ANN"]
 
 [tool.ruff.lint.pycodestyle]
 # The formatter wraps code at `line-length`; comments and docstrings, which it doesn't wrap, may go up to 200 columns
@@ -130,9 +130,9 @@ extend-select = [
   "TID", "SLF",  # absolute imports, no private access from outside
   "ERA", "TD", "FIX",  # no commented-out code or TODOs: open an issue or an xfail test instead
   "ARG001",  # unused function arguments
+  "ANN",  # type annotations (see per-file-ignores for tests)
 ]
 ignore = [
-  "ANN",
   "D",
 ]
 

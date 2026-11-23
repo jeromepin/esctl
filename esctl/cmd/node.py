@@ -1,5 +1,16 @@
+import argparse
+from typing import Any
+
 from esctl.cmd.settings import AbstractClusterSettings
-from esctl.commands import EsctlCommand, EsctlLister, EsctlShowOne, add_persistency_arguments, selected_persistency
+from esctl.commands import (
+    EsctlCommand,
+    EsctlLister,
+    EsctlShowOne,
+    ListerResult,
+    ShowOneResult,
+    add_persistency_arguments,
+    selected_persistency,
+)
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import flatten_dict
 
@@ -7,7 +18,7 @@ from esctl.utils import flatten_dict
 class NodeExclude(AbstractClusterSettings):
     """Show or define the list of nodes excluded from shard allocation."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         setting_name = f"cluster.routing.allocation.exclude.{parsed_args.by}"
 
         if parsed_args.list is not None:
@@ -17,7 +28,7 @@ class NodeExclude(AbstractClusterSettings):
         # Show both: an exclusion can be set as transient, persistent, or both
         return self._settings_get(setting_name)
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = add_persistency_arguments(super().get_parser(prog_name))
 
         parser.add_argument(
@@ -42,10 +53,10 @@ class NodeExclude(AbstractClusterSettings):
 class NodeHotThreads(EsctlCommand):
     """Print hot threads on each nodes."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.print_output(self.es.nodes.hot_threads(type=parsed_args.type))
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "--type",
@@ -59,7 +70,7 @@ class NodeHotThreads(EsctlCommand):
 class NodeList(EsctlLister):
     """List nodes."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         return JSONToCliffFormatter(self.rows(self.es.cat.nodes(format="json"))).format_for_lister(
             columns=[
                 ("ip", "IP"),
@@ -79,7 +90,7 @@ class NodeList(EsctlLister):
 class NodeStats(EsctlShowOne):
     """Returns statistical information about nodes in the cluster."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         stats = self.es.nodes.stats(
             node_id=parsed_args.node,
             metric=parsed_args.metric,
@@ -92,13 +103,13 @@ class NodeStats(EsctlShowOne):
 
         return JSONToCliffFormatter(stats, pretty_key=self.pretty_keys).to_show_one(lines=list(stats.keys()))
 
-    def transform(self, raw_stats):
+    def transform(self, raw_stats: dict[str, Any]) -> dict[str, Any]:
         if self.uses_table_formatter():
             return flatten_dict(raw_stats)
 
         return raw_stats
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "--node",

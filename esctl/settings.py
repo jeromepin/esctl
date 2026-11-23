@@ -23,7 +23,7 @@ class Settings:
 
 
 class Setting:
-    def __init__(self, name: str, value: Any, persistency: str = "defaults"):
+    def __init__(self, name: str, value: object, persistency: str = "defaults") -> None:
         self.name = name
         self.value = value
         self.persistency = persistency
@@ -73,7 +73,7 @@ class ClusterSettings(Settings):
             "defaults": self.__get_setting_for_persistency(settings, key, "defaults"),
         }
 
-    def set(self, sections: str, value: Any, persistency: Persistency = "transient") -> ObjectApiResponse[Any]:
+    def set(self, sections: str, value: object, persistency: Persistency = "transient") -> ObjectApiResponse[Any]:
         self.log.info(
             "Changing %s's %s to : %s",
             persistency,
@@ -136,5 +136,5 @@ class IndexSettings(Settings):
             for index_name, index_settings in response.items()
         }
 
-    def set(self, setting: str, value: Any, index: str) -> ObjectApiResponse[Any]:
+    def set(self, setting: str, value: object, index: str) -> ObjectApiResponse[Any]:
         return self.es.indices.put_settings(index=index, settings={setting: value})

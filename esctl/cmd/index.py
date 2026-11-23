@@ -1,7 +1,8 @@
+import argparse
 import json
 from typing import Any
 
-from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister
+from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
 
@@ -15,7 +16,7 @@ class IndexCreate(EsctlCommand):
     Read the index configuration as a JSON document from either stdin or a path.
     """
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         raw_configuration = self.read_from_file_or_stdin(parsed_args.configuration)
         # No configuration at all: create the index with the cluster's defaults
         configuration = json.loads(raw_configuration) if raw_configuration.strip() else {}
@@ -31,7 +32,7 @@ class IndexCreate(EsctlCommand):
         self.log.info("Creating index %s", parsed_args.index)
         self.print_output(self.es.indices.create(index=parsed_args.index, **configuration))
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("index", help="Name of the index to create")
         parser.add_argument(
@@ -45,7 +46,7 @@ class IndexCreate(EsctlCommand):
 class IndexList(EsctlLister):
     """Returns information about indices: number of primaries and replicas, document counts, disk size, ..."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         indices = self.transform(
             self.rows(self.es.cat.indices(format="json", index=parsed_args.index)),
         )
@@ -64,13 +65,13 @@ class IndexList(EsctlLister):
             ],
         )
 
-    def transform(self, indices):
+    def transform(self, indices: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if self.uses_table_formatter():
             for idx, indice in enumerate(indices):
                 if indice.get("health"):
                     indices[idx]["health"] = Color.colorize(
-                        indice.get("health"),
-                        getattr(Color, indice.get("health").upper()),
+                        indice["health"],
+                        getattr(Color, indice["health"].upper()),
                     )
 
                 if indice.get("status") == "close":
@@ -81,7 +82,7 @@ class IndexList(EsctlLister):
 
         return indices
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "index",
@@ -94,7 +95,7 @@ class IndexList(EsctlLister):
 class IndexClose(EsctlCommandIndex):
     """Close an index."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.info("Closing index %s", parsed_args.index)
         self.print_output(self.es.indices.close(index=parsed_args.index))
 
@@ -102,7 +103,7 @@ class IndexClose(EsctlCommandIndex):
 class IndexDelete(EsctlCommandIndex):
     """Delete an index."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.info("Deleting index %s", parsed_args.index)
         self.print_output(self.es.indices.delete(index=parsed_args.index))
 
@@ -110,7 +111,7 @@ class IndexDelete(EsctlCommandIndex):
 class IndexOpen(EsctlCommandIndex):
     """Open an index."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.info("Opening index %s", parsed_args.index)
         self.print_output(self.es.indices.open(index=parsed_args.index))
 
@@ -131,10 +132,10 @@ class IndexReindex(EsctlCommand):
             "conflicts": args.get("conflicts"),
         }
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.print_output(self.es.reindex(**self._build_request_body(vars(parsed_args))))
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "source_index",

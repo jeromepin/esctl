@@ -1,10 +1,12 @@
+import argparse
+
 from esctl.commands import EsctlCommandLogging, selected_persistency
 
 
 class LoggingGet(EsctlCommandLogging):
     """Get a logger value."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is %s", persistency)
 
@@ -19,7 +21,7 @@ class LoggingGet(EsctlCommandLogging):
 class LoggingReset(EsctlCommandLogging):
     """Reset a logger value."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is %s", persistency)
 
@@ -35,7 +37,7 @@ class LoggingReset(EsctlCommandLogging):
 class LoggingSet(EsctlCommandLogging):
     """Set a logger value."""
 
-    def take_action(self, parsed_args):
+    def take_action(self, parsed_args: argparse.Namespace) -> None:
         persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is %s", persistency)
 
@@ -52,7 +54,7 @@ class LoggingSet(EsctlCommandLogging):
             ),
         )
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
             "level",
