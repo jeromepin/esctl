@@ -134,6 +134,8 @@ Along with `command`, you can pass two options :
 * `wait_for_exit` (_default_: `true`) : wait for the command to exit before continuing. Usually set to `false` when the command is running in the foreground.
 * `wait_for_output` : if `wait_for_exit` is `false`, look for a specific output in the command's stdout. The string to look-for is interpreted as a regular expression passed to Python's [re.compile()](https://docs.python.org/3.7/library/re.html).
 
+esctl stops before sending any request if a pre-command waited for exits with a non-zero code, or exits before printing a line matching `wait_for_output`.
+
 
 ## Examples
 

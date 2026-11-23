@@ -187,34 +187,41 @@ class Esctl(App):
         self.connect()
 
         for command_block in self.context.pre_commands:
-            process = self._run_shell_subcommand(command_block.get("command"))
+            command = command_block.get("command")
+            process = self._run_shell_subcommand(command)
             self._pre_command_processes.append(process)
 
             if command_block.get("wait_for_exit"):
-                process.communicate()
+                _, stderr = process.communicate()
+
+                if process.returncode != 0:
+                    raise ExternalCommandError(
+                        f"Pre-command `{command}` failed with exit code {process.returncode}\n"
+                        f"{stderr.decode(errors='replace').strip()}",
+                    )
 
             elif command_block.get("wait_for_output"):
-                string_to_look_for = command_block.get("wait_for_output")
-                pattern = re.compile(string_to_look_for)
+                self._wait_for_output(process, command, command_block.get("wait_for_output"))
 
-                while True:
-                    line = process.stdout.readline()
-                    if not line:
-                        break
+    def _wait_for_output(self, process: subprocess.Popen, command: str, string_to_look_for: str):
+        pattern = re.compile(string_to_look_for)
 
-                    line = line.decode("utf-8").strip()
+        for raw_line in process.stdout:
+            line = raw_line.decode("utf-8", errors="replace").strip()
 
-                    match = re.search(pattern, line)
+            if pattern.search(line):
+                self.log.debug(f"Got `{string_to_look_for}` from `{command}`")
+                return
 
-                    if match is None:
-                        self.log.debug(
-                            f"Expecting command output to match `{string_to_look_for}` but got `{line}`...",
-                        )
-                    else:
-                        self.log.debug(
-                            f"Got `{string_to_look_for}` from `{command_block.get('command')}`",
-                        )
-                        break
+            self.log.debug(f"Expecting command output to match `{string_to_look_for}` but got `{line}`...")
+
+        # stdout was closed without the expected line: the command is gone or useless
+        process.wait()
+        raise ExternalCommandError(
+            f"Pre-command `{command}` exited with code {process.returncode} "
+            f"before printing a line matching `{string_to_look_for}`\n"
+            f"{process.stderr.read().decode(errors='replace').strip()}",
+        )
 
     def clean_up(self, cmd, result, err):
         self._stop_pre_commands()
