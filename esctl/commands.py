@@ -39,8 +39,8 @@ class EsctlCommon:
         return self.formatter.__class__.__name__ == "TableFormatter"
 
     def read_from_file_or_stdin(self, path: str) -> str:
-        """Read some content from a file if the path is defined otherwise read from stdin."""
-        if path is not None:
+        """Read some content from a file, or from stdin when the path is undefined or `-`."""
+        if path is not None and path != "-":
             with open(os.path.expanduser(path)) as reader:
                 return reader.read()
         else:

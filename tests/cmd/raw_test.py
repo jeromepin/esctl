@@ -51,3 +51,26 @@ def test_migration_deprecations(run_esctl, fake_es):
 
     assert result.code == 0, result.err
     assert result.json() == [{"Kind": "cluster_settings", "Level": "critical", "Message": "m", "Doc": "u"}]
+
+
+def test_raw_reads_the_body_from_stdin_with_at_dash(run_esctl, fake_es, monkeypatch):
+    import io
+
+    fake_es.on("POST", "/logs/_search", {"hits": {}})
+    monkeypatch.setattr("sys.stdin", io.StringIO('{"query": {"match_all": {}}}'))
+
+    result = run_esctl("raw", "-X", "POST", "-d", "@-", "/logs/_search")
+
+    assert result.code == 0, result.err
+    assert fake_es.last("POST", "/logs/_search").body == {"query": {"match_all": {}}}
+
+
+def test_raw_reads_the_body_from_a_file(run_esctl, fake_es, tmp_path):
+    body = tmp_path / "query.json"
+    body.write_text('{"size": 0}')
+    fake_es.on("POST", "/logs/_search", {"hits": {}})
+
+    result = run_esctl("raw", "-X", "POST", "-d", f"@{body}", "/logs/_search")
+
+    assert result.code == 0, result.err
+    assert fake_es.last("POST", "/logs/_search").body == {"size": 0}
