@@ -27,7 +27,7 @@ def test_persistency_flags(run_esctl, fake_es, argv, setting, value, flags, pers
     assert fake_es.last("PUT", "/_cluster/settings").body == {persistency: {setting: value}}
 
 
-def test_persistency_flags_are_mutually_exclusive(run_esctl, fake_es):
+def test_persistency_flags_are_mutually_exclusive(run_esctl):
     result = run_esctl("cluster", "settings", "set", "--transient", "--persistent", "a.b", "c")
 
     assert result.code == 2

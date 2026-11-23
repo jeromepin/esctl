@@ -1,106 +1,57 @@
 import json
-import unittest.mock
 from pathlib import Path
+from unittest.mock import MagicMock
 
+import pytest
 from elastic_transport import ObjectApiResponse
 
-import esctl.settings
+from esctl.settings import ClusterSettings, IndexSettings, Settings
 
-from .base_test_class import EsctlTestCase
+FIXTURES = Path(__file__).parent / "files"
 
-
-class TestClusterSettingsRetrieval(EsctlTestCase):
-    def setUp(self):
-        super().setUp()
-        patcher = unittest.mock.patch("esctl.settings.Settings.es")
-        self.mock = patcher.start()
-        self.addCleanup(patcher.stop)
-        self.mock.cluster.get_settings.return_value = ObjectApiResponse(body=self.fixtures(), meta=None)
-
-    def fixtures(self):
-        return {
-            "persistent": {
-                "thread_pool.estimated_time_interval": "200ms",
-                "cluster.routing.allocation.allow_rebalance": "indices_all_active",
-            },
-            "transient": {
-                "thread_pool.estimated_time_interval": "100ms",
-                "cluster.routing.allocation.allow_rebalance": "always",
-            },
-            "defaults": {"cluster.routing.allocation.disk.watermark.high": "90%"},
-        }
-
-    def test_settings_get(self):
-        cluster_settings = esctl.settings.ClusterSettings()
-        self.assertEqual(
-            cluster_settings.get(
-                "thread_pool.estimated_time_interval",
-                persistency="transient",
-            ).value,
-            "100ms",
-        )
-        self.assertEqual(
-            cluster_settings.get(
-                "thread_pool.estimated_time_interval",
-                persistency="persistent",
-            ).value,
-            "200ms",
-        )
-        self.assertEqual(
-            cluster_settings.get(
-                "cluster.routing.allocation.allow_rebalance",
-                persistency="persistent",
-            ).value,
-            "indices_all_active",
-        )
-        self.assertEqual(
-            cluster_settings.get(
-                "cluster.routing.allocation.allow_rebalance",
-                persistency="transient",
-            ).value,
-            "always",
-        )
-        self.assertEqual(
-            cluster_settings.get(
-                "cluster.routing.allocation.disk.watermark.high",
-                persistency="transient",
-            ).value,
-            "90%",
-        )
-        self.assertEqual(
-            cluster_settings.get(
-                "cluster.routing.allocation.disk.watermark.high",
-                persistency="persistent",
-            ).value,
-            "90%",
-        )
-        self.assertEqual(
-            cluster_settings.get(
-                "cluster.routing.allocation.foobar",
-                persistency="transient",
-            ).value,
-            None,
-        )
+CLUSTER_SETTINGS = {
+    "persistent": {
+        "thread_pool.estimated_time_interval": "200ms",
+        "cluster.routing.allocation.allow_rebalance": "indices_all_active",
+    },
+    "transient": {
+        "thread_pool.estimated_time_interval": "100ms",
+        "cluster.routing.allocation.allow_rebalance": "always",
+    },
+    "defaults": {"cluster.routing.allocation.disk.watermark.high": "90%"},
+}
 
 
-class TestIndexSettingsRetrieval(EsctlTestCase):
-    def setUp(self):
-        super().setUp()
-        patcher = unittest.mock.patch("esctl.settings.Settings.es")
-        self.mock = patcher.start()
-        self.addCleanup(patcher.stop)
-        self.mock.indices.get_settings.return_value = ObjectApiResponse(body=self.fixtures(), meta=None)
+@pytest.fixture
+def es(monkeypatch):
+    client = MagicMock()
+    monkeypatch.setattr(Settings, "es", client)
+    return client
 
-    def fixtures(self):
-        return json.loads(Path(f"{self.fixtures_path}/index_settings.json").read_text())
 
-    def test_settings_list(self):
-        index_settings = esctl.settings.IndexSettings()
+@pytest.mark.parametrize(
+    ("key", "persistency", "expected"),
+    [
+        ("thread_pool.estimated_time_interval", "transient", "100ms"),
+        ("thread_pool.estimated_time_interval", "persistent", "200ms"),
+        ("cluster.routing.allocation.allow_rebalance", "persistent", "indices_all_active"),
+        ("cluster.routing.allocation.allow_rebalance", "transient", "always"),
+        # Not set in the requested persistency: falls back to the default value
+        ("cluster.routing.allocation.disk.watermark.high", "transient", "90%"),
+        ("cluster.routing.allocation.disk.watermark.high", "persistent", "90%"),
+        ("cluster.routing.allocation.foobar", "transient", None),
+    ],
+)
+def test_cluster_setting_get(es, key, persistency, expected):
+    es.cluster.get_settings.return_value = ObjectApiResponse(body=CLUSTER_SETTINGS, meta=None)
 
-        self.assertEqual(
-            index_settings.get(
-                "foobar,qux",
-                "index.analysis.analyzer.trigram.tokenizer",
-            )["foobar"][0].value,
-            "standard",
-        )
+    assert ClusterSettings().get(key, persistency=persistency).value == expected
+
+
+def test_index_setting_get(es):
+    index_settings = json.loads((FIXTURES / "index_settings.json").read_text())
+    es.indices.get_settings.return_value = ObjectApiResponse(body=index_settings, meta=None)
+
+    settings = IndexSettings().get("foobar,qux", "index.analysis.analyzer.trigram.tokenizer")
+
+    assert settings["foobar"][0].value == "standard"

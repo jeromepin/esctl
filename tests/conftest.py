@@ -147,7 +147,7 @@ class Result:
 
 
 @pytest.fixture
-def run_esctl(write_config, fake_es, capsys):
+def run_esctl(write_config, fake_es, capsys):  # noqa: ARG001 - fake_es is only needed to patch the HTTP layer
     """Run `esctl <argv>` and return its exit code and captured output."""
 
     def run(*argv: str, config: dict[str, Any] | Path | None = None, app_class=Esctl) -> Result:

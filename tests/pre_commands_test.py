@@ -101,7 +101,7 @@ def test_pre_command_exiting_before_the_expected_output_aborts(run_esctl, fake_e
 FLOOD = "head -c 1000000 /dev/zero >{fd}"
 
 
-def test_a_chatty_stderr_does_not_block_the_expected_output(write_config, default_config, tmp_path):
+def test_a_chatty_stderr_does_not_block_the_expected_output(write_config, default_config):
     config = config_with_pre_commands(
         default_config,
         {
