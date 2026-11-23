@@ -167,7 +167,8 @@ class ConfigFileParser:
         if Path(self.path).is_file():
             with open(self.path) as config_file:
                 try:
-                    raw_config_file = OrderedDict(yaml.safe_load(config_file))
+                    # An empty file loads as None
+                    raw_config_file = OrderedDict(yaml.safe_load(config_file) or {})
                 except yaml.YAMLError as err:
                     raise ConfigurationError(f"Cannot read YAML from {self.path}: {err}") from err
         else:
@@ -176,7 +177,11 @@ class ConfigFileParser:
         self._ensure_config_file_is_valid(raw_config_file)
 
         for config_block in expected_config_blocks:
-            self.__setattr__(config_block, raw_config_file.get(config_block))
+            value = raw_config_file.get(config_block)
+            # Optional blocks may be omitted: treat them as empty
+            if value is None and config_block != "default-context":
+                value = {}
+            self.__setattr__(config_block, value)
 
             self.log.debug(
                 f"Loaded {config_block}: {self.__getattribute__(config_block)}",
@@ -201,10 +206,7 @@ class ConfigFileParser:
 
         # Merge global settings and per-cluster settings.
         # Cluster-level settings override global settings
-        if "settings" in cluster:
-            settings = {**self.settings, **cluster.get("settings")}
-        else:
-            settings = {**self.settings}
+        settings = {**self.settings, **(cluster.get("settings") or {})}
 
         pre_commands: list[dict] = []
         if "pre_commands" in raw_context:

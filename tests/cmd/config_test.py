@@ -33,3 +33,28 @@ def test_config_show_prints_the_file_not_resolved_secrets(run_esctl, default_con
     assert result.code == 0, result.err
     assert "password: s3cret" not in result.out
     assert "echo s3cret" in result.out
+
+
+def test_users_and_settings_blocks_are_optional(run_esctl, fake_es):
+    fake_es.on("GET", "/_cluster/health", {"status": "green"})
+    config = {
+        "clusters": {"local": {"servers": ["https://localhost:9200"]}},
+        "contexts": {"local": {"cluster": "local"}},
+        "default-context": "local",
+    }
+
+    result = run_esctl("cluster", "health", "-f", "json", config=config)
+
+    assert result.code == 0, result.err
+    assert "authorization" not in fake_es.last("GET", "/_cluster/health").headers
+
+
+def test_an_empty_config_file_reports_the_missing_blocks(run_esctl, tmp_path):
+    path = tmp_path / "empty.yml"
+    path.write_text("")
+
+    result = run_esctl("config", "context", "list", config=path)
+
+    assert result.code == 1
+    assert "clusters" in result.err
+    assert "not iterable" not in result.err
