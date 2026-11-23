@@ -2,6 +2,7 @@ import argparse
 from typing import Any
 
 import elasticsearch
+from typing_extensions import override
 
 from esctl.cmd.settings import AbstractClusterSettings
 from esctl.commands import EsctlShowOne, ShowOneResult, add_persistency_arguments, selected_persistency
@@ -11,6 +12,7 @@ from esctl.utils import Color, flatten_dict
 class ClusterAllocationExplain(EsctlShowOne):
     """Provide explanations for shard allocations failures."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         try:
             response = self.es.cluster.allocation_explain()
@@ -44,6 +46,7 @@ class ClusterAllocationExplain(EsctlShowOne):
 class ClusterHealth(EsctlShowOne):
     """Show the cluster health."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self.response = self.es.cluster.health().body
         health = self._sort_and_order_dict(self.response)
@@ -60,6 +63,7 @@ class ClusterHealth(EsctlShowOne):
 class ClusterInfo(EsctlShowOne):
     """Show basic informations about the cluster."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self.response = self.es.info().body
         # Flattening edits the top-level keys: keep the response intact for --jmespath
@@ -74,6 +78,7 @@ class ClusterInfo(EsctlShowOne):
 class ClusterStats(EsctlShowOne):
     """Show cluster stats."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         self.response = self.es.cluster.stats().body
         cluster_stats = self._sort_and_order_dict(
@@ -103,6 +108,7 @@ class ClusterStats(EsctlShowOne):
 class ClusterRoutingAllocationEnable(AbstractClusterSettings):
     """Get and set the cluster's routing allocation policy."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         if parsed_args.status is not None:
             self._settings_set(
@@ -113,6 +119,7 @@ class ClusterRoutingAllocationEnable(AbstractClusterSettings):
 
         return self._settings_get("cluster.routing.allocation.enable")
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = add_persistency_arguments(super().get_parser(prog_name))
 

@@ -1,12 +1,15 @@
 import argparse
 import json
 
+from typing_extensions import override
+
 from esctl.commands import EsctlCommand
 
 
 class RawCommand(EsctlCommand):
     """Performs a raw HTTP call. Useful when esctl doesn't provide a nice interface for a specific route."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         body: str = parsed_args.body
 
@@ -18,6 +21,7 @@ class RawCommand(EsctlCommand):
         # Some routes only answer plain text (e.g. hot threads)
         self.print_output(response if isinstance(response, str) else json.dumps(response))
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(

@@ -2,6 +2,8 @@ import argparse
 import json
 from typing import Any
 
+from typing_extensions import override
+
 from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
@@ -16,6 +18,7 @@ class IndexCreate(EsctlCommand):
     Read the index configuration as a JSON document from either stdin or a path.
     """
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         raw_configuration = self.read_from_file_or_stdin(parsed_args.configuration)
         # No configuration at all: create the index with the cluster's defaults
@@ -32,6 +35,7 @@ class IndexCreate(EsctlCommand):
         self.log.info("Creating index %s", parsed_args.index)
         self.print_output(self.es.indices.create(index=parsed_args.index, **configuration))
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("index", help="Name of the index to create")
@@ -46,6 +50,7 @@ class IndexCreate(EsctlCommand):
 class IndexList(EsctlLister):
     """Returns information about indices: number of primaries and replicas, document counts, disk size, ..."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         indices = self.transform(
             self.rows(self.es.cat.indices(format="json", index=parsed_args.index)),
@@ -82,6 +87,7 @@ class IndexList(EsctlLister):
 
         return indices
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -95,6 +101,7 @@ class IndexList(EsctlLister):
 class IndexClose(EsctlCommandIndex):
     """Close an index."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.info("Closing index %s", parsed_args.index)
         self.print_output(self.es.indices.close(index=parsed_args.index))
@@ -103,6 +110,7 @@ class IndexClose(EsctlCommandIndex):
 class IndexDelete(EsctlCommandIndex):
     """Delete an index."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.info("Deleting index %s", parsed_args.index)
         self.print_output(self.es.indices.delete(index=parsed_args.index))
@@ -111,6 +119,7 @@ class IndexDelete(EsctlCommandIndex):
 class IndexOpen(EsctlCommandIndex):
     """Open an index."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.log.info("Opening index %s", parsed_args.index)
         self.print_output(self.es.indices.open(index=parsed_args.index))
@@ -132,9 +141,11 @@ class IndexReindex(EsctlCommand):
             "conflicts": args.get("conflicts"),
         }
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.print_output(self.es.reindex(**self._build_request_body(vars(parsed_args))))
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(

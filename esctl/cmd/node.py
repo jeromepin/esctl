@@ -1,6 +1,8 @@
 import argparse
 from typing import Any
 
+from typing_extensions import override
+
 from esctl.cmd.settings import AbstractClusterSettings
 from esctl.commands import (
     EsctlCommand,
@@ -18,6 +20,7 @@ from esctl.utils import flatten_dict
 class NodeExclude(AbstractClusterSettings):
     """Show or define the list of nodes excluded from shard allocation."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         setting_name = f"cluster.routing.allocation.exclude.{parsed_args.by}"
 
@@ -28,6 +31,7 @@ class NodeExclude(AbstractClusterSettings):
         # Show both: an exclusion can be set as transient, persistent, or both
         return self._settings_get(setting_name)
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = add_persistency_arguments(super().get_parser(prog_name))
 
@@ -53,9 +57,11 @@ class NodeExclude(AbstractClusterSettings):
 class NodeHotThreads(EsctlCommand):
     """Print hot threads on each nodes."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         self.print_output(self.es.nodes.hot_threads(type=parsed_args.type))
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -70,6 +76,7 @@ class NodeHotThreads(EsctlCommand):
 class NodeList(EsctlLister):
     """List nodes."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         return JSONToCliffFormatter(self.rows(self.es.cat.nodes(format="json"))).format_for_lister(
             columns=[
@@ -90,6 +97,7 @@ class NodeList(EsctlLister):
 class NodeStats(EsctlShowOne):
     """Returns statistical information about nodes in the cluster."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ShowOneResult:
         stats = self.es.nodes.stats(
             node_id=parsed_args.node,
@@ -109,6 +117,7 @@ class NodeStats(EsctlShowOne):
 
         return raw_stats
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(

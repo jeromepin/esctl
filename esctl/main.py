@@ -12,6 +12,7 @@ from typing import IO, Any, ClassVar
 from cliff.app import App
 from cliff.command import Command
 from cliff.commandmanager import CommandManager
+from typing_extensions import override
 
 from esctl import utils
 from esctl.config import ConfigFileParser
@@ -38,6 +39,7 @@ class ColoredLevelFormatter(logging.Formatter):
         logging.CRITICAL: utils.Color.RED,
     }
 
+    @override
     def format(self, record: logging.LogRecord) -> str:
         # Work on a copy: the same record goes through the other handlers
         record = logging.makeLogRecord(record.__dict__)
@@ -70,6 +72,7 @@ class Esctl(App):
         self._pre_command_processes: list[subprocess.Popen] = []
         self._pre_command_drains: list[threading.Thread] = []
 
+    @override
     def configure_logging(self) -> None:
         """Create logging handlers for any log output."""
         root_logger = logging.getLogger("")
@@ -109,6 +112,7 @@ class Esctl(App):
                     purpose=field,
                 )
 
+    @override
     def initialize_app(self, argv: list[str]) -> None:
         self.config = self.config_file_parser.load_configuration(
             self.options.config_file,
@@ -173,6 +177,7 @@ class Esctl(App):
             stderr=subprocess.PIPE,
         )
 
+    @override
     def prepare_to_run_command(self, cmd: Command) -> None:
         if not self._requires_cluster(cmd):
             return
@@ -268,6 +273,7 @@ class Esctl(App):
             msg_0,
         )
 
+    @override
     def clean_up(self, cmd: Command, result: int, err: BaseException | None) -> None:
         self._stop_pre_commands()
 
@@ -296,6 +302,7 @@ class Esctl(App):
                 if stream is not None:
                     stream.close()
 
+    @override
     def build_option_parser(
         self, description: str, version: str, argparse_kwargs: dict[str, Any] | None = None
     ) -> argparse.ArgumentParser:

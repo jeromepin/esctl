@@ -1,11 +1,14 @@
 import argparse
 
+from typing_extensions import override
+
 from esctl.commands import EsctlCommandLogging, selected_persistency
 
 
 class LoggingGet(EsctlCommandLogging):
     """Get a logger value."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is %s", persistency)
@@ -21,6 +24,7 @@ class LoggingGet(EsctlCommandLogging):
 class LoggingReset(EsctlCommandLogging):
     """Reset a logger value."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is %s", persistency)
@@ -37,6 +41,7 @@ class LoggingReset(EsctlCommandLogging):
 class LoggingSet(EsctlCommandLogging):
     """Set a logger value."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> None:
         persistency = selected_persistency(parsed_args)
         self.log.debug("Persistency is %s", persistency)
@@ -54,6 +59,7 @@ class LoggingSet(EsctlCommandLogging):
             ),
         )
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(

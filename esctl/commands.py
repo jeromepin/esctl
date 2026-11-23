@@ -13,6 +13,7 @@ from cliff.lister import Lister
 from cliff.show import ShowOne
 from elastic_transport import ObjectApiResponse, TextApiResponse
 from elasticsearch import Elasticsearch
+from typing_extensions import override
 
 from esctl.elasticsearch import Client
 from esctl.settings import ClusterSettings, IndexSettings, Persistency
@@ -207,11 +208,13 @@ class EsctlCommandWithPersistency(EsctlCommand):
     be used when working with settings, logging, etc...
     """
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         return add_persistency_arguments(super().get_parser(prog_name))
 
 
 class EsctlCommandIndex(EsctlCommand):
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
@@ -222,6 +225,7 @@ class EsctlCommandIndex(EsctlCommand):
 
 
 class EsctlCommandLogging(EsctlCommandWithPersistency):
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("logger", metavar="<logger>", help=("Logger"))
@@ -233,6 +237,7 @@ class EsctlLister(Lister, EsctlCommon):
 
 
 class EsctlListerIndexSetting(EsctlLister):
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument("index", metavar="<index>", help=("Index"))
@@ -257,10 +262,12 @@ class EsctlShowOne(ShowOne, EsctlCommon):
     response: Any = None
     pretty_keys: bool = True
 
+    @override
     def run(self, parsed_args: argparse.Namespace) -> int:
         self.pretty_keys = not parsed_args.no_pretty
         return super().run(parsed_args)
 
+    @override
     def produce_output(
         self, parsed_args: argparse.Namespace, column_names: Sequence[str], data: Sequence[object]
     ) -> int:
@@ -273,6 +280,7 @@ class EsctlShowOne(ShowOne, EsctlCommon):
     def jmespath_search(self, expression: str, data: object, options: jmespath.Options | None = None) -> object:
         return jmespath.search(expression, data, options=options)
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(

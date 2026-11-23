@@ -4,6 +4,7 @@ from typing import Any, Literal
 
 from elastic_transport import ObjectApiResponse
 from elasticsearch import Elasticsearch
+from typing_extensions import override
 
 from esctl.elasticsearch import Client
 from esctl.utils import Color
@@ -28,6 +29,7 @@ class Setting:
         self.value = value
         self.persistency = persistency
 
+    @override
     def __str__(self) -> str:
         return f"{self.name}={self.value}({self.persistency})"
 

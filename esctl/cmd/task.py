@@ -4,6 +4,7 @@ import warnings
 from typing import Any
 
 from elasticsearch.exceptions import GeneralAvailabilityWarning
+from typing_extensions import override
 
 from esctl.commands import EsctlLister, ListerResult
 from esctl.formatter import JSONToCliffFormatter
@@ -12,6 +13,7 @@ from esctl.formatter import JSONToCliffFormatter
 class TaskList(EsctlLister):
     """Returns a list of tasks."""
 
+    @override
     def take_action(self, parsed_args: argparse.Namespace) -> ListerResult:
         with warnings.catch_warnings():
             # The client warns on every call that the task management API is in
@@ -64,6 +66,7 @@ class TaskList(EsctlLister):
 
         return tasks
 
+    @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:
         parser = super().get_parser(prog_name)
         parser.add_argument(
