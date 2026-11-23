@@ -337,11 +337,6 @@ class Esctl(App):
             action="store_true",
             help="Show tracebacks on errors.",
         )
-        parser.add_argument(
-            "--es-version",
-            action="store",
-            help="Elasticsearch version.",
-        )
 
         parser.add_argument(
             "--context",
