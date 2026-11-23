@@ -165,6 +165,9 @@ class CatThreadpool(EsctlLister):
         return parser
 
     def transform(self, raw_thread_pools):
+        if not self.uses_table_formatter():
+            return raw_thread_pools
+
         modified_thread_pools = []
 
         for thread_pool in raw_thread_pools:

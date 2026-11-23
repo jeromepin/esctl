@@ -26,6 +26,9 @@ class SnapshotList(EsctlLister):
         )
 
     def transform(self, snapshots):
+        if not self.uses_table_formatter():
+            return snapshots
+
         for idx in range(len(snapshots)):
             if snapshots[idx].get("status") == "PARTIAL":
                 snapshots[idx]["status"] = Color.colorize(
