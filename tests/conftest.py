@@ -19,8 +19,10 @@ import yaml
 from elastic_transport import ApiResponseMeta, HttpHeaders, Urllib3HttpNode
 from elastic_transport._node._base import NodeApiResponse
 
+from esctl.commands import EsctlCommon
 from esctl.elasticsearch import Client
 from esctl.main import Esctl
+from esctl.settings import Settings
 
 DEFAULT_CONFIG: dict[str, Any] = {
     "clusters": {"local": {"servers": ["https://localhost:9200"]}},
@@ -174,8 +176,5 @@ def _isolate_global_state():
     Client.reset()
 
     # A test that starts a patch without stopping it leaks into every later test.
-    from esctl.commands import EsctlCommon
-    from esctl.settings import Settings
-
     for owner in (EsctlCommon, Settings):
         assert isinstance(owner.__dict__["es"], property), f"{owner.__name__}.es was left patched"

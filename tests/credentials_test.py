@@ -2,6 +2,8 @@ import base64
 
 import pytest
 
+from esctl.main import Esctl
+
 
 def config_with_password_command(default_config, command):
     default_config["users"]["admin"] = {
@@ -82,8 +84,6 @@ def test_local_commands_do_not_run_the_password_command(run_esctl, default_confi
 
 
 def test_the_password_command_runs_once_per_session(write_config, default_config, tmp_path):
-    from esctl.main import Esctl
-
     config, counter = counting_password_command(default_config, tmp_path)
     app = Esctl()
     app.options, _ = app.parser.parse_known_args(["--config", str(write_config(config))])

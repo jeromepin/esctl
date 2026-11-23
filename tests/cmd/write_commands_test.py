@@ -1,5 +1,7 @@
 """Commands sending a body to Elasticsearch."""
 
+import io
+
 import pytest
 
 
@@ -70,8 +72,6 @@ def test_timeout_setting_is_used_per_request(run_esctl, fake_es, default_config)
 
 
 def test_index_create_with_an_empty_configuration_uses_defaults(run_esctl, fake_es, monkeypatch):
-    import io
-
     monkeypatch.setattr("sys.stdin", io.StringIO(""))
     fake_es.on("PUT", "/logs", {"acknowledged": True})
 

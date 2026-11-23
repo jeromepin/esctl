@@ -101,6 +101,15 @@ extend-exclude = [
   "esctl/interactive.py",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Tests are pragmatic: plain asserts, literal expected values, and as many fixtures as needed
+"tests/**" = ["S101", "PLR2004", "PLR0913", "PLR0917"]
+
+[tool.ruff.lint.pycodestyle]
+# The formatter wraps code at `line-length`; comments and docstrings, which it doesn't wrap, may go up to 200 columns
+max-line-length = 200
+max-doc-length = 200
+
 [tool.ruff.lint]
 # select = ["ALL"]
 extend-select = [
@@ -114,6 +123,8 @@ extend-select = [
   "B",  # likely bugs (bugbear)
   "A",  # no shadowing of builtins
   "FBT",  # booleans are passed by keyword
+  "PL",  # pylint
+  "E", "W",  # pycodestyle
 ]
 ignore = [
   "ANN",

@@ -1,4 +1,13 @@
+import importlib.metadata
+import io
 import logging
+import os
+import warnings
+
+from elastic_transport import SecurityWarning
+from urllib3.exceptions import HTTPWarning
+
+from esctl.main import Esctl
 
 
 def test_log_files_do_not_contain_color_codes(run_esctl, tmp_path):
@@ -23,9 +32,6 @@ def test_console_levels_are_colored_once_and_names_stay_untouched(run_esctl, fak
 
 
 def urllib3_warnings_are_silenced() -> bool:
-    import warnings
-
-    from urllib3.exceptions import HTTPWarning
 
     return any(
         action == "ignore" and module is None and issubclass(HTTPWarning, category)
@@ -43,9 +49,6 @@ def test_tls_warnings_are_kept_when_certificates_are_verified(run_esctl, fake_es
 
 
 def test_no_insecure_warning_when_certificate_checks_are_disabled_on_purpose(run_esctl, fake_es, default_config):
-    import warnings
-
-    from elastic_transport import SecurityWarning
 
     fake_es.on("GET", "/_cluster/health", {"status": "green"})
     default_config["settings"]["no_check_certificate"] = True
@@ -59,9 +62,6 @@ def test_no_insecure_warning_when_certificate_checks_are_disabled_on_purpose(run
 
 
 def test_the_terminal_width_is_not_overridden(monkeypatch):
-    import os
-
-    from esctl.main import Esctl
 
     monkeypatch.delenv("COLUMNS", raising=False)
 
@@ -71,16 +71,12 @@ def test_the_terminal_width_is_not_overridden(monkeypatch):
 
 
 def test_unused_es_version_option_is_gone():
-    from esctl.main import Esctl
-
     options = {option for action in Esctl().parser._actions for option in action.option_strings}
 
     assert "--es-version" not in options
 
 
 def test_quiet_mode_only_shows_errors_as_documented(run_esctl, fake_es):
-    from esctl.main import Esctl
-
     fake_es.on("GET", "/_cluster/health", {"error": "boom"}, status=500)
 
     result = run_esctl("-q", "cluster", "health")
@@ -92,9 +88,6 @@ def test_quiet_mode_only_shows_errors_as_documented(run_esctl, fake_es):
 
 
 def test_the_app_can_be_subclassed():
-    import importlib.metadata
-
-    from esctl.main import Esctl
 
     class CustomEsctl(Esctl):
         pass
@@ -103,9 +96,6 @@ def test_the_app_can_be_subclassed():
 
 
 def test_commands_write_to_the_app_stdout(write_config, fake_es, capsys):
-    import io
-
-    from esctl.main import Esctl
 
     fake_es.on("GET", "/_cluster/health", {"status": "green"})
     app = Esctl()
