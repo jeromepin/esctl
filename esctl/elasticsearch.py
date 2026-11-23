@@ -47,7 +47,7 @@ class Client:
         http_auth: tuple[str, str] | None = None,
     ) -> Elasticsearch:
         elasticsearch_client_kwargs = {
-            "http_auth": http_auth,
+            "basic_auth": http_auth,
         }
 
         if context.settings.get("no_check_certificate"):
@@ -65,7 +65,7 @@ class Client:
             )
 
         if "timeout" in context.settings:
-            elasticsearch_client_kwargs["timeout"] = context.settings.get("timeout")
+            elasticsearch_client_kwargs["request_timeout"] = context.settings.get("timeout")
 
         return Elasticsearch(
             # The client spreads requests over every node and retries on another one when a node fails

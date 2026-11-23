@@ -1,8 +1,12 @@
+import json
 from typing import Any
 
 from esctl.commands import EsctlCommand, EsctlCommandIndex, EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
+
+# Top-level keys of the create index API body
+INDEX_CONFIGURATION_KEYS = {"aliases", "mappings", "settings"}
 
 
 class IndexCreate(EsctlCommand):
@@ -12,10 +16,19 @@ class IndexCreate(EsctlCommand):
     """
 
     def take_action(self, parsed_args):
-        configuration = self.read_from_file_or_stdin(parsed_args.configuration)
+        raw_configuration = self.read_from_file_or_stdin(parsed_args.configuration)
+        # No configuration at all: create the index with the cluster's defaults
+        configuration = json.loads(raw_configuration) if raw_configuration.strip() else {}
+
+        unknown_keys = set(configuration) - INDEX_CONFIGURATION_KEYS
+        if unknown_keys:
+            raise ValueError(
+                f"Unknown index configuration keys: {', '.join(sorted(unknown_keys))}. "
+                f"Expected any of: {', '.join(sorted(INDEX_CONFIGURATION_KEYS))}",
+            )
 
         self.log.info(f"Creating index {parsed_args.index}")
-        print(self.es.indices.create(index=parsed_args.index, body=configuration))
+        print(self.es.indices.create(index=parsed_args.index, **configuration))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
@@ -118,7 +131,7 @@ class IndexReindex(EsctlCommand):
         }
 
     def take_action(self, parsed_args):
-        print(self.es.reindex(body=self._build_request_body(vars(parsed_args))))
+        print(self.es.reindex(**self._build_request_body(vars(parsed_args))))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
