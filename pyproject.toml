@@ -101,6 +101,7 @@ line-length = 120
 # select = ["ALL"]
 extend-select = [
   "DTZ",  # naive datetimes (and the deprecated utcfromtimestamp/utcnow)
+  "B006",  # mutable default arguments, shared between calls
 ]
 ignore = [
   "ANN",
