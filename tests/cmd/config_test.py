@@ -58,3 +58,40 @@ def test_an_empty_config_file_reports_the_missing_blocks(run_esctl, tmp_path):
     assert result.code == 1
     assert "clusters" in result.err
     assert "not iterable" not in result.err
+
+
+def test_config_commands_work_when_run_as_a_module(write_config):
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "esctl.main",
+            "--config",
+            str(write_config()),
+            "config",
+            "cluster",
+            "list",
+            "-f",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert '"Name": "local"' in result.stdout
+
+
+def test_each_app_instance_has_its_own_config(run_esctl, default_config):
+    other = {**default_config, "clusters": {"other": {"servers": ["https://other:9200"]}}}
+    other["contexts"] = {"local": {"cluster": "other"}}
+
+    first = run_esctl("config", "cluster", "list", "-f", "json")
+    second = run_esctl("config", "cluster", "list", "-f", "json", config=other)
+
+    assert [c["Name"] for c in first.json()] == ["local"]
+    assert [c["Name"] for c in second.json()] == ["other"]
