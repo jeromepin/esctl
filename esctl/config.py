@@ -135,7 +135,7 @@ class ConfigFileParser:
                             "schema": {
                                 "type": "dict",
                                 "schema": {
-                                    "command": {"type": "string"},
+                                    "command": {"type": "string", "required": True, "empty": False},
                                     "wait_for_exit": {"type": "boolean"},
                                     "wait_for_output": {"type": "string"},
                                 },

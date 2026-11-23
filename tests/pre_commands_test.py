@@ -150,3 +150,17 @@ def test_output_printed_after_the_expected_line_keeps_being_read(write_config, d
         assert done.exists(), "the pre-command blocked writing to a full stdout pipe"
     finally:
         app.clean_up(cmd, 0, None)
+
+
+def test_pre_commands_require_a_command(run_esctl, fake_es, default_config, monkeypatch):
+    import io
+
+    # shlex.split(None) used to read the command to run from stdin
+    monkeypatch.setattr("sys.stdin", io.StringIO("touch /tmp/esctl-should-not-run-this"))
+    config = config_with_pre_commands(default_config, {"wait_for_exit": True})
+
+    result = run_esctl("cluster", "health", config=config)
+
+    assert result.code == 1
+    assert "contexts.local.pre_commands.0.command': required field" in result.err
+    assert fake_es.requests == []
