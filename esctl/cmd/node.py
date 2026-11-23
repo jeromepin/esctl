@@ -86,18 +86,11 @@ class NodeStats(EsctlShowOne):
             index_metric=parsed_args.index_metric,
             level=parsed_args.level,
         ).get("nodes")
-
-        if parsed_args.jmespath is not None:
-            path = self.jmespath_search(parsed_args.jmespath, stats)
-
-            return (tuple(["Result"]), tuple([path]))
+        self.response = stats
 
         stats = self.transform(stats)
 
-        return JSONToCliffFormatter(
-            stats,
-            pretty_key=not parsed_args.no_pretty,
-        ).to_show_one(lines=list(stats.keys()))
+        return JSONToCliffFormatter(stats, pretty_key=self.pretty_keys).to_show_one(lines=list(stats.keys()))
 
     def transform(self, raw_stats):
         if self.uses_table_formatter():

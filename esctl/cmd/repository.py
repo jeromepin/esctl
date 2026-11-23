@@ -20,8 +20,9 @@ class RepositoryShow(EsctlShowOne):
         repository = self.es.snapshot.get_repository(
             name=parsed_args.repository,
         ).get(parsed_args.repository)
+        self.response = repository
 
-        return JSONToCliffFormatter(repository).to_show_one(
+        return JSONToCliffFormatter(repository, pretty_key=self.pretty_keys).to_show_one(
             lines=list(repository.keys()),
         )
 

@@ -7,11 +7,10 @@ class DocumentGet(EsctlShowOne):
     """Retrieves the specified JSON document from an index."""
 
     def take_action(self, parsed_args):
-        document = flatten_dict(
-            self.es.get(index=parsed_args.index, id=parsed_args.id),
-        )
+        self.response = self.es.get(index=parsed_args.index, id=parsed_args.id).body
+        document = flatten_dict(self.response)
 
-        return JSONToCliffFormatter(document).to_show_one(lines=list(document.keys()))
+        return JSONToCliffFormatter(document, pretty_key=self.pretty_keys).to_show_one(lines=list(document.keys()))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)

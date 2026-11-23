@@ -22,14 +22,13 @@ class AbstractClusterSettings(EsctlShowOne):
 
     def _settings_get(self, setting: str):
         s = self.cluster_settings.mget(setting)
+        self.response = {
+            "transient": s.get("transient").value,
+            "persistent": s.get("persistent").value,
+            "defaults": s.get("defaults").value,
+        }
 
-        return JSONToCliffFormatter(
-            {
-                "transient": s.get("transient").value,
-                "persistent": s.get("persistent").value,
-                "defaults": s.get("defaults").value,
-            },
-        ).to_show_one(
+        return JSONToCliffFormatter(self.response, pretty_key=self.pretty_keys).to_show_one(
             lines=[("transient"), ("persistent"), ("defaults")],
             none_as="" if self.uses_table_formatter() else None,
         )
@@ -61,6 +60,7 @@ class ClusterSettingsList(EsctlShowOne):
     def take_action(self, parsed_args):
         default_settings = {}
         settings_list = self.cluster_settings.list_().get("defaults")
+        self.response = settings_list
 
         for setting_name, setting_value in settings_list.items():
             if type(setting_value).__name__ == "list":
@@ -159,6 +159,7 @@ class IndexSettingsList(EsctlShowOne):
         sample_index_name = indices[0].get("index")
         # {setting name: Setting}, merged from the index' explicit settings and defaults
         index_settings = self.index_settings.list_(sample_index_name)[sample_index_name]
+        self.response = {name: setting.value for name, setting in index_settings.items()}
 
         settings = {}
         for setting_name, setting in sorted(index_settings.items()):

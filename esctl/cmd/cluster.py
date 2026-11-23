@@ -11,6 +11,7 @@ class ClusterAllocationExplain(EsctlShowOne):
     def take_action(self, parsed_args):
         try:
             response = self.es.cluster.allocation_explain()
+            self.response = response.body
         except elasticsearch.BadRequestError:
             # Without a body, Elasticsearch explains the first unassigned shard
             # and answers 400 when there is none
@@ -41,7 +42,8 @@ class ClusterHealth(EsctlShowOne):
     """Show the cluster health."""
 
     def take_action(self, parsed_args):
-        health = self._sort_and_order_dict(self.es.cluster.health())
+        self.response = self.es.cluster.health().body
+        health = self._sort_and_order_dict(self.response)
 
         if self.uses_table_formatter():
             health["status"] = Color.colorize(
@@ -56,8 +58,9 @@ class ClusterInfo(EsctlShowOne):
     """Show basic informations about the cluster."""
 
     def take_action(self, parsed_args):
-        # The response object is read-only: work on its body
-        infos = self.es.info().body
+        self.response = self.es.info().body
+        # Flattening edits the top-level keys: keep the response intact for --jmespath
+        infos = dict(self.response)
 
         if self.uses_table_formatter():
             infos = self._delete_and_merge_inner_dict_into_parent(infos, "version")
@@ -69,8 +72,9 @@ class ClusterStats(EsctlShowOne):
     """Show cluster stats."""
 
     def take_action(self, parsed_args):
+        self.response = self.es.cluster.stats().body
         cluster_stats = self._sort_and_order_dict(
-            self.transform(flatten_dict(self.es.cluster.stats())),
+            self.transform(flatten_dict(self.response)),
         )
 
         return (tuple(cluster_stats.keys()), tuple(cluster_stats.values()))

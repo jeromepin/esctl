@@ -212,7 +212,26 @@ class EsctlListerIndexSetting(EsctlLister):
 
 
 class EsctlShowOne(ShowOne, EsctlCommon):
-    """Expect a key-value list to create a two-columns table."""
+    """Expect a key-value list to create a two-columns table.
+
+    Commands store the API response they display in `self.response`, so
+    `--jmespath` can query it; and pass `self.pretty_keys` to the formatter
+    when they prettify keys, so `--no-pretty` can disable it.
+    """
+
+    response: Any = None
+    pretty_keys: bool = True
+
+    def run(self, parsed_args):
+        self.pretty_keys = not parsed_args.no_pretty
+        return super().run(parsed_args)
+
+    def produce_output(self, parsed_args, column_names, data):
+        if parsed_args.jmespath is not None:
+            source = self.response if self.response is not None else dict(zip(column_names, data))
+            column_names, data = ("Result",), (self.jmespath_search(parsed_args.jmespath, source),)
+
+        return super().produce_output(parsed_args, column_names, data)
 
     def jmespath_search(self, expression, data, options=None):
         return jmespath.search(expression, data, options=options)
@@ -226,6 +245,9 @@ class EsctlShowOne(ShowOne, EsctlCommon):
         )
         parser.add_argument(
             "--jmespath",
-            help=("[Experimental] Execute a JMESPath query on the response. See https://jmespath.org for help."),
+            help=(
+                "[Experimental] Execute a JMESPath query on the API response instead of displaying it. "
+                "See https://jmespath.org for help."
+            ),
         )
         return parser
