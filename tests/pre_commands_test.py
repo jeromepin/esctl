@@ -58,3 +58,32 @@ def test_started_pre_commands_are_stopped_when_a_later_one_cannot_start(run_esct
     assert "/nonexistent/binary" in result.err
     assert "Could not clean up" not in result.err
     assert not is_running(int(pid_file.read_text()))
+
+
+def test_failing_pre_command_aborts_before_any_request(run_esctl, fake_es, default_config):
+    config = config_with_pre_commands(default_config, {"command": "sh -c 'echo cannot connect >&2; exit 4'"})
+
+    result = run_esctl("cluster", "health", config=config)
+
+    assert result.code == 1
+    assert "failed with exit code 4" in result.err
+    assert "cannot connect" in result.err
+    assert fake_es.requests == []
+
+
+def test_pre_command_exiting_before_the_expected_output_aborts(run_esctl, fake_es, default_config):
+    config = config_with_pre_commands(
+        default_config,
+        {
+            "command": "sh -c 'echo starting; echo address already in use >&2; exit 1'",
+            "wait_for_exit": False,
+            "wait_for_output": "^Forwarding from",
+        },
+    )
+
+    result = run_esctl("cluster", "health", config=config)
+
+    assert result.code == 1
+    assert "exited with code 1 before printing a line matching `^Forwarding from`" in result.err
+    assert "address already in use" in result.err
+    assert fake_es.requests == []
