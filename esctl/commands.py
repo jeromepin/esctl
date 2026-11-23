@@ -50,9 +50,17 @@ class EsctlCommon:
         self,
         verb: str,
         route: str,
-        body: dict[Any, Any] | None,
-    ) -> dict[Any, Any]:
-        return self.es.transport.perform_request(verb.upper(), route, body=body)
+        body: dict[Any, Any] | str | None,
+    ) -> Any:
+        """Send an arbitrary request and return the decoded response body."""
+        headers = {"accept": "application/json"}
+        if body is not None:
+            headers["content-type"] = "application/json"
+
+        if not route.startswith("/"):
+            route = f"/{route}"
+
+        return self.es.perform_request(verb.upper(), route, headers=headers, body=body).body
 
     def objects_list_to_flat_dict(self, lst: list[dict[str, Any]]) -> dict[str, Any]:
         """Convert a list of dict to a flattened dict with full name.
