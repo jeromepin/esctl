@@ -32,5 +32,8 @@ jobs:
       - name: Format
         run: uv run ruff format --diff
 
+      - name: Type check
+        run: uv run ty check
+
       - name: Test with pytest
         run: uv run pytest
