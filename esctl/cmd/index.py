@@ -27,7 +27,7 @@ class IndexCreate(EsctlCommand):
                 f"Expected any of: {', '.join(sorted(INDEX_CONFIGURATION_KEYS))}",
             )
 
-        self.log.info(f"Creating index {parsed_args.index}")
+        self.log.info("Creating index %s", parsed_args.index)
         print(self.es.indices.create(index=parsed_args.index, **configuration))
 
     def get_parser(self, prog_name):
@@ -94,7 +94,7 @@ class IndexClose(EsctlCommandIndex):
     """Close an index."""
 
     def take_action(self, parsed_args):
-        self.log.info("Closing index " + parsed_args.index)
+        self.log.info("Closing index %s", parsed_args.index)
         print(self.es.indices.close(index=parsed_args.index))
 
 
@@ -102,7 +102,7 @@ class IndexDelete(EsctlCommandIndex):
     """Delete an index."""
 
     def take_action(self, parsed_args):
-        self.log.info("Deleting index " + parsed_args.index)
+        self.log.info("Deleting index %s", parsed_args.index)
         print(self.es.indices.delete(index=parsed_args.index))
 
 
@@ -110,7 +110,7 @@ class IndexOpen(EsctlCommandIndex):
     """Open an index."""
 
     def take_action(self, parsed_args):
-        self.log.info("Opening index " + parsed_args.index)
+        self.log.info("Opening index %s", parsed_args.index)
         print(self.es.indices.open(index=parsed_args.index))
 
 
