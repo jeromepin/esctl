@@ -43,10 +43,27 @@ def test_allocation_explain(run_esctl, fake_es):
     result = run_esctl("cluster", "allocation", "explain", "-f", "json")
 
     assert result.code == 0, result.err
-    rows = {row["Attribute"]: row["Value"] for row in result.json()}
+    rows = result.json()
     assert rows["node-1"] == "disk watermark"
     assert rows["node-2"] == "yes"
     assert rows["reason"] == "NODE_LEFT"
+
+
+def test_allocation_explain_table_has_one_row_per_attribute(run_esctl, fake_es):
+    fake_es.on("POST", "/_cluster/allocation/explain", EXPLAIN)
+
+    result = run_esctl("cluster", "allocation", "explain", "-f", "value")
+
+    assert result.code == 0, result.err
+    assert result.out.splitlines() == [
+        "logs",
+        "no",
+        "cannot allocate",
+        "no_attempt",
+        "NODE_LEFT",
+        "disk watermark",
+        "yes",
+    ]
 
 
 def test_allocation_explain_without_unassigned_shards(run_esctl, fake_es):

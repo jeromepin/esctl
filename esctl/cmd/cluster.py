@@ -1,11 +1,11 @@
 import elasticsearch
 
 from esctl.cmd.settings import AbstractClusterSettings
-from esctl.commands import EsctlLister, EsctlShowOne
+from esctl.commands import EsctlShowOne
 from esctl.utils import Color, flatten_dict
 
 
-class ClusterAllocationExplain(EsctlLister):
+class ClusterAllocationExplain(EsctlShowOne):
     """Provide explanations for shard allocations failures."""
 
     def take_action(self, parsed_args):
@@ -18,7 +18,7 @@ class ClusterAllocationExplain(EsctlLister):
                 "Unable to find any unassigned shards to explain. This may indicate that all shards are allocated.",
             )
 
-            return (("Attribute", "Value"), ())
+            return ((), ())
 
         unassigned_info = response.get("unassigned_info") or {}
         output = {
@@ -34,7 +34,7 @@ class ClusterAllocationExplain(EsctlLister):
             deciders = node.get("deciders") or [{}]
             output[node.get("node_name")] = deciders[0].get("explanation", node.get("node_decision"))
 
-        return (("Attribute", "Value"), tuple(output.items()))
+        return (tuple(output.keys()), tuple(output.values()))
 
 
 class ClusterHealth(EsctlShowOne):
