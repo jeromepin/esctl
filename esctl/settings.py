@@ -75,7 +75,7 @@ class ClusterSettings(Settings):
             f"Changing {persistency}'s {Color.colorize(sections, Color.ITALIC)} to : {Color.colorize(value, Color.ITALIC)}",
         )
         return self.es.cluster.put_settings(
-            body={persistency: {sections: value}},
+            **{persistency: {sections: value}},
             flat_settings=True,
         )
 
@@ -138,4 +138,4 @@ class IndexSettings(Settings):
         return settings
 
     def set(self, setting: str, value: Any, index: str):
-        return self.es.indices.put_settings(index=index, body={setting: value})
+        return self.es.indices.put_settings(index=index, settings={setting: value})
