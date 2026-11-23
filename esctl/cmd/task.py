@@ -32,13 +32,10 @@ class TaskList(EsctlLister):
         )
 
     def convert_timestamp_in_ms_to_human_readable(self, time_in_ms: int) -> str:
-        miliseconds = str(round((time_in_ms / 1000) % 1, 3)).split(".")[1]
-        return (
-            datetime.datetime.utcfromtimestamp(time_in_ms / 1000).strftime(
-                "%Y-%m-%d %H:%M:%S",
-            )
-            + f".{miliseconds}"
-        )
+        # Integer arithmetic: going through float seconds loses milliseconds
+        seconds, milliseconds = divmod(time_in_ms, 1000)
+        start = datetime.datetime.fromtimestamp(seconds, tz=datetime.timezone.utc)
+        return f"{start:%Y-%m-%d %H:%M:%S}.{milliseconds:03d}"
 
     def transform(self, nodes):
         tasks = []
