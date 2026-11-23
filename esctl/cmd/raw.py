@@ -15,7 +15,7 @@ class RawCommand(EsctlCommand):
         response = self.request(verb=parsed_args.verb, route=parsed_args.route, body=body)
 
         # Some routes only answer plain text (e.g. hot threads)
-        print(response if isinstance(response, str) else json.dumps(response))
+        self.print_output(response if isinstance(response, str) else json.dumps(response))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)

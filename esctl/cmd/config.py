@@ -16,9 +16,7 @@ class ConfigClusterList(EsctlLister):
                 "name": cluster_name,
                 "servers": "\n".join(cluster_definition.get("servers")),
             }
-            for cluster_name, cluster_definition in self.app.config.get(
-                "clusters",
-            ).items()
+            for cluster_name, cluster_definition in self.app.config["clusters"].items()
         ]
 
         return JSONToCliffFormatter(clusters).format_for_lister(
@@ -38,9 +36,7 @@ class ConfigContextList(EsctlLister):
                 "user": context_definition.get("user"),
                 "cluster": context_definition.get("cluster"),
             }
-            for context_name, context_definition in self.app.config.get(
-                "contexts",
-            ).items()
+            for context_name, context_definition in self.app.config["contexts"].items()
         ]
 
         return JSONToCliffFormatter(self.transform(contexts)).format_for_lister(
@@ -93,7 +89,7 @@ class ConfigShow(EsctlCommand):
 
     def take_action(self, parsed_args):
         setup_yaml()
-        print(
+        self.print_output(
             yaml.safe_dump(
                 dict(self.app.config),
                 None,

@@ -43,7 +43,7 @@ class RepositoryVerify(EsctlCommand):
             name=parsed_args.repository,
         )
 
-        print(repository)
+        self.print_output(repository)
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)

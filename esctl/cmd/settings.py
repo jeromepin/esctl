@@ -183,11 +183,11 @@ class IndexSettingsSet(EsctlCommandIndex):
         if not setting_name.startswith("index."):
             setting_name = f"index.{setting_name}"
 
-        print(
+        self.print_output(
             f"Changing {Color.colorize(setting_name, Color.ITALIC)} to {Color.colorize(parsed_args.value, Color.ITALIC)} in index {Color.colorize(parsed_args.index, Color.ITALIC)}",
         )
 
-        print(
+        self.print_output(
             self.index_settings.set(setting_name, parsed_args.value, parsed_args.index),
         )
 

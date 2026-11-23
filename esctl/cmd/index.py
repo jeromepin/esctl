@@ -29,7 +29,7 @@ class IndexCreate(EsctlCommand):
             raise ValueError(msg)
 
         self.log.info("Creating index %s", parsed_args.index)
-        print(self.es.indices.create(index=parsed_args.index, **configuration))
+        self.print_output(self.es.indices.create(index=parsed_args.index, **configuration))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
@@ -96,7 +96,7 @@ class IndexClose(EsctlCommandIndex):
 
     def take_action(self, parsed_args):
         self.log.info("Closing index %s", parsed_args.index)
-        print(self.es.indices.close(index=parsed_args.index))
+        self.print_output(self.es.indices.close(index=parsed_args.index))
 
 
 class IndexDelete(EsctlCommandIndex):
@@ -104,7 +104,7 @@ class IndexDelete(EsctlCommandIndex):
 
     def take_action(self, parsed_args):
         self.log.info("Deleting index %s", parsed_args.index)
-        print(self.es.indices.delete(index=parsed_args.index))
+        self.print_output(self.es.indices.delete(index=parsed_args.index))
 
 
 class IndexOpen(EsctlCommandIndex):
@@ -112,7 +112,7 @@ class IndexOpen(EsctlCommandIndex):
 
     def take_action(self, parsed_args):
         self.log.info("Opening index %s", parsed_args.index)
-        print(self.es.indices.open(index=parsed_args.index))
+        self.print_output(self.es.indices.open(index=parsed_args.index))
 
 
 class IndexReindex(EsctlCommand):
@@ -132,7 +132,7 @@ class IndexReindex(EsctlCommand):
         }
 
     def take_action(self, parsed_args):
-        print(self.es.reindex(**self._build_request_body(vars(parsed_args))))
+        self.print_output(self.es.reindex(**self._build_request_body(vars(parsed_args))))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)

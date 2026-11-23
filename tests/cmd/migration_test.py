@@ -72,8 +72,6 @@ def test_transform(mock_request: MagicMock, capsys):
 
     out, _ = capsys.readouterr()
 
-    print(out)
-
     assert out.startswith(
         json.dumps(
             [
