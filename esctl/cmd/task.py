@@ -47,7 +47,7 @@ class TaskList(EsctlLister):
     def transform(self, nodes):
         tasks = []
 
-        for _, node_definition in nodes.items():
+        for node_definition in nodes.values():
             for task_name, task in node_definition.get("tasks").items():
                 task["name"] = task_name
 

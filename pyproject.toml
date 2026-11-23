@@ -96,6 +96,10 @@ esctl = "esctl.main:main"
 [tool.ruff]
 # Allow lines to be as long as 120.
 line-length = 120
+extend-exclude = [
+  # Copied from cliff for cmd2 0.8: to be replaced when upgrading cliff and cmd2
+  "esctl/interactive.py",
+]
 
 [tool.ruff.lint]
 # select = ["ALL"]
@@ -128,7 +132,7 @@ dev-dependencies = [
     "pytest-icdiff>=0.9",
     "pytest>=8.3.4",
     "pyupgrade>=3.19.0",
-    "ruff>=0.8.3",
+    "ruff>=0.17.6",
     "setuptools>=75.6.0",
     "ty==0.0.108",
     "uv>=0.5.11",

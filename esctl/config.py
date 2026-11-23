@@ -199,8 +199,7 @@ class ConfigFileParser:
         # to disk: never share objects between them.
         if context_name not in self.contexts:
             raise ConfigurationError(
-                f"Unknown context `{context_name}`. "
-                f"Here are the contexts I know : {', '.join(self.contexts.keys())}",
+                f"Unknown context `{context_name}`. Here are the contexts I know : {', '.join(self.contexts.keys())}",
             )
 
         raw_context = copy.deepcopy(self.contexts[context_name])
