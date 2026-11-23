@@ -1,37 +1,24 @@
-from esctl.commands import EsctlCommand, EsctlLister, EsctlShowOne
+from esctl.cmd.settings import AbstractClusterSettings
+from esctl.commands import EsctlCommand, EsctlLister, EsctlShowOne, add_persistency_arguments, selected_persistency
 from esctl.formatter import JSONToCliffFormatter
-from esctl.utils import Color, flatten_dict
+from esctl.utils import flatten_dict
 
 
-class NodeExclude(EsctlCommand):
-    """Define a list of excluded nodes from routing."""
+class NodeExclude(AbstractClusterSettings):
+    """Show or define the list of nodes excluded from shard allocation."""
 
     def take_action(self, parsed_args):
         setting_name = f"cluster.routing.allocation.exclude.{parsed_args.by}"
 
-        if parsed_args.list is None:
-            setting = self.cluster_settings.get(setting_name, persistency="transient")
+        if parsed_args.list is not None:
+            self.log.info(f"Changing node exclusion list ({setting_name}) to : {parsed_args.list}")
+            self._settings_set(setting_name, parsed_args.list, persistency=selected_persistency(parsed_args))
 
-            if setting.value is None:
-                setting.value = ""
-
-            self.print_success(setting.value)
-
-        else:
-            self.print_output(
-                "Changing node exclusion list"
-                f" ({Color.colorize(setting_name, Color.ITALIC)}) to : {Color.colorize(parsed_args.list, Color.ITALIC)}",
-            )
-            self.print_success(
-                self.cluster_settings.set(
-                    setting_name,
-                    parsed_args.list,
-                    persistency="transient",
-                ),
-            )
+        # Show both: an exclusion can be set as transient, persistent, or both
+        return self._settings_get(setting_name)
 
     def get_parser(self, prog_name):
-        parser = super().get_parser(prog_name)
+        parser = add_persistency_arguments(super().get_parser(prog_name))
 
         parser.add_argument(
             "--by",
