@@ -16,6 +16,9 @@ from esctl.utils import Color
 
 class EsctlCommon:
     log = logging.getLogger(__name__)
+    # Whether the command talks to Elasticsearch. Local commands neither
+    # resolve credentials nor run the context's pre-commands.
+    requires_cluster = True
     cluster_settings = ClusterSettings()
     index_settings = IndexSettings()
 

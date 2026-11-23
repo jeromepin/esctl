@@ -57,3 +57,39 @@ def test_external_password_requires_a_command(run_esctl, fake_es, default_config
     assert result.code == 1
     assert "users.admin.external_password.command': required field" in result.err
     assert fake_es.requests == []
+
+
+def counting_password_command(default_config, tmp_path):
+    counter = tmp_path / "calls"
+    return config_with_password_command(default_config, f"echo call >> {counter}; echo s3cret"), counter
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ("config", "context", "list"),
+        ("config", "show"),
+        ("help", "cluster", "health"),
+    ],
+)
+def test_local_commands_do_not_run_the_password_command(run_esctl, default_config, tmp_path, argv):
+    config, counter = counting_password_command(default_config, tmp_path)
+
+    result = run_esctl(*argv, config=config)
+
+    assert result.code == 0, result.err
+    assert not counter.exists()
+
+
+def test_the_password_command_runs_once_per_session(write_config, default_config, tmp_path):
+    from esctl.main import Esctl
+
+    config, counter = counting_password_command(default_config, tmp_path)
+    app = Esctl()
+    app.options, _ = app.parser.parse_known_args(["--config", str(write_config(config))])
+    app.initialize_app([])
+
+    app.connect()
+    app.connect()
+
+    assert counter.read_text().splitlines() == ["call"]
