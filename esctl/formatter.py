@@ -1,8 +1,8 @@
 class TableKey:
-    def __init__(self, id, name=None, pretty_key=True):
-        self.id = id
+    def __init__(self, key, name=None, *, pretty_key=True):
+        self.key = key
         if name is None:
-            self.name = self._create_name_from_id(pretty_key=pretty_key)
+            self.name = self._create_name_from_key(pretty_key=pretty_key)
         else:
             self.name = name
 
@@ -37,12 +37,12 @@ class TableKey:
 
         return words
 
-    def _create_name_from_id(self, pretty_key=True):
+    def _create_name_from_key(self, *, pretty_key=True):
         """Extrapolate the column's name based on its ID."""
         if not pretty_key:
-            return self.id
+            return self.key
 
-        name = self._split_string(self.id)
+        name = self._split_string(self.key)
 
         for idx in range(len(name)):
             # Format some special words like "percent" -> %
@@ -61,13 +61,13 @@ class TableKey:
         return " ".join(name)
 
     def __repr__(self):
-        return f"({self.id}, {self.name})"
+        return f"({self.key}, {self.name})"
 
 
 class JSONToCliffFormatter:
     """Format a JSON object to one of the cliff's class expected inputs."""
 
-    def __init__(self, json, pretty_key=True):
+    def __init__(self, json, *, pretty_key=True):
         self.json = json
         self.pretty_key = pretty_key
 
@@ -151,7 +151,7 @@ class JSONToCliffFormatter:
         for raw_line in self.json:
             line = []
             for column in columns:
-                element = raw_line.get(column.id)
+                element = raw_line.get(column.key)
 
                 if element is None:
                     element = none_as
@@ -183,7 +183,7 @@ class JSONToCliffFormatter:
         for line in lines:
             keys.append(line.name)
 
-            element = self.json.get(line.id)
+            element = self.json.get(line.key)
             if element is None:
                 element = none_as
 

@@ -50,7 +50,8 @@ def test_every_configured_server_is_used():
 
 
 def test_a_failing_node_is_retried_on_another_one(run_esctl, fake_es, default_config, monkeypatch):
-    from elastic_transport import ConnectionError, Urllib3HttpNode
+    from elastic_transport import ConnectionError as TransportConnectionError
+    from elastic_transport import Urllib3HttpNode
 
     default_config["clusters"]["local"]["servers"] = ["https://down:9200", "https://up:9200"]
     default_config["settings"]["max_retries"] = 1
@@ -60,7 +61,7 @@ def test_a_failing_node_is_retried_on_another_one(run_esctl, fake_es, default_co
     def perform_request(node, *args, **kwargs):
         if node.config.host == "down":
             msg = "connection refused"
-            raise ConnectionError(msg)
+            raise TransportConnectionError(msg)
         return healthy(node, *args, **kwargs)
 
     monkeypatch.setattr(Urllib3HttpNode, "perform_request", perform_request)

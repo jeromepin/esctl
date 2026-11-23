@@ -112,6 +112,8 @@ extend-select = [
   "PTH",  # pathlib instead of os.path and open()
   "RET", "SIM", "FURB", "C4", "PERF", "PLW", "RUF", "ICN",  # simpler, more idiomatic code
   "B",  # likely bugs (bugbear)
+  "A",  # no shadowing of builtins
+  "FBT",  # booleans are passed by keyword
 ]
 ignore = [
   "ANN",

@@ -44,7 +44,7 @@ class TestCreateColumnNameFromId(EsctlTestCase):
     def test_name_interpolation(self):
         for case in self.cases:
             self.assertEqual(
-                TableKey(case.get("input"))._create_name_from_id(),
+                TableKey(case.get("input"))._create_name_from_key(),
                 case.get("expected_output"),
             )
 
@@ -53,6 +53,6 @@ class TestCreateColumnNameFromId(EsctlTestCase):
 
         for case in cases:
             self.assertEqual(
-                TableKey(case)._create_name_from_id(pretty_key=False),
+                TableKey(case)._create_name_from_key(pretty_key=False),
                 case,
             )
