@@ -64,8 +64,7 @@ class EsctlCommon:
         """Read some content from a file, or from stdin when the path is undefined or `-`."""
         if path is not None and path != "-":
             return Path(path).expanduser().read_text()
-        else:
-            return sys.stdin.read()
+        return sys.stdin.read()
 
     def request(
         self,
@@ -164,7 +163,7 @@ class EsctlCommon:
 
 
 class EsctlCommand(Command, EsctlCommon):
-    """Simple command to run. Doesn’t expect any output."""
+    """Simple command to run. Doesn't expect any output."""
 
 
 def add_persistency_arguments(parser):
@@ -249,7 +248,7 @@ class EsctlShowOne(ShowOne, EsctlCommon):
 
     def produce_output(self, parsed_args, column_names, data):
         if parsed_args.jmespath is not None:
-            source = self.response if self.response is not None else dict(zip(column_names, data))
+            source = self.response if self.response is not None else dict(zip(column_names, data, strict=True))
             column_names, data = ("Result",), (self.jmespath_search(parsed_args.jmespath, source),)
 
         return super().produce_output(parsed_args, column_names, data)

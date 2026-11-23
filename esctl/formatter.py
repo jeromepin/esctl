@@ -58,9 +58,7 @@ class TableKey:
             else:
                 name[idx] = name[idx][0].upper() + name[idx][1:]
 
-        name = " ".join(name)
-
-        return name
+        return " ".join(name)
 
     def __repr__(self):
         return f"({self.id}, {self.name})"
@@ -101,15 +99,10 @@ class JSONToCliffFormatter:
         :return: A list of TableKey objects
         :rtype: list
         """
-        valid_list = []
-
-        for column in columns:
-            if isinstance(column, str):
-                column = (column,)
-
-            valid_list.append(TableKey(*column, pretty_key=self.pretty_key))
-
-        return valid_list
+        return [
+            TableKey(*((column,) if isinstance(column, str) else column), pretty_key=self.pretty_key)
+            for column in columns
+        ]
 
     def format_for_lister(self, columns=(), none_as=None):
         """Convert a JSON object to an object compliant with

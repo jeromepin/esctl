@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 import warnings
 
 from elasticsearch.exceptions import GeneralAvailabilityWarning
@@ -41,7 +41,7 @@ class TaskList(EsctlLister):
     def convert_timestamp_in_ms_to_human_readable(self, time_in_ms: int) -> str:
         # Integer arithmetic: going through float seconds loses milliseconds
         seconds, milliseconds = divmod(time_in_ms, 1000)
-        start = datetime.datetime.fromtimestamp(seconds, tz=datetime.timezone.utc)
+        start = dt.datetime.fromtimestamp(seconds, tz=dt.timezone.utc)
         return f"{start:%Y-%m-%d %H:%M:%S}.{milliseconds:03d}"
 
     def transform(self, nodes):

@@ -118,7 +118,7 @@ class NodeStats(EsctlShowOne):
             "--index-metric",
             help=(
                 "A comma-separated list of indices metrics you wish returned. "
-                "Isn’t used if indices (or all) metric isn’t specified."
+                "Isn't used if indices (or all) metric isn't specified."
                 "Valid choices are: "
                 "_all, completion, docs, fielddata, query_cache, flush, get, indexing, merge, "
                 "request_cache, refresh, search, segments, store, warmer, suggest."

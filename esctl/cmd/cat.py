@@ -88,7 +88,7 @@ class CatShards(EsctlLister):
         ]
 
         if self.has_unassigned_shards:
-            columns = columns + [("UNASSIGNED",)]
+            columns = [*columns, ("UNASSIGNED",)]
 
         return JSONToCliffFormatter(shards).format_for_lister(columns=columns)
 
@@ -102,7 +102,7 @@ class CatShards(EsctlLister):
             if shard_index not in indices:
                 indices[shard_index] = {
                     "index": shard_index,
-                    **{n: "" for n in nodes},
+                    **dict.fromkeys(nodes, ""),
                 }
 
             shard_node = shard.get("node") or "UNASSIGNED"
@@ -136,7 +136,7 @@ class CatThreadpool(EsctlLister):
     _default_headers = "node_name,name,active,queue,rejected,type"
 
     def take_action(self, parsed_args):
-        headers = parsed_args.headers if parsed_args.headers else self._default_headers
+        headers = parsed_args.headers or self._default_headers
 
         thread_pools = self.transform(
             self.rows(
