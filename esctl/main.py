@@ -13,6 +13,7 @@ from cliff.commandmanager import CommandManager
 from esctl import utils
 from esctl.config import ConfigFileParser
 from esctl.elasticsearch import Client
+from esctl.exceptions import ExternalCommandError
 from esctl.interactive import InteractiveApp
 
 # `configure_logging` and `build_option_parser` methods comes from cliff
@@ -106,13 +107,11 @@ class Esctl(App):
         root_logger.addHandler(console)
 
     def insert_password_into_context(self):
-        external_passowrd_definition = self.context.user.get("external_password")
-        del self.context.user["external_password"]
-
-        if "command" in external_passowrd_definition and "run" in external_passowrd_definition.get("command"):
-            self.context.user["password"] = self._run_os_system_command(
-                external_passowrd_definition.get("command").get("run"),
-            )
+        external_password_definition = self.context.user.pop("external_password")
+        self.context.user["password"] = self._run_os_system_command(
+            external_password_definition["command"]["run"],
+            purpose="password",
+        )
 
     def initialize_app(self, argv):
         self.config = self.config_file_parser.load_configuration(
@@ -134,9 +133,29 @@ class Esctl(App):
 
         Client.configure(self.context, http_auth)
 
-    def _run_os_system_command(self, raw_command: str) -> str:
+    def _run_os_system_command(self, raw_command: str, purpose: str) -> str:
+        """Run a shell command from the configuration file and return its output."""
         self.log.debug(f"Running command : {raw_command}")
-        return os.popen(raw_command).read().strip()
+        # Running through a shell is intended: users write pipelines in their config file
+        completed = subprocess.run(  # noqa: S602
+            raw_command,
+            shell=True,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        if completed.returncode != 0:
+            raise ExternalCommandError(
+                f"The command retrieving the {purpose} failed with exit code {completed.returncode}: "
+                f"`{raw_command}`\n{completed.stderr.strip()}",
+            )
+
+        value = completed.stdout.strip()
+        if not value:
+            raise ExternalCommandError(f"The command retrieving the {purpose} printed nothing: `{raw_command}`")
+
+        return value
 
     def _run_shell_subcommand(self, command):
         command = command.split(" ")

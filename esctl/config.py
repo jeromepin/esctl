@@ -83,6 +83,7 @@ class ConfigFileParser:
             "schema": {
                 "command": {
                     "type": "dict",
+                    "required": True,
                     "schema": {
                         "run": {
                             "type": "string",
