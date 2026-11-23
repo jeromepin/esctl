@@ -89,3 +89,14 @@ def test_quiet_mode_only_shows_errors_as_documented(run_esctl, fake_es):
     assert "WARNING" not in result.err
     quiet = next(action for action in Esctl().parser._actions if "-q" in action.option_strings)
     assert quiet.help == "Suppress output except errors."
+
+
+def test_the_app_can_be_subclassed():
+    import importlib.metadata
+
+    from esctl.main import Esctl
+
+    class CustomEsctl(Esctl):
+        pass
+
+    assert CustomEsctl().parser.description == importlib.metadata.metadata("esctl")["Summary"]

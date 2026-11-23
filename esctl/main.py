@@ -21,6 +21,9 @@ from esctl.interactive import InteractiveApp
 # and are modified
 
 
+DISTRIBUTION_NAME = "esctl"
+
+
 class ColoredLevelFormatter(logging.Formatter):
     """Colorize the level name, without touching the global level names
     (which would also color log files and accumulate across app instances)."""
@@ -51,8 +54,8 @@ class Esctl(App):
 
     def __init__(self):
         super().__init__(
-            description=importlib.metadata.metadata(self.__class__.__name__)["Summary"],
-            version=importlib.metadata.version(self.__class__.__name__),
+            description=importlib.metadata.metadata(DISTRIBUTION_NAME)["Summary"],
+            version=importlib.metadata.version(DISTRIBUTION_NAME),
             command_manager=CommandManager("esctl"),
             deferred_help=True,
             interactive_app_factory=InteractiveApp,
