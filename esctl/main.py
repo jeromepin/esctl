@@ -63,7 +63,8 @@ class Esctl(App):
         )
         self.interactive_mode = False
         self.config_file_parser = ConfigFileParser()
-        self.config = None
+        # Loaded by initialize_app(), before any command runs
+        self.config: dict[str, Any] = {}
         self._connected = False
         self._pre_command_processes: list[subprocess.Popen] = []
         self._pre_command_drains: list[threading.Thread] = []

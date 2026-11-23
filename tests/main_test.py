@@ -100,3 +100,18 @@ def test_the_app_can_be_subclassed():
         pass
 
     assert CustomEsctl().parser.description == importlib.metadata.metadata("esctl")["Summary"]
+
+
+def test_commands_write_to_the_app_stdout(write_config, fake_es, capsys):
+    import io
+
+    from esctl.main import Esctl
+
+    fake_es.on("GET", "/_cluster/health", {"status": "green"})
+    app = Esctl()
+    app.stdout = io.StringIO()
+
+    app.run(["--config", str(write_config()), "raw", "/_cluster/health"])
+
+    assert app.stdout.getvalue() == '{"status": "green"}\n'
+    assert capsys.readouterr().out == ""

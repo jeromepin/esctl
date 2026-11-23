@@ -43,7 +43,7 @@ class NodeHotThreads(EsctlCommand):
     """Print hot threads on each nodes."""
 
     def take_action(self, parsed_args):
-        print(self.es.nodes.hot_threads(type=parsed_args.type))
+        self.print_output(self.es.nodes.hot_threads(type=parsed_args.type))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)

@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jmespath
 from cliff.command import Command
@@ -16,11 +16,18 @@ from esctl.elasticsearch import Client
 from esctl.settings import ClusterSettings, IndexSettings, Persistency
 from esctl.utils import Color
 
+if TYPE_CHECKING:
+    # Not imported at runtime: when run with `python -m esctl.main`, it would
+    # load a second, never initialized copy of the module
+    from esctl.main import Esctl
+
 
 class EsctlCommon:
     log = logging.getLogger(__name__)
     # Set by cliff on display commands (listers and show-ones) when they run
     formatter: object = None
+    # Set by cliff's Command constructor
+    app: "Esctl"
     # Whether the command talks to Elasticsearch. Local commands neither
     # resolve credentials nor run the context's pre-commands.
     requires_cluster = True
@@ -35,10 +42,11 @@ class EsctlCommon:
         return {e[0]: e[1] for e in sorted(dct.items())}
 
     def print_success(self, message):
-        print("{} {}".format(Color.colorize("==>", Color.GREEN), message))
+        self.print_output(f"{Color.colorize('==>', Color.GREEN)} {message}")
 
     def print_output(self, message):
-        print(f"{message}")
+        # Write where cliff expects commands to write, instead of sys.stdout
+        self.app.stdout.write(f"{message}\n")
 
     def uses_table_formatter(self) -> bool:
         return isinstance(self.formatter, TableFormatter)
