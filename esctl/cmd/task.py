@@ -1,4 +1,7 @@
 import datetime
+import warnings
+
+from elasticsearch.exceptions import GeneralAvailabilityWarning
 
 from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
@@ -8,13 +11,17 @@ class TaskList(EsctlLister):
     """Returns a list of tasks."""
 
     def take_action(self, parsed_args):
-        tasks = self.transform(
-            self.es.tasks.list(
+        with warnings.catch_warnings():
+            # The client warns on every call that the task management API is in
+            # technical preview: that's not actionable for esctl users
+            warnings.simplefilter("ignore", GeneralAvailabilityWarning)
+            response = self.es.tasks.list(
                 actions=parsed_args.actions,
                 detailed=parsed_args.detailed,
                 parent_task_id=parsed_args.parent_task_id,
-            ).get("nodes"),
-        )
+            )
+
+        tasks = self.transform(response.get("nodes"))
 
         return JSONToCliffFormatter(tasks).format_for_lister(
             columns=[
