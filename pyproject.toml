@@ -110,6 +110,8 @@ extend-select = [
   "EM",  # exception messages are assigned first, so tracebacks don't repeat them
   "T20",  # commands write to cliff's stdout, not with print()
   "PTH",  # pathlib instead of os.path and open()
+  "RET", "SIM", "FURB", "C4", "PERF", "PLW", "RUF", "ICN",  # simpler, more idiomatic code
+  "B",  # likely bugs (bugbear)
 ]
 ignore = [
   "ANN",

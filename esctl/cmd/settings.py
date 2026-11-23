@@ -1,3 +1,5 @@
+from typing import Any
+
 from esctl.commands import (
     EsctlCommandIndex,
     EsctlListerIndexSetting,
@@ -8,6 +10,13 @@ from esctl.commands import (
 from esctl.formatter import JSONToCliffFormatter
 from esctl.settings import ClusterSettings, IndexSettings, Persistency
 from esctl.utils import Color
+
+
+def displayed_value(value: Any) -> Any:
+    """Show list values one item per line, and `[]` when empty."""
+    if isinstance(value, list):
+        return ",\n".join(value) if value else "[]"
+    return value
 
 
 class AbstractClusterSettings(EsctlShowOne):
@@ -58,18 +67,9 @@ class ClusterSettingsList(EsctlShowOne):
     cluster_settings: ClusterSettings
 
     def take_action(self, parsed_args):
-        default_settings = {}
         settings_list = self.cluster_settings.list_().get("defaults", {})
         self.response = settings_list
-
-        for setting_name, setting_value in settings_list.items():
-            if type(setting_value).__name__ == "list":
-                if len(setting_value) > 0:
-                    setting_value = ",\n".join(setting_value)
-                else:
-                    setting_value = "[]"
-
-            default_settings[setting_name] = setting_value
+        default_settings = {name: displayed_value(value) for name, value in settings_list.items()}
 
         return (tuple(default_settings.keys()), tuple(default_settings.values()))
 
@@ -123,21 +123,17 @@ class IndexSettingsGet(EsctlListerIndexSetting):
         )
 
         raw_settings = self.index_settings.get(index, setting_name)
-        settings = []
-
-        for index_name, settings_list in raw_settings.items():
-            for setting in settings_list:
-                if setting.value is not None:
-                    settings.append(
-                        {
-                            "index": index_name,
-                            "setting": setting.name,
-                            "value": setting.value,
-                            "default": setting.persistency == "defaults",
-                        },
-                    )
-
-        return settings
+        return [
+            {
+                "index": index_name,
+                "setting": setting.name,
+                "value": setting.value,
+                "default": setting.persistency == "defaults",
+            }
+            for index_name, settings_list in raw_settings.items()
+            for setting in settings_list
+            if setting.value is not None
+        ]
 
     def take_action(self, parsed_args):
         return JSONToCliffFormatter(
@@ -161,13 +157,7 @@ class IndexSettingsList(EsctlShowOne):
         index_settings = self.index_settings.list_(sample_index_name)[sample_index_name]
         self.response = {name: setting.value for name, setting in index_settings.items()}
 
-        settings = {}
-        for setting_name, setting in sorted(index_settings.items()):
-            setting_value = setting.value
-            if isinstance(setting_value, list):
-                setting_value = ",\n".join(setting_value) if setting_value else "[]"
-
-            settings[setting_name] = setting_value
+        settings = {name: displayed_value(setting.value) for name, setting in sorted(index_settings.items())}
 
         return (tuple(settings.keys()), tuple(settings.values()))
 

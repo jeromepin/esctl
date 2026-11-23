@@ -239,15 +239,13 @@ class ConfigFileParser:
             for pre_command in raw_context.get("pre_commands", [])
         ]
 
-        context = Context(
+        return Context(
             context_name,
             user,
             cluster,
             settings,
             pre_commands=pre_commands,
         )
-
-        return context
 
     def create_context(self, context_name: str | None = None) -> Context:
         if context_name:

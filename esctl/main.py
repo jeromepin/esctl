@@ -165,13 +165,11 @@ class Esctl(App):
     def _run_shell_subcommand(self, command):
         command = shlex.split(command)
         self.log.debug("Running pre-command : %s", command)
-        process = subprocess.Popen(
+        return subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-
-        return process
 
     def prepare_to_run_command(self, cmd):
         if not self._requires_cluster(cmd):

@@ -66,7 +66,7 @@ users:
 def test_unknown_context_names_the_known_ones(tmp_path):
     parser = load(tmp_path, BASE + "contexts:\n  a:\n    cluster: c\n")
 
-    with pytest.raises(ConfigurationError, match="Unknown context `nope`.*: a"):
+    with pytest.raises(ConfigurationError, match=r"Unknown context `nope`.*: a"):
         parser.create_context("nope")
 
 
@@ -80,7 +80,7 @@ def test_missing_default_context_asks_for_one(tmp_path):
 def test_unknown_user_is_an_error_instead_of_silently_unauthenticated(tmp_path):
     parser = load(tmp_path, BASE + "contexts:\n  a:\n    cluster: c\n    user: typo\n")
 
-    with pytest.raises(ConfigurationError, match="requires a user named `typo`.*: u"):
+    with pytest.raises(ConfigurationError, match=r"requires a user named `typo`.*: u"):
         parser.create_context("a")
 
 

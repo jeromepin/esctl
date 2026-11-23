@@ -30,21 +30,24 @@ class MigrationDeprecations(EsctlLister):
         for kind, elements in deprecations.items():
             # Some kinds (index_settings, data_streams, templates, ilm_policies...)
             # group their deprecations by resource name: prefix messages with it
-            if isinstance(elements, dict):
-                elements = [
+            kind_deprecations = (
+                [
                     {**deprecation, "message": f"[{name}] {deprecation['message']}"}
                     for name, resource_deprecations in elements.items()
                     for deprecation in resource_deprecations
                 ]
+                if isinstance(elements, dict)
+                else elements
+            )
 
-            for deprecation in elements:
-                rows.append(
-                    {
-                        "kind": kind,
-                        "level": deprecation["level"],
-                        "message": deprecation["message"],
-                        "url": deprecation["url"],
-                    },
-                )
+            rows.extend(
+                {
+                    "kind": kind,
+                    "level": deprecation["level"],
+                    "message": deprecation["message"],
+                    "url": deprecation["url"],
+                }
+                for deprecation in kind_deprecations
+            )
 
         return rows
