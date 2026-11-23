@@ -106,29 +106,27 @@ class CatShards(EsctlLister):
         return JSONToCliffFormatter(shards).format_for_lister(columns=columns)
 
     def transform(self, shards_list: list[dict[str, Any]], nodes: list[str]) -> list[dict[str, Any]]:
-        indices = {}
+        # index name -> node name -> shards: an index can have several shards on the same node
+        shards_by_index: dict[str, dict[str, list[str]]] = {}
         self.has_unassigned_shards: bool = False
 
         for shard in shards_list:
-            shard_index = shard.get("index")
-
-            if shard_index not in indices:
-                indices[shard_index] = {
-                    "index": shard_index,
-                    **dict.fromkeys(nodes, ""),
-                }
-
             shard_node = shard.get("node") or "UNASSIGNED"
 
             if shard_node == "UNASSIGNED":
                 self.has_unassigned_shards = True
 
-            # An index can have several shards on the same node: list them all
-            shard_name = f"{shard.get('shard')}{shard.get('prirep')}"
-            existing = indices[shard_index].get(shard_node)
-            indices[shard_index][shard_node] = f"{existing}, {shard_name}" if existing else shard_name
+            shards_by_node = shards_by_index.setdefault(shard["index"], {})
+            shards_by_node.setdefault(shard_node, []).append(f"{shard['shard']}{shard['prirep']}")
 
-        return list(indices.values())
+        return [
+            {
+                "index": index,
+                **dict.fromkeys(nodes, ""),
+                **{node: ", ".join(shards) for node, shards in shards_by_node.items()},
+            }
+            for index, shards_by_node in shards_by_index.items()
+        ]
 
     @override
     def get_parser(self, prog_name: str) -> argparse.ArgumentParser:

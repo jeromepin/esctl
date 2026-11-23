@@ -147,7 +147,8 @@ python-version = "3.10"
 extra-paths = ["stubs"]
 
 [tool.ty.rules]
-missing-override-decorator = "error"
+# Strict: every rule, including the opt-in ones, is an error
+all = "error"
 
 [tool.ty.src]
 include = ["esctl", "tests"]
