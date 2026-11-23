@@ -44,3 +44,16 @@ def test_start_time_keeps_three_digit_milliseconds(timestamp, expected):
     from esctl.cmd.task import TaskList
 
     assert TaskList(None, None).convert_timestamp_in_ms_to_human_readable(timestamp) == expected
+
+
+def test_technical_preview_warning_is_not_shown(run_esctl, fake_es):
+    import warnings
+
+    fake_es.on("GET", "/_tasks", TASKS)
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        result = run_esctl("task", "list")
+
+    assert result.code == 0, result.err
+    assert [str(w.message) for w in caught if "technical preview" in str(w.message)] == []
