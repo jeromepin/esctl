@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import sys
@@ -188,9 +189,12 @@ class ConfigFileParser:
         return raw_config_file
 
     def get_context_informations(self, context_name: str):
-        raw_context = self.contexts.get(context_name)
-        user = self.users.get(raw_context.get("user"))
-        cluster = self.clusters.get(raw_context.get("cluster"))
+        # The context gets mutated at runtime (resolved credentials, defaults,
+        # running processes...) while the raw configuration may be written back
+        # to disk: never share objects between them.
+        raw_context = copy.deepcopy(self.contexts.get(context_name))
+        user = copy.deepcopy(self.users.get(raw_context.get("user")))
+        cluster = copy.deepcopy(self.clusters.get(raw_context.get("cluster")))
 
         if cluster is None:
             self.log.error(
