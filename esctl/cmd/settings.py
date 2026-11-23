@@ -1,5 +1,3 @@
-import collections
-
 from esctl.commands import EsctlCommandIndex, EsctlListerIndexSetting, EsctlShowOne
 from esctl.formatter import JSONToCliffFormatter
 from esctl.settings import ClusterSettings, IndexSettings
@@ -162,27 +160,20 @@ class IndexSettingsList(EsctlShowOne):
     index_settings: IndexSettings
 
     def take_action(self, parsed_args):
+        indices = self.es.cat.indices(format="json", h="index")
+        if not indices:
+            self.log.warning("There is no index to list settings from.")
+            return ((), ())
+
+        sample_index_name = indices[0].get("index")
+        # {setting name: Setting}, merged from the index' explicit settings and defaults
+        index_settings = self.index_settings.list_(sample_index_name)[sample_index_name]
+
         settings = {}
-        sample_index_name = self.es.cat.indices(format="json", h="index")[0].get(
-            "index",
-        )
-
-        settings_list = self.index_settings.list_(sample_index_name)
-        settings_list = collections.OrderedDict(
-            sorted(
-                {
-                    **settings_list.get("settings"),
-                    **settings_list.get("defaults"),
-                }.items(),
-            ),
-        )
-
-        for setting_name, setting_value in settings_list.items():
-            if type(setting_value).__name__ == "list":
-                if len(setting_value) > 0:
-                    setting_value = ",\n".join(setting_value)
-                else:
-                    setting_value = "[]"
+        for setting_name, setting in sorted(index_settings.items()):
+            setting_value = setting.value
+            if isinstance(setting_value, list):
+                setting_value = ",\n".join(setting_value) if setting_value else "[]"
 
             settings[setting_name] = setting_value
 
