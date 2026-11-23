@@ -3,6 +3,7 @@ import importlib.metadata
 import logging
 import os
 import re
+import shlex
 import subprocess
 import sys
 
@@ -164,7 +165,7 @@ class Esctl(App):
         return value
 
     def _run_shell_subcommand(self, command):
-        command = command.split(" ")
+        command = shlex.split(command)
         self.log.debug(f"Running pre-command : {command}")
         process = subprocess.Popen(
             command,
