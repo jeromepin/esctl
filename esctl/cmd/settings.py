@@ -128,8 +128,9 @@ class IndexSettingsGet(EsctlListerIndexSetting):
     """Get an index-level setting value."""
 
     def retrieve_setting(self, setting_name, index):
-        if not setting_name.startswith("index."):
-            setting_name = f"index.{setting_name}"
+        setting_name = ",".join(
+            name if name.startswith("index.") else f"index.{name}" for name in setting_name.split(",")
+        )
 
         raw_settings = self.index_settings.get(index, setting_name)
         settings = []

@@ -109,33 +109,27 @@ class IndexSettings(Settings):
 
         return settings
 
-    def get(self, index: str, key: str | None) -> dict[str, list[Setting]]:
+    def get(self, index: str, key: str) -> dict[str, list[Setting]]:
+        """Get settings of one or several indices.
+
+        `key` is a comma-separated list of setting names, each one possibly
+        containing `*` wildcards.
+        """
         self.log.debug(f"Retrieving setting(s) '{key}' for indices : {index}")
 
         response = self.list_(index)
-        settings: dict[str, list[Setting]] = {}
+        # Indices can define different settings: match patterns against all of them
+        known_settings = sorted({name for index_settings in response.values() for name in index_settings})
+
         requested_settings: list[str] = []
+        for pattern in key.split(","):
+            matches = fnmatch.filter(known_settings, pattern) if "*" in pattern else [pattern]
+            requested_settings.extend(name for name in matches if name not in requested_settings)
 
-        known_settings = [list(index_settings.keys()) for _, index_settings in response.items()][0]
-
-        if "*" in key:
-            requested_settings = fnmatch.filter(known_settings, key)
-
-        elif "," in key:
-            requested_settings = key.split(",")
-        else:
-            requested_settings = [key]
-
-        for index_name, index_settings in response.items():
-            settings[index_name] = []
-
-            for setting_name in requested_settings:
-                if setting_name in known_settings:
-                    settings[index_name].append(index_settings.get(setting_name))
-                else:
-                    settings[index_name].append(Setting(setting_name, None))
-
-        return settings
+        return {
+            index_name: [index_settings.get(name) or Setting(name, None) for name in requested_settings]
+            for index_name, index_settings in response.items()
+        }
 
     def set(self, setting: str, value: Any, index: str):
         return self.es.indices.put_settings(index=index, settings={setting: value})
