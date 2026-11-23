@@ -307,7 +307,7 @@ class Esctl(App):
             action="store_const",
             dest="verbose_level",
             const=0,
-            help="Suppress output except warnings and errors.",
+            help="Suppress output except errors.",
         )
         parser.add_argument(
             "--log-file",

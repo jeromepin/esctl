@@ -76,3 +76,16 @@ def test_unused_es_version_option_is_gone():
     options = {option for action in Esctl().parser._actions for option in action.option_strings}
 
     assert "--es-version" not in options
+
+
+def test_quiet_mode_only_shows_errors_as_documented(run_esctl, fake_es):
+    from esctl.main import Esctl
+
+    fake_es.on("GET", "/_cluster/health", {"error": "boom"}, status=500)
+
+    result = run_esctl("-q", "cluster", "health")
+
+    assert "ERROR" in result.err
+    assert "WARNING" not in result.err
+    quiet = next(action for action in Esctl().parser._actions if "-q" in action.option_strings)
+    assert quiet.help == "Suppress output except errors."
