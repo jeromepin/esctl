@@ -21,6 +21,10 @@ from esctl.interactive import InteractiveApp
 # and are modified
 
 
+# Seconds a pre-command gets to exit after SIGTERM before being killed
+PRE_COMMAND_STOP_TIMEOUT = 5
+
+
 class Esctl(App):
     log = App.LOG
 
@@ -37,6 +41,7 @@ class Esctl(App):
         self.config_file_parser = ConfigFileParser()
         self.config = None
         self._connected = False
+        self._pre_command_processes: list[subprocess.Popen] = []
 
     def configure_logging(self):
         """Create logging handlers for any log output."""
@@ -181,46 +186,58 @@ class Esctl(App):
 
         self.connect()
 
-        if hasattr(self.context, "pre_commands"):
-            for i in range(len(self.context.pre_commands)):
-                command_block = self.context.pre_commands[i]
-                process = self._run_shell_subcommand(command_block.get("command"))
+        for command_block in self.context.pre_commands:
+            process = self._run_shell_subcommand(command_block.get("command"))
+            self._pre_command_processes.append(process)
 
-                if command_block.get("wait_for_exit"):
-                    process.communicate()
+            if command_block.get("wait_for_exit"):
+                process.communicate()
 
-                elif command_block.get("wait_for_output"):
-                    string_to_look_for = command_block.get("wait_for_output")
-                    pattern = re.compile(string_to_look_for)
+            elif command_block.get("wait_for_output"):
+                string_to_look_for = command_block.get("wait_for_output")
+                pattern = re.compile(string_to_look_for)
 
-                    while True:
-                        line = process.stdout.readline()
-                        if not line:
-                            break
+                while True:
+                    line = process.stdout.readline()
+                    if not line:
+                        break
 
-                        line = line.decode("utf-8").strip()
+                    line = line.decode("utf-8").strip()
 
-                        match = re.search(pattern, line)
+                    match = re.search(pattern, line)
 
-                        if match is None:
-                            self.log.debug(
-                                f"Expecting command output to match `{string_to_look_for}` but got `{line}`...",
-                            )
-                        else:
-                            self.log.debug(
-                                f"Got `{string_to_look_for}` from `{command_block.get('command')}`",
-                            )
-                            break
-
-                self.context.pre_commands[i]["process"] = process
+                    if match is None:
+                        self.log.debug(
+                            f"Expecting command output to match `{string_to_look_for}` but got `{line}`...",
+                        )
+                    else:
+                        self.log.debug(
+                            f"Got `{string_to_look_for}` from `{command_block.get('command')}`",
+                        )
+                        break
 
     def clean_up(self, cmd, result, err):
-        if self._requires_cluster(cmd) and hasattr(self.context, "pre_commands"):
-            for pre_command in self.context.pre_commands:
-                pre_command.get("process").terminate()
+        self._stop_pre_commands()
 
         if err:
             self.log.debug("got an error: %s", err)
+
+    def _stop_pre_commands(self):
+        """Stop every pre-command started for the current command, even if starting them failed midway."""
+        processes, self._pre_command_processes = self._pre_command_processes, []
+
+        for process in processes:
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=PRE_COMMAND_STOP_TIMEOUT)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+
+            for stream in (process.stdout, process.stderr):
+                if stream is not None:
+                    stream.close()
 
     def build_option_parser(self, description, version, argparse_kwargs=None):
         """Return an argparse option parser for this application."""
