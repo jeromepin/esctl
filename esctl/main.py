@@ -18,7 +18,6 @@ from esctl import utils
 from esctl.config import ConfigFileParser
 from esctl.elasticsearch import Client
 from esctl.exceptions import ExternalCommandError
-from esctl.interactive import InteractiveApp
 
 # `configure_logging` and `build_option_parser` methods comes from cliff
 # and are modified
@@ -47,6 +46,15 @@ class ColoredLevelFormatter(logging.Formatter):
         return super().format(record)
 
 
+def interactive_app(*args: object, **kwargs: object) -> object:
+    """Create the interactive shell, started when esctl runs without a command."""
+    # Imported on demand, as cliff does: cmd2 is slow to import, and prints a readline warning
+    # on import when it can't enable tab completion
+    from esctl.interactive import InteractiveApp  # noqa: PLC0415
+
+    return InteractiveApp(*args, **kwargs)
+
+
 # Seconds a pre-command gets to exit after SIGTERM before being killed
 PRE_COMMAND_STOP_TIMEOUT = 5
 # Lines of a background pre-command's stderr kept to explain its failure
@@ -62,7 +70,7 @@ class Esctl(App):
             version=importlib.metadata.version(DISTRIBUTION_NAME),
             command_manager=CommandManager("esctl"),
             deferred_help=True,
-            interactive_app_factory=InteractiveApp,
+            interactive_app_factory=interactive_app,
         )
         self.interactive_mode = False
         self.config_file_parser = ConfigFileParser()

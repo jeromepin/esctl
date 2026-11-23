@@ -2,6 +2,8 @@ import importlib.metadata
 import io
 import logging
 import os
+import subprocess
+import sys
 import warnings
 
 from elastic_transport import SecurityWarning
@@ -107,3 +109,26 @@ def test_commands_write_to_the_app_stdout(write_config, fake_es, capsys):
 
     assert app.stdout.getvalue() == '{"status": "green"}\n'
     assert capsys.readouterr().out == ""
+
+
+def test_commands_do_not_load_the_interactive_shell(write_config):
+    # cmd2 is slow to import and prints a readline warning on import (e.g. on macOS)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; from esctl.main import main; code = main(sys.argv[1:]); print('cmd2' in sys.modules)",
+            "--config",
+            str(write_config()),
+            "config",
+            "cluster",
+            "list",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines()[-1] == "False"
+    assert "readline" not in result.stderr.lower()
