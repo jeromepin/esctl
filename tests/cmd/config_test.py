@@ -1,3 +1,6 @@
+import subprocess
+import sys
+
 import yaml
 
 
@@ -61,9 +64,6 @@ def test_an_empty_config_file_reports_the_missing_blocks(run_esctl, tmp_path):
 
 
 def test_config_commands_work_when_run_as_a_module(write_config):
-    import subprocess
-    import sys
-
     result = subprocess.run(
         [
             sys.executable,

@@ -4,6 +4,8 @@ from pathlib import Path
 
 from elastic_transport import ObjectApiResponse
 
+import esctl.settings
+
 from .base_test_class import EsctlTestCase
 
 
@@ -29,8 +31,6 @@ class TestClusterSettingsRetrieval(EsctlTestCase):
         }
 
     def test_settings_get(self):
-        import esctl.settings
-
         cluster_settings = esctl.settings.ClusterSettings()
         self.assertEqual(
             cluster_settings.get(
@@ -95,8 +95,6 @@ class TestIndexSettingsRetrieval(EsctlTestCase):
         return json.loads(Path(f"{self.fixtures_path}/index_settings.json").read_text())
 
     def test_settings_list(self):
-        import esctl.settings
-
         index_settings = esctl.settings.IndexSettings()
 
         self.assertEqual(

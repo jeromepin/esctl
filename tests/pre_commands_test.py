@@ -1,3 +1,13 @@
+import io
+import os
+import subprocess
+import sys
+import time
+from types import SimpleNamespace
+
+from esctl.main import Esctl
+
+
 def config_with_pre_commands(default_config, *pre_commands):
     default_config["contexts"]["local"]["pre_commands"] = list(pre_commands)
     return default_config
@@ -15,8 +25,6 @@ def test_pre_command_arguments_follow_shell_quoting(run_esctl, fake_es, default_
 
 
 def is_running(pid: int) -> bool:
-    import os
-
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -94,9 +102,6 @@ FLOOD = "head -c 1000000 /dev/zero >{fd}"
 
 
 def test_a_chatty_stderr_does_not_block_the_expected_output(write_config, default_config, tmp_path):
-    import subprocess
-    import sys
-
     config = config_with_pre_commands(
         default_config,
         {
@@ -122,10 +127,6 @@ def test_a_chatty_stderr_does_not_block_the_expected_output(write_config, defaul
 
 
 def test_output_printed_after_the_expected_line_keeps_being_read(write_config, default_config, tmp_path):
-    import time
-    from types import SimpleNamespace
-
-    from esctl.main import Esctl
 
     done = tmp_path / "done"
     config = config_with_pre_commands(
@@ -153,8 +154,6 @@ def test_output_printed_after_the_expected_line_keeps_being_read(write_config, d
 
 
 def test_pre_commands_require_a_command(run_esctl, fake_es, default_config, monkeypatch):
-    import io
-
     # shlex.split(None) used to read the command to run from stdin
     monkeypatch.setattr("sys.stdin", io.StringIO("touch /tmp/esctl-should-not-run-this"))
     config = config_with_pre_commands(default_config, {"wait_for_exit": True})

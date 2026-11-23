@@ -1,6 +1,8 @@
 import random
 
 import pytest
+from elastic_transport import ConnectionError as TransportConnectionError
+from elastic_transport import Urllib3HttpNode
 
 from esctl.commands import EsctlCommon
 from esctl.config import Context
@@ -50,9 +52,6 @@ def test_every_configured_server_is_used():
 
 
 def test_a_failing_node_is_retried_on_another_one(run_esctl, fake_es, default_config, monkeypatch):
-    from elastic_transport import ConnectionError as TransportConnectionError
-    from elastic_transport import Urllib3HttpNode
-
     default_config["clusters"]["local"]["servers"] = ["https://down:9200", "https://up:9200"]
     default_config["settings"]["max_retries"] = 1
     fake_es.on("GET", "/_cluster/health", {"status": "green"})

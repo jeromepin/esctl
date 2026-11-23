@@ -1,3 +1,6 @@
+import io
+
+
 def test_raw_get(run_esctl, fake_es):
     fake_es.on("GET", "/_cluster/health", {"status": "green"})
 
@@ -37,8 +40,6 @@ def test_raw_prints_text_responses_as_is(run_esctl, fake_es):
 
 
 def test_raw_reads_the_body_from_stdin_with_at_dash(run_esctl, fake_es, monkeypatch):
-    import io
-
     fake_es.on("POST", "/logs/_search", {"hits": {}})
     monkeypatch.setattr("sys.stdin", io.StringIO('{"query": {"match_all": {}}}'))
 

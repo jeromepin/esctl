@@ -2,6 +2,11 @@ from esctl.commands import EsctlLister
 from esctl.formatter import JSONToCliffFormatter
 from esctl.utils import Color
 
+# Disk usage above which `cat allocation` highlights a node. 85% is Elasticsearch's default
+# low disk watermark: no new shard is allocated to the node beyond it.
+DISK_PERCENT_CRITICAL = 85
+DISK_PERCENT_WARNING = 70
+
 
 class CatAllocation(EsctlLister):
     """Show the number of shards allocated to each node.
@@ -32,13 +37,13 @@ class CatAllocation(EsctlLister):
 
         for node in allocation:
             if self.uses_table_formatter() and node.get("disk.percent") is not None:
-                if int(node.get("disk.percent")) > 85:
+                if int(node.get("disk.percent")) > DISK_PERCENT_CRITICAL:
                     node["disk.percent"] = Color.colorize(
                         node.get("disk.percent"),
                         Color.RED,
                     )
 
-                elif int(node.get("disk.percent")) > 70:
+                elif int(node.get("disk.percent")) > DISK_PERCENT_WARNING:
                     node["disk.percent"] = Color.colorize(
                         node.get("disk.percent"),
                         Color.YELLOW,
