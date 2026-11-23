@@ -12,11 +12,10 @@ class RawCommand(EsctlCommand):
         if parsed_args.body is not None and parsed_args.body.startswith("@"):
             body = self.read_from_file_or_stdin(parsed_args.body[1:])
 
-        print(
-            json.dumps(
-                self.request(verb=parsed_args.verb, route=parsed_args.route, body=body),
-            ),
-        )
+        response = self.request(verb=parsed_args.verb, route=parsed_args.route, body=body)
+
+        # Some routes only answer plain text (e.g. hot threads)
+        print(response if isinstance(response, str) else json.dumps(response))
 
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
