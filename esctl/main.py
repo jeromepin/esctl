@@ -20,9 +20,6 @@ from esctl.interactive import InteractiveApp
 
 
 class Esctl(App):
-    _es = None
-    _config = None
-    _config_file_parser = ConfigFileParser()
     log = App.LOG
 
     def __init__(self):
@@ -35,6 +32,8 @@ class Esctl(App):
             interactive_app_factory=InteractiveApp,
         )
         self.interactive_mode = False
+        self.config_file_parser = ConfigFileParser()
+        self.config = None
 
         self.LOCAL_COMMANDS: list[str] = [
             "ConfigClusterList",
@@ -116,10 +115,10 @@ class Esctl(App):
             )
 
     def initialize_app(self, argv):
-        Esctl._config = Esctl._config_file_parser.load_configuration(
+        self.config = self.config_file_parser.load_configuration(
             self.options.config_file,
         )
-        self.context = Esctl._config_file_parser.create_context(self.options.context)
+        self.context = self.config_file_parser.create_context(self.options.context)
 
         http_auth = None
 
