@@ -1,4 +1,4 @@
-import elasticsearch as elasticsearch
+import elasticsearch
 
 from esctl.cmd.settings import AbstractClusterSettings
 from esctl.commands import EsctlLister, EsctlShowOne
@@ -11,31 +11,30 @@ class ClusterAllocationExplain(EsctlLister):
     def take_action(self, parsed_args):
         try:
             response = self.es.cluster.allocation_explain()
-        except elasticsearch.TransportError as transport_error:
-            if transport_error.args[0] == 400:
-                self.log.warning(
-                    "Unable to find any unassigned shards to explain."
-                    " This may indicate that all shards are allocated.",
-                )
+        except elasticsearch.BadRequestError:
+            # Without a body, Elasticsearch explains the first unassigned shard
+            # and answers 400 when there is none
+            self.log.warning(
+                "Unable to find any unassigned shards to explain. This may indicate that all shards are allocated.",
+            )
 
-                return (("Attribute", "Value"), tuple())
-        else:
-            output = {
-                "index": response.get("index"),
-                "can_allocate": response.get("can_allocate"),
-                "explanation": response.get("allocate_explanation"),
-                "last_allocation_status": response.get("unassigned_info").get(
-                    "last_allocation_status",
-                ),
-                "reason": response.get("unassigned_info").get("reason"),
-            }
+            return (("Attribute", "Value"), ())
 
-            for node in response.get("node_allocation_decisions"):
-                output[node.get("node_name")] = node.get("deciders")[0].get(
-                    "explanation",
-                )
+        unassigned_info = response.get("unassigned_info") or {}
+        output = {
+            "index": response.get("index"),
+            "can_allocate": response.get("can_allocate"),
+            "explanation": response.get("allocate_explanation"),
+            "last_allocation_status": unassigned_info.get("last_allocation_status"),
+            "reason": unassigned_info.get("reason"),
+        }
 
-            return (("Attribute", "Value"), tuple(output.items()))
+        for node in response.get("node_allocation_decisions") or []:
+            # Nodes where the shard could be allocated have no deciders
+            deciders = node.get("deciders") or [{}]
+            output[node.get("node_name")] = deciders[0].get("explanation", node.get("node_decision"))
+
+        return (("Attribute", "Value"), tuple(output.items()))
 
 
 class ClusterHealth(EsctlShowOne):
