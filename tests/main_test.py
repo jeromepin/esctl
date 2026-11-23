@@ -70,10 +70,13 @@ def test_the_terminal_width_is_not_overridden(monkeypatch):
     assert "COLUMNS" not in os.environ
 
 
-def test_unused_es_version_option_is_gone():
-    options = {option for action in Esctl().parser._actions for option in action.option_strings}
+def help_text() -> str:
+    # Unwrapped: argparse wraps help to the terminal width
+    return " ".join(Esctl().parser.format_help().split())
 
-    assert "--es-version" not in options
+
+def test_unused_es_version_option_is_gone():
+    assert "--es-version" not in help_text()
 
 
 def test_quiet_mode_only_shows_errors_as_documented(run_esctl, fake_es):
@@ -83,8 +86,7 @@ def test_quiet_mode_only_shows_errors_as_documented(run_esctl, fake_es):
 
     assert "ERROR" in result.err
     assert "WARNING" not in result.err
-    quiet = next(action for action in Esctl().parser._actions if "-q" in action.option_strings)
-    assert quiet.help == "Suppress output except errors."
+    assert "-q, --quiet Suppress output except errors." in help_text()
 
 
 def test_the_app_can_be_subclassed():

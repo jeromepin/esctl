@@ -126,6 +126,10 @@ extend-select = [
   "PL",  # pylint
   "E", "W",  # pycodestyle
   "S",  # security (bandit)
+  "PT",  # pytest style
+  "TID", "SLF",  # absolute imports, no private access from outside
+  "ERA", "TD", "FIX",  # no commented-out code or TODOs: open an issue or an xfail test instead
+  "ARG001",  # unused function arguments
 ]
 ignore = [
   "ANN",

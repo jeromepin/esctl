@@ -1,58 +1,43 @@
+import pytest
+
 from esctl.formatter import TableKey
 
-from .base_test_class import EsctlTestCase
+PRETTY_NAMES = [
+    ("index.uuid", "Index UUID"),
+    ("index.id", "Index ID"),
+    ("index.gc_deletes", "Index GC Deletes"),
+    ("foo.bar", "Foo Bar"),
+    ("index.provided_name", "Index Provided Name"),
+    ("index.soft_deletes.retention_lease.period", "Index Soft Deletes Retention Lease Period"),
+    ("FooBar", "FooBar"),
+    ("foo_bar", "Foo Bar"),
+    ("foo-bar", "Foo-bar"),
+    ("foo.percent", "Foo %"),
+    ("_index", "_Index"),
+    ("_seq_no", "_Seq_no"),
+    ("_", "_"),
+    ("_source._metadata.createTime", "_Source _Metadata CreateTime"),
+]
+
+# Keys of `node stats` start with a node ID, which should be kept as-is
+NODE_ID_KEYS = [
+    ("b4XevSayQNCx_-1mrroUzw.index.uuid", "b4XevSayQNCx_-1mrroUzw Index UUID"),
+    ("BfTa0i_sQQmyFsVzjOtApQ.index.uuid", "BfTa0i_sQQmyFsVzjOtApQ Index UUID"),
+    ("Xggkx0fORHO_vgJ-WBp0bw.index.uuid", "Xggkx0fORHO_vgJ-WBp0bw Index UUID"),
+]
 
 
-class TestCreateColumnNameFromId(EsctlTestCase):
-    def setUp(self):
-        self.cases = [
-            {"input": "index.uuid", "expected_output": "Index UUID"},
-            {"input": "index.id", "expected_output": "Index ID"},
-            {"input": "index.gc_deletes", "expected_output": "Index GC Deletes"},
-            {"input": "foo.bar", "expected_output": "Foo Bar"},
-            {"input": "index.provided_name", "expected_output": "Index Provided Name"},
-            {
-                "input": "index.soft_deletes.retention_lease.period",
-                "expected_output": "Index Soft Deletes Retention Lease Period",
-            },
-            {"input": "FooBar", "expected_output": "FooBar"},
-            {"input": "foo_bar", "expected_output": "Foo Bar"},
-            {"input": "foo-bar", "expected_output": "Foo-bar"},
-            {"input": "foo.percent", "expected_output": "Foo %"},
-            {"input": "_index", "expected_output": "_Index"},
-            {"input": "_seq_no", "expected_output": "_Seq_no"},
-            {"input": "_", "expected_output": "_"},
-            {
-                "input": "_source._metadata.createTime",
-                "expected_output": "_Source _Metadata CreateTime",
-            },
-            # TODO: Rework name handling in `node stats` command
-            # {
-            #     "input": "b4XevSayQNCx_-1mrroUzw.index.uuid",
-            #     "expected_output": "b4XevSayQNCx_-1mrroUzw Index UUID",
-            # },
-            # {
-            #     "input": "BfTa0i_sQQmyFsVzjOtApQ.index.uuid",
-            #     "expected_output": "BfTa0i_sQQmyFsVzjOtApQ Index UUID",
-            # },
-            # {
-            #     "input": "Xggkx0fORHO_vgJ-WBp0bw.index.uuid",
-            #     "expected_output": "Xggkx0fORHO_vgJ-WBp0bw Index UUID",
-            # },
-        ]
+@pytest.mark.parametrize(("key", "expected"), PRETTY_NAMES)
+def test_pretty_name(key, expected):
+    assert TableKey(key).name == expected
 
-    def test_name_interpolation(self):
-        for case in self.cases:
-            self.assertEqual(
-                TableKey(case.get("input"))._create_name_from_key(),
-                case.get("expected_output"),
-            )
 
-    def test_no_pretty_name_interpolation(self):
-        cases = [c.get("input") for c in self.cases]
+@pytest.mark.xfail(reason="node IDs are split on underscores and title-cased", strict=True)
+@pytest.mark.parametrize(("key", "expected"), NODE_ID_KEYS)
+def test_pretty_name_keeps_node_ids(key, expected):
+    assert TableKey(key).name == expected
 
-        for case in cases:
-            self.assertEqual(
-                TableKey(case)._create_name_from_key(pretty_key=False),
-                case,
-            )
+
+@pytest.mark.parametrize("key", [key for key, _ in PRETTY_NAMES + NODE_ID_KEYS])
+def test_raw_name(key):
+    assert TableKey(key, pretty_key=False).name == key
