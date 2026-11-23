@@ -99,6 +99,9 @@ line-length = 120
 
 [tool.ruff.lint]
 # select = ["ALL"]
+extend-select = [
+  "DTZ",  # naive datetimes (and the deprecated utcfromtimestamp/utcnow)
+]
 ignore = [
   "ANN",
   "D",
