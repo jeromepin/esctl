@@ -115,7 +115,8 @@ class ConfigUserList(EsctlLister):
                 "username": user_definition.get("username"),
                 "password": user_definition.get("password"),
             }
-            for user_name, user_definition in self.app.config.get("users").items()
+            # `users` is optional
+            for user_name, user_definition in (self.app.config.get("users") or {}).items()
         ]
 
         return JSONToCliffFormatter(users).format_for_lister(

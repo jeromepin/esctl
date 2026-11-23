@@ -95,3 +95,13 @@ def test_each_app_instance_has_its_own_config(run_esctl, default_config):
 
     assert [c["Name"] for c in first.json()] == ["local"]
     assert [c["Name"] for c in second.json()] == ["other"]
+
+
+def test_config_user_list_without_users(run_esctl, default_config):
+    del default_config["users"]
+    default_config["contexts"]["local"].pop("user")
+
+    result = run_esctl("config", "user", "list", "-f", "json", config=default_config)
+
+    assert result.code == 0, result.err
+    assert result.json() == []
