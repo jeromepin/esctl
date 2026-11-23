@@ -8,7 +8,7 @@ class SecurityRolesGet(EsctlLister):
     def take_action(self, parsed_args):
         roles = self.transform(
             self._sort_and_order_dict(
-                self.es.security.get_role(format="json", name=parsed_args.roles),
+                self.es.security.get_role(name=parsed_args.roles),
             ),
         )
 
