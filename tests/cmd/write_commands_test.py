@@ -53,12 +53,12 @@ def test_index_create_from_a_file(run_esctl, fake_es, tmp_path):
 
 def test_index_create_rejects_unknown_keys(run_esctl, fake_es, tmp_path):
     configuration = tmp_path / "index.json"
-    configuration.write_text('{"setings": {}}')
+    configuration.write_text('{"setings": {}}')  # spellchecker:disable-line
 
     result = run_esctl("index", "create", "logs", "--configuration", str(configuration))
 
     assert result.code == 1
-    assert "Unknown index configuration keys: setings" in result.err
+    assert "Unknown index configuration keys: setings" in result.err  # spellchecker:disable-line
     assert fake_es.requests == []
 
 

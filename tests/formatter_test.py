@@ -22,7 +22,7 @@ PRETTY_NAMES = [
 # Keys of `node stats` start with a node ID, which should be kept as-is
 NODE_ID_KEYS = [
     ("b4XevSayQNCx_-1mrroUzw.index.uuid", "b4XevSayQNCx_-1mrroUzw Index UUID"),
-    ("BfTa0i_sQQmyFsVzjOtApQ.index.uuid", "BfTa0i_sQQmyFsVzjOtApQ Index UUID"),
+    ("BfTa0i_sQQmyFsVzjOtApQ.index.uuid", "BfTa0i_sQQmyFsVzjOtApQ Index UUID"),  # spellchecker:disable-line
     ("Xggkx0fORHO_vgJ-WBp0bw.index.uuid", "Xggkx0fORHO_vgJ-WBp0bw Index UUID"),
 ]
 

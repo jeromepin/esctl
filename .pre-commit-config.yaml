@@ -8,6 +8,11 @@ repos:
       - id: check-added-large-files
       - id: mixed-line-ending
 
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.52.2
+    hooks:
+      - id: typos
+
   - repo: local
     hooks:
       - id: format
