@@ -36,6 +36,8 @@ dependencies = [
     "cliff==3.2",
     "elasticsearch==8.*",
     "jmespath>=1.0.1",
+    # cliff 3.2 imports pkg_resources: setuptools 81 removed it and 80.9 warns on every run. Drop this pin when cliff is upgraded.
+    "setuptools<80.9",
     "typing-extensions>=4.4",
 ]
 
