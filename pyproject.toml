@@ -163,3 +163,10 @@ name = "testpypi"
 url = "https://test.pypi.org/simple/"
 publish-url = "https://test.pypi.org/legacy/"
 explicit = true
+
+[tool.typos.files]
+extend-exclude = ["*.png"]
+
+[tool.typos.default]
+# Opt a line out with a trailing `# spellchecker:disable-line` (random node IDs, misspellings on purpose)
+extend-ignore-re = ["(?Rm)^.*#\\s*spellchecker:disable-line$"]
