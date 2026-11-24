@@ -70,16 +70,18 @@ esctl cluster routing allocation enable none
 
 ## Installation
 
-### Using PIP
+Esctl is installed as a [uv](https://docs.astral.sh/uv/) tool, in its own isolated environment.
+
+### From PyPI
 
 ```bash
-pip install esctl
+uv tool install esctl
 ```
 
 ### From source
 
 ```bash
-pip install git+https://github.com/jeromepin/esctl.git
+uv tool install git+https://github.com/jeromepin/esctl.git
 ```
 
 
